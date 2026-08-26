@@ -1,0 +1,311 @@
+/* ==========================================================
+   MINIMALIST THEME — CSS-only customization over mkdocs-material
+   ========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---------- Design Tokens ---------- */
+:root {
+  --brand-navy: #0b2545;
+  --brand-beige: #f3efe6;
+  --brand-gold: #c8a84e;
+  --brand-white: #ffffff;
+  --brand-gray: #555555;
+
+  /* Material overrides */
+  --md-primary-fg-color: var(--brand-white);
+  --md-primary-fg-color--light: var(--brand-white);
+  --md-primary-fg-color--dark: var(--brand-white);
+  --md-primary-bg-color: var(--brand-navy);
+  --md-text-font: "Inter", sans-serif;
+}
+
+/* ============================
+   1. GLOBAL — full-width layout
+   ============================ */
+
+/* Force page background white */
+body {
+  background-color: var(--brand-white) !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================
+   2. HEADER
+   ============================ */
+
+.md-header {
+  background-color: var(--brand-white) !important;
+  color: var(--brand-navy) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #ebebeb;
+}
+
+/* Hide the Material logo icon (SVG book) next to site name */
+.md-header__button.md-logo {
+  display: none !important;
+}
+
+/* Hide hamburger menu button on desktop */
+[data-md-toggle="drawer"] + label,
+label[for="__drawer"] {
+  display: none !important;
+}
+
+/* Site name */
+.md-header__title {
+  color: var(--brand-navy) !important;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 1.5px;
+  font-weight: 400;
+  margin-left: 1.5rem;
+}
+
+.md-header__title .md-header__topic {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+}
+
+/* Header icons — dark color */
+.md-header .md-icon,
+.md-header svg {
+  color: var(--brand-navy) !important;
+  fill: var(--brand-navy) !important;
+}
+
+/* Search bar styling */
+.md-search__input {
+  background-color: #f5f5f5 !important;
+  color: var(--brand-navy) !important;
+  border-radius: 4px;
+}
+
+.md-search__input::placeholder {
+  color: #999 !important;
+}
+
+/* ============================
+   3. NAVIGATION TABS
+   ============================ */
+
+.md-tabs {
+  background-color: var(--brand-white) !important;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.md-tabs__link {
+  color: var(--brand-gray) !important;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 1 !important;
+  transition: color 0.2s ease;
+}
+
+.md-tabs__link:hover {
+  color: var(--brand-navy) !important;
+}
+
+.md-tabs__item--active .md-tabs__link {
+  color: var(--brand-navy) !important;
+  border-bottom: 2px solid var(--brand-navy);
+}
+
+/* ============================
+   4. MAIN CONTENT AREA — remove all width constraints
+   ============================ */
+
+/* Remove the max-width on the main grid wrapper for ALL pages */
+.md-main__inner.md-grid {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.md-main {
+  background-color: var(--brand-white) !important;
+}
+
+/* Hide BOTH sidebars on all pages (adjust if you want sidebars on non-home pages) */
+.md-sidebar {
+  display: none !important;
+}
+
+/* Make the content container fill the full width */
+.md-content {
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Remove article padding/margin from the content inner */
+article.md-content__inner {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ============================
+   5. HOMEPAGE HERO SECTION
+   ============================ */
+
+.hero-split {
+  display: flex;
+  min-height: calc(100vh - 6rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hero-left {
+  flex: 1 1 50%;
+  background-color: var(--brand-white);
+  padding: 6rem 4rem 4rem 8%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.hero-right {
+  flex: 1 1 50%;
+  background-color: var(--brand-beige);
+  box-sizing: border-box;
+}
+
+/* Hero title — LARGE and impactful
+   Override .md-typeset h1 which sets font-size and margin */
+.md-typeset .hero-title,
+h1.hero-title {
+  font-family: "Bebas Neue", sans-serif !important;
+  font-size: clamp(3.5rem, 8vw, 7rem) !important;
+  font-weight: 400 !important;
+  color: var(--brand-navy) !important;
+  line-height: 1.05 !important;
+  text-transform: uppercase;
+  margin: 0 0 1.5rem 0 !important;
+  padding: 0 !important;
+  letter-spacing: 2px;
+  border: none !important;
+}
+
+/* Gold accent divider */
+.hero-divider {
+  width: 50px;
+  height: 4px;
+  background-color: var(--brand-gold);
+  margin-bottom: 2rem;
+  border-radius: 2px;
+}
+
+/* Subtitle paragraph */
+.md-typeset .hero-subtitle,
+.hero-subtitle {
+  font-family: "Inter", sans-serif !important;
+  font-size: 1.15rem !important;
+  color: var(--brand-gray) !important;
+  max-width: 420px;
+  line-height: 1.7 !important;
+  margin-bottom: 2.5rem !important;
+}
+
+/* CTA button */
+.md-typeset .hero-btn,
+a.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--brand-navy);
+  color: var(--brand-white) !important;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+}
+
+.md-typeset .hero-btn:hover,
+a.hero-btn:hover {
+  background-color: #081a30;
+  transform: translateY(-2px);
+  color: var(--brand-white) !important;
+}
+
+/* ============================
+   6. FOOTER
+   ============================ */
+
+.md-footer {
+  background-color: var(--brand-beige) !important;
+  color: var(--brand-gray) !important;
+  border-top: 1px solid #e5e0d3;
+}
+
+/* Hide the prev/next navigation arrows */
+.md-footer__inner {
+  display: none !important;
+}
+
+/* Copyright area */
+.md-footer-meta {
+  background-color: var(--brand-beige) !important;
+}
+
+.md-footer-meta__inner.md-grid {
+  max-width: 100% !important;
+  padding: 1.5rem 8% !important;
+}
+
+.md-copyright {
+  color: var(--brand-navy) !important;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.md-copyright a {
+  color: var(--brand-navy) !important;
+}
+
+/* ============================
+   7. RESPONSIVE
+   ============================ */
+
+@media screen and (max-width: 768px) {
+  .hero-split {
+    flex-direction: column;
+  }
+
+  .hero-right {
+    display: none;
+  }
+
+  .hero-left {
+    padding: 3rem 1.5rem;
+  }
+
+  .md-typeset .hero-title,
+  h1.hero-title {
+    font-size: 2.8rem !important;
+  }
+}
+
+/* ============================
+   8. MISC CLEANUP
+   ============================ */
+
+/* Remove edit/source button */
+.md-content__button {
+  display: none !important;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
