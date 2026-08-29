@@ -45,11 +45,15 @@ body {
 }
 
 /* ============================
-   2. HIDE DEFAULT MATERIAL HEADER & TABS
+   2. OVERRIDE DEFAULT MATERIAL HEADER & HIDE TABS
    ============================ */
 
+/* Our custom header reuses .md-header — reset its default Material styles */
 .md-header {
-  display: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  position: static !important;
+  color: inherit !important;
 }
 
 .md-tabs {
@@ -148,15 +152,33 @@ body {
   position: relative;
 }
 
+/* Hide the overlay that Material uses for mobile fullscreen search */
+.nav-search-wrap .md-search__overlay {
+  display: none;
+}
+
+/* Hide the search output/results dropdown for now — it appears below */
+.nav-search-wrap .md-search__output {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.nav-search-wrap .md-search__inner {
+  width: 220px;
+}
+
 .nav-search-wrap .md-search__form {
   background: var(--paper-card) !important;
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
-  padding: 0 14px !important;
+  padding: 0 !important;
   width: 220px;
   height: 38px;
   box-shadow: none !important;
   transition: border-color .2s ease, box-shadow .2s ease;
+  position: relative;
 }
 
 .nav-search-wrap .md-search__form:focus-within {
@@ -169,21 +191,45 @@ body {
   font-family: 'Fraunces', serif;
   font-size: 13.5px;
   color: var(--ink) !important;
-  padding: 0 !important;
-  height: 38px;
+  padding: 0 14px 0 36px !important;
+  height: 38px !important;
+  width: 100% !important;
 }
 
 .nav-search-wrap .md-search__input::placeholder {
   color: var(--slate-light) !important;
 }
 
-.nav-search-wrap .md-search__icon {
+/* The search icon (label) — absolutely positioned inside the form */
+.nav-search-wrap label.md-search__icon {
+  position: absolute !important;
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   color: var(--slate-light) !important;
 }
 
-.nav-search-wrap .md-search__icon svg {
-  width: 15px;
-  height: 15px;
+.nav-search-wrap label.md-search__icon svg {
+  width: 16px !important;
+  height: 16px !important;
+  fill: var(--slate-light) !important;
+}
+
+/* Hide the back arrow SVG (second child), only show the magnifying glass */
+.nav-search-wrap label.md-search__icon svg:last-child {
+  display: none;
+}
+
+/* Clear button */
+.nav-search-wrap .md-search__options {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
 /* ============================
