@@ -19,7 +19,7 @@
     
     
       
-        <title>Sprint2 - Compiladores (G16)</title>
+        <title>Documento de Planejamento - Sprint 2 - Compiladores (G16)</title>
       
     
     
@@ -69,13 +69,18 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#documento-de-planejamento-sprint-2" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
     </div>
     
     
-<header class="custom-header">
+<header class="custom-header md-header" data-md-component="header">
   <nav class="navbar">
     <div class="nav-inner">
 
@@ -317,6 +322,71 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visao-geral-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visão Geral da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-formalizacao-da-especificacao-lexica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Formalização da Especificação Léxica
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-conclusao-do-analisador-lexico-scanner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Conclusão do Analisador Léxico (Scanner)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-testes-do-scanner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Testes do Scanner
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-esboco-da-gramatica-livre-de-contexto-glc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Esboço da Gramática Livre de Contexto (GLC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -333,9 +403,41 @@
 
 
 
-  <h1>Sprint2</h1>
-
-
+<h1 id="documento-de-planejamento-sprint-2">Documento de Planejamento - Sprint 2</h1>
+<h2 id="visao-geral-da-sprint">Visão Geral da Sprint</h2>
+<p><strong>Objetivo Principal:</strong> Formalizar a especificação léxica da linguagem, concluir a implementação funcional do Analisador Léxico (Scanner) e estabelecer o início da gramática livre de contexto para a fase seguinte.
+<strong>Período:</strong> 02/09/2026 a 16/09/2026</p>
+<hr />
+<h2 id="1-formalizacao-da-especificacao-lexica">1. Formalização da Especificação Léxica</h2>
+<p>Partindo da tabela de tokens e das decisões de escopo produzidas na Sprint 1, o objetivo é consolidar uma especificação formal e completa.</p>
+<ul>
+<li><strong>Expressões Regulares:</strong> Documentar formalmente as expressões regulares que definem cada categoria de token (identificadores, literais numéricos, literais de string, operadores compostos, comentários, etc.).</li>
+<li><strong>Autômatos Finitos:</strong> Produzir os diagramas de autômatos finitos determinísticos (AFD) correspondentes às expressões regulares, ilustrando as transições de estados do Scanner.</li>
+<li><strong>Regras de Desambiguação:</strong> Documentar as regras de precedência léxica (ex: correspondência mais longa, prioridade de palavras reservadas sobre identificadores).</li>
+</ul>
+<h2 id="2-conclusao-do-analisador-lexico-scanner">2. Conclusão do Analisador Léxico (Scanner)</h2>
+<p>Evoluir a implementação inicial da Sprint 1 para um Scanner completo e robusto.</p>
+<ul>
+<li><strong>Cobertura Completa de Tokens:</strong> Implementar o reconhecimento de todos os tokens definidos na especificação (incluindo operadores compostos, literais de string com caracteres de escape, e comentários de linha/bloco).</li>
+<li><strong>Tratamento de Erros Léxicos:</strong> Implementar detecção e reporte de erros léxicos (caracteres inválidos, strings não terminadas, números mal formados), indicando linha e coluna.</li>
+<li><strong>Controle de Posição:</strong> Garantir que cada token gerado carregue informações de localização (linha, coluna) para uso nas fases posteriores de análise.</li>
+<li><strong>Ignorar Elementos Não-Significativos:</strong> Confirmar o tratamento correto de espaços em branco, tabulações, quebras de linha e comentários.</li>
+</ul>
+<h2 id="3-testes-do-scanner">3. Testes do Scanner</h2>
+<p>Expandir a cobertura de testes além dos testes iniciais da Sprint 1.</p>
+<ul>
+<li><strong>Testes Unitários por Categoria:</strong> Criar testes específicos para cada categoria de token (palavras reservadas, identificadores, operadores, literais, símbolos de pontuação).</li>
+<li><strong>Testes de Erros:</strong> Validar que o Scanner reporta corretamente entradas inválidas e continua a análise após o erro (modo de recuperação).</li>
+<li><strong>Testes com Arquivos Fonte:</strong> Executar o Scanner sobre pequenos programas-exemplo na linguagem definida, verificando se a sequência de tokens gerada é a esperada.</li>
+</ul>
+<h2 id="4-esboco-da-gramatica-livre-de-contexto-glc">4. Esboço da Gramática Livre de Contexto (GLC)</h2>
+<p>Preparação para a Sprint 3, que dará início ao Analisador Sintático.</p>
+<ul>
+<li><strong>Definição das Produções:</strong> Esboçar as regras de produção da gramática que descreve a sintaxe da linguagem (declarações, expressões, comandos de controle, blocos).</li>
+<li><strong>Identificação de Ambiguidades:</strong> Analisar as produções em busca de possíveis ambiguidades ou conflitos que dificultem a construção do Parser.</li>
+<li><strong>Escolha da Técnica de Parsing:</strong> Definir e documentar a abordagem de análise sintática a ser utilizada (ex: Recursive Descent, LL(1), ou uso de gerador de parser).</li>
+</ul>
+<hr />
 
 
 
