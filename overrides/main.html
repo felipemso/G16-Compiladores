@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block header %}
+<header class="custom-header">
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Título navbar -->
+      <a href="{{ config.site_url | d('./', true) }}" class="brand">
+        <span class="brand-name">Compiladores</span>
+        <span class="brand-tag">(G16)</span>
+      </a>
+
+      <!-- Chaves navbar -->
+      <ul class="nav-links">
+        {% for nav_item in nav %}
+          <li>
+            <a href="{{ nav_item.url | url }}"
+               {% if nav_item.active %}class="current"{% endif %}>
+              {{ nav_item.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <!-- Search — reuses Material's native search component -->
+      <div class="nav-search-wrap">
+        {% include "partials/search.html" %}
+      </div>
+
+    </div>
+  </nav>
+</header>
+{% endblock %}

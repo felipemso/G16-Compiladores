@@ -1,12 +1,15 @@
 site_name: Compiladores (G16)
 theme:
   name: material
+  custom_dir: overrides
   features:
-    - navigation.tabs
     - search.suggest
     - search.highlight
   palette:
     scheme: default
+  font:
+    text: Inter
+    code: JetBrains Mono
 
 extra_css:
   - stylesheets/custom.css
@@ -14,10 +17,10 @@ extra_css:
 extra:
   generator: false
 
-copyright: "&copy; 2024 MINIMALIST"
+copyright: "&copy; Grupo 16, Compiladores(T01)"
 
 nav:
-  - HOME: index.md
-  - SOBRE: sobre.md
-  - DOCS: docs.md
-  - EQUIPE: equipe.md
+  - Home: index.md
+  - Sobre: sobre.md
+  - Docs: docs.md
+  - Equipe: equipe.md

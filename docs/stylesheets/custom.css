@@ -1,125 +1,195 @@
 /* ==========================================================
-   MINIMALIST THEME — CSS-only customization over mkdocs-material
+   COMPILADORES (G16) — Custom theme over mkdocs-material
+   Based on template.html design
    ========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ---------- Design Tokens ---------- */
 :root {
-  --brand-navy: #0b2545;
-  --brand-beige: #f3efe6;
-  --brand-gold: #c8a84e;
-  --brand-white: #ffffff;
-  --brand-gray: #555555;
+  --navy-950: #0a1330;
+  --navy-900: #0e1b3d;
+  --navy-800: #16265a;
+  --gold-500: #c99a3d;
+  --gold-300: #e0be7a;
+  --paper: #f5f4f0;
+  --paper-card: #ffffff;
+  --ink: #1c2436;
+  --slate: #59627a;
+  --slate-light: #8890a3;
+  --line: #e4e2da;
 
   /* Material overrides */
-  --md-primary-fg-color: var(--brand-white);
-  --md-primary-fg-color--light: var(--brand-white);
-  --md-primary-fg-color--dark: var(--brand-white);
-  --md-primary-bg-color: var(--brand-navy);
-  --md-text-font: "Inter", sans-serif;
+  --md-primary-fg-color: var(--paper);
+  --md-primary-fg-color--light: var(--paper);
+  --md-primary-fg-color--dark: var(--paper);
+  --md-primary-bg-color: var(--navy-900);
+  --md-text-font: "Fraunces", serif;
+  --md-code-font: "JetBrains Mono", monospace;
 }
 
 /* ============================
-   1. GLOBAL — full-width layout
+   1. GLOBAL
    ============================ */
 
-/* Force page background white */
+html { scroll-behavior: smooth; }
+
 body {
-  background-color: var(--brand-white) !important;
+  background: var(--paper) !important;
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
   margin: 0;
   padding: 0;
 }
 
 /* ============================
-   2. HEADER
+   2. HIDE DEFAULT MATERIAL HEADER & TABS
    ============================ */
 
 .md-header {
-  background-color: var(--brand-white) !important;
-  color: var(--brand-navy) !important;
-  box-shadow: none !important;
-  border-bottom: 1px solid #ebebeb;
-}
-
-/* Hide the Material logo icon (SVG book) next to site name */
-.md-header__button.md-logo {
   display: none !important;
 }
-
-/* Hide hamburger menu button on desktop */
-[data-md-toggle="drawer"] + label,
-label[for="__drawer"] {
-  display: none !important;
-}
-
-/* Site name */
-.md-header__title {
-  color: var(--brand-navy) !important;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 1.5px;
-  font-weight: 400;
-  margin-left: 1.5rem;
-}
-
-.md-header__title .md-header__topic {
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: 400;
-}
-
-/* Header icons — dark color */
-.md-header .md-icon,
-.md-header svg {
-  color: var(--brand-navy) !important;
-  fill: var(--brand-navy) !important;
-}
-
-/* Search bar styling */
-.md-search__input {
-  background-color: #f5f5f5 !important;
-  color: var(--brand-navy) !important;
-  border-radius: 4px;
-}
-
-.md-search__input::placeholder {
-  color: #999 !important;
-}
-
-/* ============================
-   3. NAVIGATION TABS
-   ============================ */
 
 .md-tabs {
-  background-color: var(--brand-white) !important;
-  border-bottom: 1px solid #ebebeb;
-}
-
-.md-tabs__link {
-  color: var(--brand-gray) !important;
-  font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 1 !important;
-  transition: color 0.2s ease;
-}
-
-.md-tabs__link:hover {
-  color: var(--brand-navy) !important;
-}
-
-.md-tabs__item--active .md-tabs__link {
-  color: var(--brand-navy) !important;
-  border-bottom: 2px solid var(--brand-navy);
+  display: none !important;
 }
 
 /* ============================
-   4. MAIN CONTENT AREA — remove all width constraints
+   3. CUSTOM NAVBAR
    ============================ */
 
-/* Remove the max-width on the main grid wrapper for ALL pages */
+.custom-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar {
+  background: rgba(245, 244, 240, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  height: 72px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  font-size: 21px;
+  color: var(--navy-900);
+  letter-spacing: -0.005em;
+}
+
+.brand-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--gold-500);
+  letter-spacing: 0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  list-style: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--slate);
+  font-family: 'Fraunces', serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  padding: 4px 1px;
+  border-bottom: 2px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--navy-900);
+}
+
+.nav-links a.current {
+  color: var(--navy-900);
+  border-bottom-color: var(--gold-500);
+}
+
+/* -- Search override (Material search styled as template) -- */
+
+.nav-search-wrap {
+  flex-shrink: 0;
+}
+
+.nav-search-wrap .md-search {
+  position: relative;
+}
+
+.nav-search-wrap .md-search__form {
+  background: var(--paper-card) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  padding: 0 14px !important;
+  width: 220px;
+  height: 38px;
+  box-shadow: none !important;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.nav-search-wrap .md-search__form:focus-within {
+  border-color: var(--gold-500) !important;
+  box-shadow: 0 0 0 3px rgba(201, 154, 61, 0.14) !important;
+}
+
+.nav-search-wrap .md-search__input {
+  background: transparent !important;
+  font-family: 'Fraunces', serif;
+  font-size: 13.5px;
+  color: var(--ink) !important;
+  padding: 0 !important;
+  height: 38px;
+}
+
+.nav-search-wrap .md-search__input::placeholder {
+  color: var(--slate-light) !important;
+}
+
+.nav-search-wrap .md-search__icon {
+  color: var(--slate-light) !important;
+}
+
+.nav-search-wrap .md-search__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ============================
+   4. MAIN CONTENT AREA
+   ============================ */
+
 .md-main__inner.md-grid {
   max-width: 100% !important;
   margin: 0 !important;
@@ -127,185 +197,300 @@ label[for="__drawer"] {
 }
 
 .md-main {
-  background-color: var(--brand-white) !important;
+  background: var(--paper) !important;
 }
 
-/* Hide BOTH sidebars on all pages (adjust if you want sidebars on non-home pages) */
 .md-sidebar {
   display: none !important;
 }
 
-/* Make the content container fill the full width */
 .md-content {
   max-width: 100% !important;
   margin: 0 !important;
 }
 
-/* Remove article padding/margin from the content inner */
 article.md-content__inner {
   margin: 0 !important;
   padding: 0 !important;
 }
 
 /* ============================
-   5. HOMEPAGE HERO SECTION
+   5. BACKGROUND GRID
    ============================ */
 
-.hero-split {
-  display: flex;
-  min-height: calc(100vh - 6rem);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.hero-left {
-  flex: 1 1 50%;
-  background-color: var(--brand-white);
-  padding: 6rem 4rem 4rem 8%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  box-sizing: border-box;
-}
-
-.hero-right {
-  flex: 1 1 50%;
-  background-color: var(--brand-beige);
-  box-sizing: border-box;
-}
-
-/* Hero title — LARGE and impactful
-   Override .md-typeset h1 which sets font-size and margin */
-.md-typeset .hero-title,
-h1.hero-title {
-  font-family: "Bebas Neue", sans-serif !important;
-  font-size: clamp(3.5rem, 8vw, 7rem) !important;
-  font-weight: 400 !important;
-  color: var(--brand-navy) !important;
-  line-height: 1.05 !important;
-  text-transform: uppercase;
-  margin: 0 0 1.5rem 0 !important;
-  padding: 0 !important;
-  letter-spacing: 2px;
-  border: none !important;
-}
-
-/* Gold accent divider */
-.hero-divider {
-  width: 50px;
-  height: 4px;
-  background-color: var(--brand-gold);
-  margin-bottom: 2rem;
-  border-radius: 2px;
-}
-
-/* Subtitle paragraph */
-.md-typeset .hero-subtitle,
-.hero-subtitle {
-  font-family: "Inter", sans-serif !important;
-  font-size: 1.15rem !important;
-  color: var(--brand-gray) !important;
-  max-width: 420px;
-  line-height: 1.7 !important;
-  margin-bottom: 2.5rem !important;
-}
-
-/* CTA button */
-.md-typeset .hero-btn,
-a.hero-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--brand-navy);
-  color: var(--brand-white) !important;
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  text-decoration: none !important;
-  padding: 1rem 2rem;
-  border-radius: 4px;
-  transition: background-color 0.25s ease, transform 0.15s ease;
-}
-
-.md-typeset .hero-btn:hover,
-a.hero-btn:hover {
-  background-color: #081a30;
-  transform: translateY(-2px);
-  color: var(--brand-white) !important;
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse 900px 600px at 15% 0%, black 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ============================
-   6. FOOTER
+   6. HOMEPAGE — HERO + CARDS
+   ============================ */
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 96px 32px;
+  display: grid;
+  grid-template-columns: 1fr 0.92fr;
+  gap: 64px;
+  align-items: center;
+}
+
+/* -- Hero -- */
+
+.md-typeset .hero h1,
+.hero h1 {
+  font-family: 'Fraunces', serif !important;
+  font-weight: 600 !important;
+  font-optical-sizing: auto;
+  font-size: clamp(42px, 6.4vw, 68px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--navy-900) !important;
+  max-width: 780px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.hero h1 .accent {
+  color: var(--gold-500);
+}
+
+.rule {
+  width: 72px;
+  height: 4px;
+  background: var(--gold-500);
+  margin: 28px 0 26px;
+  border-radius: 2px;
+}
+
+.md-typeset .lede,
+.lede {
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+  color: var(--slate) !important;
+  max-width: 560px;
+}
+
+.lede strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* -- Cards -- */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 22px 22px 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  text-decoration: none !important;
+  color: inherit !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold-500), var(--gold-300));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .3s ease;
+}
+
+.card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 16px 32px -20px rgba(14, 27, 61, 0.28);
+  border-color: transparent;
+}
+
+.card:hover::before {
+  transform: scaleY(1);
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--navy-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--gold-300);
+}
+
+.md-typeset .card h3,
+.card h3 {
+  font-family: 'Fraunces', serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-optical-sizing: auto;
+  color: var(--navy-900) !important;
+  letter-spacing: -0.005em;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.card p {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--slate);
+  margin: 0 !important;
+}
+
+.card-arrow {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--gold-500);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.card:hover .card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ============================
+   7. FOOTER
    ============================ */
 
 .md-footer {
-  background-color: var(--brand-beige) !important;
-  color: var(--brand-gray) !important;
-  border-top: 1px solid #e5e0d3;
+  background: var(--paper) !important;
+  color: var(--slate) !important;
+  border-top: 1px solid var(--line);
 }
 
-/* Hide the prev/next navigation arrows */
 .md-footer__inner {
   display: none !important;
 }
 
-/* Copyright area */
 .md-footer-meta {
-  background-color: var(--brand-beige) !important;
+  background: var(--paper) !important;
 }
 
 .md-footer-meta__inner.md-grid {
-  max-width: 100% !important;
-  padding: 1.5rem 8% !important;
+  max-width: 1180px !important;
+  padding: 1.5rem 32px !important;
 }
 
 .md-copyright {
-  color: var(--brand-navy) !important;
+  color: var(--navy-900) !important;
   font-size: 0.85rem;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .md-copyright a {
-  color: var(--brand-navy) !important;
+  color: var(--navy-900) !important;
 }
 
 /* ============================
-   7. RESPONSIVE
+   8. RESPONSIVE
    ============================ */
 
-@media screen and (max-width: 768px) {
-  .hero-split {
-    flex-direction: column;
+@media screen and (max-width: 860px) {
+  .wrap {
+    grid-template-columns: 1fr;
+    padding: 56px 20px 64px;
+    gap: 40px;
   }
 
-  .hero-right {
+  .nav-inner {
+    padding: 0 20px;
+    height: 64px;
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 18px;
+  }
+
+  .nav-search-wrap {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 620px) {
+  .brand-tag {
     display: none;
   }
 
-  .hero-left {
-    padding: 3rem 1.5rem;
+  .nav-links a {
+    font-size: 13.5px;
   }
+}
 
-  .md-typeset .hero-title,
-  h1.hero-title {
-    font-size: 2.8rem !important;
+a:focus-visible,
+.card:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
   }
 }
 
 /* ============================
-   8. MISC CLEANUP
+   9. MISC CLEANUP
    ============================ */
 
-/* Remove edit/source button */
 .md-content__button {
   display: none !important;
-}
-
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
 }
