@@ -2,9 +2,11 @@ site_name: Compiladores (G16)
 theme:
   name: material
   custom_dir: overrides
+  language: pt
   features:
     - search.suggest
     - search.highlight
+    - navigation.expand
   palette:
     scheme: default
   font:
@@ -22,5 +24,6 @@ copyright: "&copy; Grupo 16, Compiladores(T01)"
 nav:
   - Home: index.md
   - Sobre: sobre.md
-  - Docs: docs.md
+  - Documentação:
+      - Escopo e Arquitetura: tech-docs/escopo-e-arq.md
   - Equipe: equipe.md
