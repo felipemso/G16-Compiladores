@@ -9,24 +9,28 @@
       
       
       
+        <link rel="prev" href="../../sobre/">
+      
+      
+        <link rel="next" href="../../equipe/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Documento de Planejamento - Sprint 2 - Compiladores (G16)</title>
+        <title>Escopo e Arquitetura - Compiladores (G16)</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -45,9 +49,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../stylesheets/custom.css">
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -70,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#documento-de-planejamento-sprint-2" class="md-skip">
+        <a href="#documento-de-arquitetura-e-escopo" class="md-skip">
           Ir para o conteúdo
         </a>
       
@@ -95,7 +99,7 @@
         
           <li>
             
-              <a href="../../.."
+              <a href="../.."
                  >
                 Home
               </a>
@@ -104,7 +108,7 @@
         
           <li>
             
-              <a href="../../../sobre/"
+              <a href="../../sobre/"
                  >
                 Sobre
               </a>
@@ -113,8 +117,8 @@
         
           <li>
             
-              <a href="../../../tech-docs/escopo-e-arq/"
-                 >
+              <a href="./"
+                 class="current">
                 Documentação
               </a>
             
@@ -122,7 +126,7 @@
         
           <li>
             
-              <a href="../../../equipe/"
+              <a href="../../equipe/"
                  >
                 Equipe
               </a>
@@ -194,7 +198,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
+    <a href="../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -212,7 +216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -239,7 +243,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sobre/" class="md-nav__link">
+      <a href="../../sobre/" class="md-nav__link">
         
   
   
@@ -263,20 +267,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -297,7 +301,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -312,10 +316,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../tech-docs/escopo-e-arq/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escopo e Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -331,6 +362,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-visao-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Visão Geral
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-escopo-do-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Escopo do MVP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-arquitetura-analisador-lexico-fase-atual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Arquitetura: Analisador Léxico (Fase Atual)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Arquitetura: Analisador Léxico (Fase Atual)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-tecnologias-e-ferramentas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Tecnologias e Ferramentas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-estrutura-e-identificacao-de-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Estrutura e Identificação de Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-tratamento-de-espacos-e-comentarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Tratamento de Espaços e Comentários
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -350,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../equipe/" class="md-nav__link">
+      <a href="../../equipe/" class="md-nav__link">
         
   
   
@@ -397,10 +520,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#visao-geral-da-sprint" class="md-nav__link">
+  <a href="#1-visao-geral" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Visão Geral da Sprint
+        1. Visão Geral
       
     </span>
   </a>
@@ -408,10 +531,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-formalizacao-da-especificacao-lexica" class="md-nav__link">
+  <a href="#2-escopo-do-mvp" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Formalização da Especificação Léxica
+        2. Escopo do MVP
       
     </span>
   </a>
@@ -419,35 +542,52 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-conclusao-do-analisador-lexico-scanner" class="md-nav__link">
+  <a href="#3-arquitetura-analisador-lexico-fase-atual" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Conclusão do Analisador Léxico (Scanner)
+        3. Arquitetura: Analisador Léxico (Fase Atual)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Arquitetura: Analisador Léxico (Fase Atual)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-tecnologias-e-ferramentas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Tecnologias e Ferramentas
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#3-testes-do-scanner" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#32-estrutura-e-identificacao-de-tokens" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Testes do Scanner
+        3.2 Estrutura e Identificação de Tokens
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#4-esboco-da-gramatica-livre-de-contexto-glc" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#33-tratamento-de-espacos-e-comentarios" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Esboço da Gramática Livre de Contexto (GLC)
+        3.3 Tratamento de Espaços e Comentários
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -468,41 +608,45 @@
 
 
 
-<h1 id="documento-de-planejamento-sprint-2">Documento de Planejamento - Sprint 2</h1>
-<h2 id="visao-geral-da-sprint">Visão Geral da Sprint</h2>
-<p><strong>Objetivo Principal:</strong> Formalizar a especificação léxica da linguagem, concluir a implementação funcional do Analisador Léxico (Scanner) e estabelecer o início da gramática livre de contexto para a fase seguinte.
-<strong>Período:</strong> 02/09/2026 a 16/09/2026</p>
+<h1 id="documento-de-arquitetura-e-escopo">Documento de Arquitetura e Escopo</h1>
+<h2 id="1-visao-geral">1. Visão Geral</h2>
+<p>O projeto consiste no desenvolvimento de um compilador para traduzir código-fonte de JavaScript (JS) para Python (Py). </p>
+<h2 id="2-escopo-do-mvp">2. Escopo do MVP</h2>
+<p>Com base nas definições atuais, o escopo inicial focará apenas nas construções básicas da linguagem JavaScript. </p>
+<p><strong>Recursos Suportados (JavaScript):</strong>
+*   Declaração de variáveis (<code>let</code>, <code>const</code>, <code>var</code>).
+*   Estruturas de controle de fluxo (<code>if</code>, <code>else</code>, <code>switch</code>, <code>case</code>).
+*   Estruturas de repetição (<code>for</code>, <code>while</code>, <code>do</code>).
+*   Declaração de funções simples e retorno (<code>function</code>, <code>return</code>).
+*   Tipos básicos e operações matemáticas/lógicas.</p>
 <hr />
-<h2 id="1-formalizacao-da-especificacao-lexica">1. Formalização da Especificação Léxica</h2>
-<p>Partindo da tabela de tokens e das decisões de escopo produzidas na Sprint 1, o objetivo é consolidar uma especificação formal e completa.</p>
+<h2 id="3-arquitetura-analisador-lexico-fase-atual">3. Arquitetura: Analisador Léxico (Fase Atual)</h2>
+<p>No momento, o foco arquitetural está restrito à primeira etapa do compilador: o Analisador Léxico.</p>
+<h3 id="31-tecnologias-e-ferramentas">3.1 Tecnologias e Ferramentas</h3>
 <ul>
-<li><strong>Expressões Regulares:</strong> Documentar formalmente as expressões regulares que definem cada categoria de token (identificadores, literais numéricos, literais de string, operadores compostos, comentários, etc.).</li>
-<li><strong>Autômatos Finitos:</strong> Produzir os diagramas de autômatos finitos determinísticos (AFD) correspondentes às expressões regulares, ilustrando as transições de estados do Scanner.</li>
-<li><strong>Regras de Desambiguação:</strong> Documentar as regras de precedência léxica (ex: correspondência mais longa, prioridade de palavras reservadas sobre identificadores).</li>
+<li><strong>Linguagem de Implementação:</strong> C</li>
+<li><strong>Gerador de Analisador Léxico:</strong> Flex </li>
+<li><strong>Arquivo correspondente:</strong> <code>lexer.l</code></li>
 </ul>
-<h2 id="2-conclusao-do-analisador-lexico-scanner">2. Conclusão do Analisador Léxico (Scanner)</h2>
-<p>Evoluir a implementação inicial da Sprint 1 para um Scanner completo e robusto.</p>
+<h3 id="32-estrutura-e-identificacao-de-tokens">3.2 Estrutura e Identificação de Tokens</h3>
+<p>O lexer será responsável por varrer o código-fonte caractere por caractere e convertê-lo em uma sequência de tokens lógicos. As seguintes categorias de tokens serão implementadas:</p>
+<ol>
+<li><strong>Palavras-Chave (Keywords):</strong>
+    Identificadores reservados pela linguagem (ex: <code>let</code>, <code>if</code>, <code>function</code>, <code>return</code>). </li>
+<li><strong>Identificadores (Identifiers):</strong>
+    Nomes definidos pelo usuário para variáveis, funções, etc. </li>
+<li><strong>Literais (Literals):</strong>
+    Valores numéricos, strings (aspas simples e duplas) e booleanos.</li>
+<li><strong>Operadores (Operators):</strong>
+    Símbolos matemáticos (<code>+</code>, <code>-</code>, etc.), lógicos (<code>&amp;&amp;</code>, <code>||</code>) e de comparação (<code>==</code>, <code>!=</code>, <code>&lt;</code>, etc.).</li>
+<li><strong>Pontuação (Punctuators):</strong>
+    Chaves <code>{}</code>, parênteses <code>()</code>, colchetes <code>[]</code>, ponto e vírgula <code>;</code>.</li>
+</ol>
+<h3 id="33-tratamento-de-espacos-e-comentarios">3.3 Tratamento de Espaços e Comentários</h3>
 <ul>
-<li><strong>Cobertura Completa de Tokens:</strong> Implementar o reconhecimento de todos os tokens definidos na especificação (incluindo operadores compostos, literais de string com caracteres de escape, e comentários de linha/bloco).</li>
-<li><strong>Tratamento de Erros Léxicos:</strong> Implementar detecção e reporte de erros léxicos (caracteres inválidos, strings não terminadas, números mal formados), indicando linha e coluna.</li>
-<li><strong>Controle de Posição:</strong> Garantir que cada token gerado carregue informações de localização (linha, coluna) para uso nas fases posteriores de análise.</li>
-<li><strong>Ignorar Elementos Não-Significativos:</strong> Confirmar o tratamento correto de espaços em branco, tabulações, quebras de linha e comentários.</li>
+<li><strong>Espaços em Branco:</strong> Espaços, tabulações e quebras de linha (<code>\n</code>, <code>\t</code>, <code></code>) serão consumidos e ignorados pelo lexer.</li>
+<li><strong>Comentários:</strong> Comentários de linha (<code>//</code>) e de bloco (<code>/* */</code>) também serão ignorados, não gerando tokens para o Parser.</li>
 </ul>
-<h2 id="3-testes-do-scanner">3. Testes do Scanner</h2>
-<p>Expandir a cobertura de testes além dos testes iniciais da Sprint 1.</p>
-<ul>
-<li><strong>Testes Unitários por Categoria:</strong> Criar testes específicos para cada categoria de token (palavras reservadas, identificadores, operadores, literais, símbolos de pontuação).</li>
-<li><strong>Testes de Erros:</strong> Validar que o Scanner reporta corretamente entradas inválidas e continua a análise após o erro (modo de recuperação).</li>
-<li><strong>Testes com Arquivos Fonte:</strong> Executar o Scanner sobre pequenos programas-exemplo na linguagem definida, verificando se a sequência de tokens gerada é a esperada.</li>
-</ul>
-<h2 id="4-esboco-da-gramatica-livre-de-contexto-glc">4. Esboço da Gramática Livre de Contexto (GLC)</h2>
-<p>Preparação para a Sprint 3, que dará início ao Analisador Sintático.</p>
-<ul>
-<li><strong>Definição das Produções:</strong> Esboçar as regras de produção da gramática que descreve a sintaxe da linguagem (declarações, expressões, comandos de controle, blocos).</li>
-<li><strong>Identificação de Ambiguidades:</strong> Analisar as produções em busca de possíveis ambiguidades ou conflitos que dificultem a construção do Parser.</li>
-<li><strong>Escolha da Técnica de Parsing:</strong> Definir e documentar a abordagem de análise sintática a ser utilizada (ex: Recursive Descent, LL(1), ou uso de gerador de parser).</li>
-</ul>
-<hr />
 
 
 
@@ -551,10 +695,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
