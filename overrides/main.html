@@ -15,10 +15,17 @@
       <ul class="nav-links">
         {% for nav_item in nav %}
           <li>
-            <a href="{{ nav_item.url | url }}"
-               {% if nav_item.active %}class="current"{% endif %}>
-              {{ nav_item.title }}
-            </a>
+            {% if nav_item.is_section %}
+              <a href="{{ nav_item.children[0].url | url }}"
+                 {% if nav_item.active %}class="current"{% endif %}>
+                {{ nav_item.title }}
+              </a>
+            {% else %}
+              <a href="{{ nav_item.url | url }}"
+                 {% if nav_item.active %}class="current"{% endif %}>
+                {{ nav_item.title }}
+              </a>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
