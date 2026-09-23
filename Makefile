@@ -3,8 +3,8 @@ TARGET = minijs
 
 # Pastas do projeto
 SRC_DIR = src
-LEXER_DIR = $(SRC_DIR)/lexer
-PARSER_DIR = $(SRC_DIR)/parser
+LEXER_DIR = lexer
+PARSER_DIR = parser
 
 # Arquivos C gerados automaticamente pelo Flex e Bison
 LEX_C = lex.yy.c
@@ -26,6 +26,6 @@ $(YACC_C): $(PARSER_DIR)/parser.y
 $(LEX_C): $(LEXER_DIR)/lexer.l
 	flex $(LEXER_DIR)/lexer.l
 
-# Regra para limpar a "sujeira" (arquivos gerados)
+# Regra para limpar a os temporários gerados
 clean:
 	rm -f $(TARGET) $(LEX_C) $(YACC_C) $(YACC_H)

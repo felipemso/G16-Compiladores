@@ -1,0 +1,29 @@
+# Binários e executáveis compilados
+*.exe
+*.out
+minijs
+minijs.exe
+
+# Arquivos objeto e bibliotecas
+*.o
+*.obj
+*.a
+*.lib
+
+# Arquivos intermediários gerados pelo Flex e Bison
+lex.yy.c
+lex.yy.h
+parser.tab.c
+parser.tab.h
+*.tab.c
+*.tab.h
+location.hh
+position.hh
+stack.hh
+
+# Configurações de ambiente, editores e SO
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
