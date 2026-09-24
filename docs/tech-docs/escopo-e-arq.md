@@ -1,43 +1,52 @@
-# Documento de Arquitetura e Escopo 
+# Documento de Arquitetura e Escopo
 
 ## 1. Visão Geral
-O projeto consiste no desenvolvimento de um compilador para traduzir código-fonte de JavaScript (JS) para Python (Py). 
-
-## 2. Escopo do MVP 
-Com base nas definições atuais, o escopo inicial focará apenas nas construções básicas da linguagem JavaScript. 
-
-**Recursos Suportados (JavaScript):**
-*   Declaração de variáveis (`let`, `const`, `var`).
-*   Estruturas de controle de fluxo (`if`, `else`, `switch`, `case`).
-*   Estruturas de repetição (`for`, `while`, `do`).
-*   Declaração de funções simples e retorno (`function`, `return`).
-*   Tipos básicos e operações matemáticas/lógicas.
+O projeto desenvolve um compilador que traduz código JavaScript básico (Mini-JS) diretamente para Python.
 
 ---
 
-## 3. Arquitetura: Analisador Léxico (Fase Atual)
+## 2. Escopo
 
-No momento, o foco arquitetural está restrito à primeira etapa do compilador: o Analisador Léxico.
+O compilador traduz apenas comandos de JavaScript que possuem equivalente direto em Python.
 
-### 3.1 Tecnologias e Ferramentas
-*   **Linguagem de Implementação:** C
-*   **Gerador de Analisador Léxico:** Flex 
-*   **Arquivo correspondente:** `lexer.l`
+### 2.1 O que o Compilador Suporta
+* **Variáveis:** declarações com `let`, `const` e `var`, com ou sem valor inicial.
+* **Atribuição:** comandos simples de atribuição (`x = 10;`).
+* **Condicionais:** `if` e `else`.
+* **Repetição:** laços `while` e laços `for` tradicionais.
+* **Funções Básicas:** 
+  * Declaração de funções com nome e parâmetros: `function soma(a, b) { ... }`.
+  * Retorno de valor com `return`.
+  * Chamada de funções: `soma(2, 3)`.
+* **Expressões e Operadores:**
+  * Matemática: `+`, `-`, `*`, `/` e `-` unário.
+  * Comparação: `==`, `!=`, `<`, `<=`, `>`, `>=`.
+  * Lógica: `&&` (e), `||` (ou), `!` (não).
+  * Parênteses para prioridade: `(a + b) * c`.
+* **Tipos de Dados:**
+  * Números (inteiros e decimais).
+  * Textos (strings com aspas simples ou duplas).
+  * Booleanos (`true` e `false`).
+  * Listas/Arrays: criação (`[1, 2, 3]`) e acesso por índice (`lista[0]`).
+* **Saída:** comando `console.log(...)` (traduzido diretamente para `print(...)`).
 
-### 3.2 Estrutura e Identificação de Tokens
-O lexer será responsável por varrer o código-fonte caractere por caractere e convertê-lo em uma sequência de tokens lógicos. As seguintes categorias de tokens serão implementadas:
+### 2.2 O que NÃO Faz Parte do Projeto
+* **Sem Orientação a Objetos:** o projeto é estritamente procedural. Não usamos classes (`class`), instanciação (`new`) nem `this`.
+* **Sem Funções Complexas:** nada de *arrow functions* (`() => {}`), funções anônimas, funções dentro de variáveis ou *callbacks*. Apenas funções declaradas tradicionais são aceitas.
+* **Ponto e Vírgula Obrigatório:** toda instrução deve terminar com `;` (sem inserção automática de `;`).
 
-1.  **Palavras-Chave (Keywords):**
-    Identificadores reservados pela linguagem (ex: `let`, `if`, `function`, `return`). 
-2.  **Identificadores (Identifiers):**
-    Nomes definidos pelo usuário para variáveis, funções, etc. 
-3.  **Literais (Literals):**
-    Valores numéricos, strings (aspas simples e duplas) e booleanos.
-4.  **Operadores (Operators):**
-    Símbolos matemáticos (`+`, `-`, etc.), lógicos (`&&`, `||`) e de comparação (`==`, `!=`, `<`, etc.).
-5.  **Pontuação (Punctuators):**
-    Chaves `{}`, parênteses `()`, colchetes `[]`, ponto e vírgula `;`.
+---
 
-### 3.3 Tratamento de Espaços e Comentários
-*   **Espaços em Branco:** Espaços, tabulações e quebras de linha (`\n`, `\t`, ` `) serão consumidos e ignorados pelo lexer.
-*   **Comentários:** Comentários de linha (`//`) e de bloco (`/* */`) também serão ignorados, não gerando tokens para o Parser.
+## 3. Arquitetura do Compilador
+
+O fluxo de compilação acontece em 4 etapas lineares:
+
+1. **Léxico (Flex):** lê o texto em JS, gera os tokens e descarta comentários e espaços.
+2. **Sintático (Bison):** valida a estrutura do código e as regras gramaticais.
+3. **Árvore Sintática (AST):** organiza o programa validado em uma estrutura de árvore na memória.
+4. **Emissão de Código:** percorre a árvore e gera o arquivo `.py` correspondente, devidamente identado.
+
+### Tecnologias
+* **Linguagem:** C
+* **Ferramentas:** Flex (`lexer.l`) e Bison (`parser.y`)
+* **Comunicação:** arquivo `parser.tab.h` (tokens) e estrutura `%union` / `yylval` para troca de dados entre léxico e sintático.

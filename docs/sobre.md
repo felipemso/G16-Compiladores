@@ -5,14 +5,14 @@ hide:
 ---
 # Sobre o Projeto
 
-Este projeto tem como foco o desenvolvimento completo de um compilador, implementado de forma estruturada e incremental ao longo de várias sprints. O objetivo principal é aplicar e consolidar os conhecimentos teóricos e práticos sobre a construção de compiladores, passando pelas principais fases de tradução de uma linguagem fonte.
+Este projeto tem como foco o desenvolvimento de um compilador para traduzir código-fonte de um subconjunto estruturado e imperativo de **JavaScript (Mini-JS)** diretamente para **Python**. O desenvolvimento é conduzido de forma incremental ao longo de várias sprints, consolidando as principais etapas clássicas da engenharia de compiladores.
 
 ## Fluxo de Compilação
 
-O fluxo de compilação especificado para a arquitetura base do projeto é composto pelas seguintes tecnologias e etapas:
+O fluxo de compilação especificado para a arquitetura do projeto é composto pelas seguintes tecnologias e etapas:
 
 ![Fluxo de Compilação](assets/FluxoCompilador.png)
 
-1. **Analisador Léxico:** Desenvolvido utilizando o **Flex/Lexer**. É responsável por fazer a varredura e processamento do código-fonte, aplicando expressões regulares para reconhecer os componentes válidos da linguagem e gerar a sequência de tokens (lexemas).
-2. **Analisador Sintático:** Implementado utilizando o **Bison**. Esta etapa recebe os tokens gerados no processo léxico, valida a correta formação das instruções de acordo com a gramática livre de contexto da linguagem e constrói a Árvore Sintática Abstrata (AST).
-3. **Gerador de Código Final:** Responsável por pegar a representação estruturada, validada e possivelmente otimizada, traduzindo-a efetivamente para a linguagem alvo, resultando no código final executável.
+1. **Analisador Léxico:** Desenvolvido em C utilizando o **Flex**. É responsável por fazer a varredura do código-fonte em JavaScript, descartando espaços em branco e comentários e convertendo o texto em uma sequência de tokens válidos.
+2. **Analisador Sintático:** Implementado em C utilizando o **Bison**. Esta etapa recebe os tokens gerados no processo léxico, valida a estrutura das instruções contra a gramática livre de contexto da linguagem e constrói a Árvore Sintática Abstrata (AST).
+3. **Gerador de Código Final:** Responsável por percorrer a representação intermediária estruturada na AST e emitir o código correspondente em **Python (`.py`)**, devidamente identado e pronto para execução.
