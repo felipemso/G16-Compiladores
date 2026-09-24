@@ -18,7 +18,7 @@
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../assets/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
@@ -400,6 +400,147 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprints/sprint1/sprint1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprints/sprint2/sprint2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprints/sprint3/sprint3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -493,14 +634,14 @@
 
 
 <h1 id="sobre-o-projeto">Sobre o Projeto</h1>
-<p>Este projeto tem como foco o desenvolvimento completo de um compilador, implementado de forma estruturada e incremental ao longo de várias sprints. O objetivo principal é aplicar e consolidar os conhecimentos teóricos e práticos sobre a construção de compiladores, passando pelas principais fases de tradução de uma linguagem fonte.</p>
+<p>Este projeto tem como foco o desenvolvimento de um compilador para traduzir código-fonte de um subconjunto estruturado e imperativo de <strong>JavaScript (Mini-JS)</strong> diretamente para <strong>Python</strong>. O desenvolvimento é conduzido de forma incremental ao longo de várias sprints, consolidando as principais etapas clássicas da engenharia de compiladores.</p>
 <h2 id="fluxo-de-compilacao">Fluxo de Compilação</h2>
-<p>O fluxo de compilação especificado para a arquitetura base do projeto é composto pelas seguintes tecnologias e etapas:</p>
+<p>O fluxo de compilação especificado para a arquitetura do projeto é composto pelas seguintes tecnologias e etapas:</p>
 <p><img alt="Fluxo de Compilação" src="../assets/FluxoCompilador.png" /></p>
 <ol>
-<li><strong>Analisador Léxico:</strong> Desenvolvido utilizando o <strong>Flex/Lexer</strong>. É responsável por fazer a varredura e processamento do código-fonte, aplicando expressões regulares para reconhecer os componentes válidos da linguagem e gerar a sequência de tokens (lexemas).</li>
-<li><strong>Analisador Sintático:</strong> Implementado utilizando o <strong>Bison</strong>. Esta etapa recebe os tokens gerados no processo léxico, valida a correta formação das instruções de acordo com a gramática livre de contexto da linguagem e constrói a Árvore Sintática Abstrata (AST).</li>
-<li><strong>Gerador de Código Final:</strong> Responsável por pegar a representação estruturada, validada e possivelmente otimizada, traduzindo-a efetivamente para a linguagem alvo, resultando no código final executável.</li>
+<li><strong>Analisador Léxico:</strong> Desenvolvido em C utilizando o <strong>Flex</strong>. É responsável por fazer a varredura do código-fonte em JavaScript, descartando espaços em branco e comentários e convertendo o texto em uma sequência de tokens válidos.</li>
+<li><strong>Analisador Sintático:</strong> Implementado em C utilizando o <strong>Bison</strong>. Esta etapa recebe os tokens gerados no processo léxico, valida a estrutura das instruções contra a gramática livre de contexto da linguagem e constrói a Árvore Sintática Abstrata (AST).</li>
+<li><strong>Gerador de Código Final:</strong> Responsável por percorrer a representação intermediária estruturada na AST e emitir o código correspondente em <strong>Python (<code>.py</code>)</strong>, devidamente identado e pronto para execução.</li>
 </ol>
 
 
