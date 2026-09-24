@@ -1,6 +1,7 @@
 site_name: Compiladores (G16)
 theme:
   name: material
+  favicon: assets/favicon.png
   custom_dir: overrides
   language: pt
   features:
@@ -26,4 +27,8 @@ nav:
   - Sobre: sobre.md
   - Documentação:
       - Escopo e Arquitetura: tech-docs/escopo-e-arq.md
+      - Sprints:
+          - Sprint 1: sprints/sprint1/sprint1.md
+          - Sprint 2: sprints/sprint2/sprint2.md
+          - Sprint 3: sprints/sprint3/sprint3.md
   - Equipe: equipe.md
