@@ -56,6 +56,11 @@ int main(void) {
     total++; falhas += run_test("Comando console.log com literal", "console.log(\"teste\");", true);
     total++; falhas += run_test("Bloco de instrucoes delimitado", "{ let x = 1; console.log(x); }", true);
     total++; falhas += run_test("Instrucao vazia e comentarios", "// comentario\n; { ; }\n", true);
+    total++; falhas += run_test("Programa vazio", "", true);
+    total++; falhas += run_test("Programa apenas com comentarios", "// linha\n/* bloco */\n", true);
+    total++; falhas += run_test("Blocos aninhados", "{ { let a = 1; } }", true);
+    total++; falhas += run_test("Blocos vazios aninhados", "{ { { } } }", true);
+    total++; falhas += run_test("Blocos intercalados no escopo global", "let a = 1; { a = 2; } console.log(a); { }", true);
 
     /* Casos inválidos */
     printf("\n--- Casos Invalidos (Falha Sintatica Esperada) ---\n");
@@ -63,6 +68,8 @@ int main(void) {
     total++; falhas += run_test("Expressao incompleta antes do ponto e virgula", "let x = 10 + ;", false);
     total++; falhas += run_test("Parenteses desbalanceados", "let a = (10 + 20;", false);
     total++; falhas += run_test("Chave de bloco nao fechada", "{ let x = 1;", false);
+    total++; falhas += run_test("Chave de fechamento extra", "{ let x = 1; } }", false);
+    total++; falhas += run_test("Bloco aninhado nao fechado", "{ { let x = 1; }", false);
     total++; falhas += run_test("Identificador invalido iniciando com digito", "let 123a = 456;", false);
     total++; falhas += run_test("Declaracao sem identificador", "let ;", false);
     total++; falhas += run_test("Declaracao em cadeia com virgula pendente", "let a = 1, ;", false);
