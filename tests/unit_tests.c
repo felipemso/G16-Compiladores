@@ -51,6 +51,11 @@ int main(void) {
     total++; falhas += run_test("Declaracoes em cadeia com virgula", "let a = 1, b = 2, c;", true);
     total++; falhas += run_test("Comando de reatribuicao simples", "x = y + 5;", true);
     total++; falhas += run_test("Reatribuicao com operacao", "contador = contador + 1;", true);
+    total++; falhas += run_test("Reatribuicao da propria variavel", "x = x + 1;", true);
+    total++; falhas += run_test("Declaracao em cadeia mista", "let a = 1, b, c = 3;", true);
+    total++; falhas += run_test("Declaracao em cadeia com var", "var i = 0, j;", true);
+    total++; falhas += run_test("Declaracao em cadeia com const", "const A = 1, B = A * 2;", true);
+    total++; falhas += run_test("Declaracao com string e booleano", "let s = 'ok', f = false;", true);
     total++; falhas += run_test("Expressao com precedencia de operadores", "let a = (10 + 20) * 3;", true);
     total++; falhas += run_test("Expressao relacional e logica", "let ok = 5 > 2 && 10 <= 20;", true);
     total++; falhas += run_test("Comando console.log com literal", "console.log(\"teste\");", true);
@@ -59,6 +64,11 @@ int main(void) {
     total++; falhas += run_test("If-else aninhado associa else ao if interno", "if (a) if (b) x = 1; else x = 2;", true);
     total++; falhas += run_test("While com bloco", "while (contador < 10) { contador = contador + 1; }", true);
     total++; falhas += run_test("For com declaracao e incremento", "for (let i = 0; i < 10; i = i + 1) { total = total + i; }", true);
+    total++; falhas += run_test("Programa vazio", "", true);
+    total++; falhas += run_test("Programa apenas com comentarios", "// linha\n/* bloco */\n", true);
+    total++; falhas += run_test("Blocos aninhados", "{ { let a = 1; } }", true);
+    total++; falhas += run_test("Blocos vazios aninhados", "{ { { } } }", true);
+    total++; falhas += run_test("Blocos intercalados no escopo global", "let a = 1; { a = 2; } console.log(a); { }", true);
 
     /* Casos inválidos */
     printf("\n--- Casos Invalidos (Falha Sintatica Esperada) ---\n");
@@ -66,10 +76,17 @@ int main(void) {
     total++; falhas += run_test("Expressao incompleta antes do ponto e virgula", "let x = 10 + ;", false);
     total++; falhas += run_test("Parenteses desbalanceados", "let a = (10 + 20;", false);
     total++; falhas += run_test("Chave de bloco nao fechada", "{ let x = 1;", false);
+    total++; falhas += run_test("Chave de fechamento extra", "{ let x = 1; } }", false);
+    total++; falhas += run_test("Bloco aninhado nao fechado", "{ { let x = 1; }", false);
     total++; falhas += run_test("Identificador invalido iniciando com digito", "let 123a = 456;", false);
     total++; falhas += run_test("Declaracao sem identificador", "let ;", false);
     total++; falhas += run_test("Declaracao em cadeia com virgula pendente", "let a = 1, ;", false);
     total++; falhas += run_test("Atribuicao sem expressao", "x = ;", false);
+    total++; falhas += run_test("Const sem inicializacao", "const PI;", false);
+    total++; falhas += run_test("Const em cadeia com item sem inicializacao", "const A = 1, B;", false);
+    total++; falhas += run_test("Declarador sem palavra-chave em cadeia", "a = 1, b = 2;", false);
+    total++; falhas += run_test("Atribuicao a literal", "10 = x;", false);
+    total++; falhas += run_test("Palavra-chave duplicada", "let let x = 1;", false);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

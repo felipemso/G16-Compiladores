@@ -67,11 +67,11 @@ comando:
 
 declaracao_var:
     tipo_declarador lista_declaradores SEMICOLON
+  | CONST lista_declaradores_const SEMICOLON
   ;
 
 tipo_declarador:
     LET
-  | CONST
   | VAR
   ;
 
@@ -85,7 +85,17 @@ item_declarador:
         printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
         free($1);
     }
-  | ID ASSIGN expressao {
+  | item_declarador_inicializado
+  ;
+
+/* const exige inicializacao em todos os itens (const x; e erro de sintaxe no JS) */
+lista_declaradores_const:
+    item_declarador_inicializado
+  | lista_declaradores_const COMMA item_declarador_inicializado
+  ;
+
+item_declarador_inicializado:
+    ID ASSIGN expressao {
         printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
         free($1);
     }
