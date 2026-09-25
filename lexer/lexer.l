@@ -40,13 +40,13 @@
 "console.log"           { return PRINT; }
 
  /* 2. Valores Literais */
-"true"|"false"                  { return BOOLEAN_VAL; }
-[0-9]+(\.[0-9]+)?               { return NUM; }
-\"[^\"]*\"                      { return STRING_VAL; } 
-\'[^\']*\'                      { return STRING_VAL; } 
+"true"                          { yylval.booleano = 1; return BOOLEAN_VAL; }
+"false"                         { yylval.booleano = 0; return BOOLEAN_VAL; }
+[0-9]+(\.[0-9]+)?               { yylval.valor_num = atof(yytext); return NUM; }
+\"[^\"]*\"|\'[^\']*\'           { yylval.texto = strdup(yytext); return STRING_VAL; } 
 
  /* 3. Identificadores */
-[a-zA-Z_][a-zA-Z0-9_]*          { return ID; }
+[a-zA-Z_][a-zA-Z0-9_]*          { yylval.texto = strdup(yytext); return ID; }
 
  /* 4. Operadores Relacionais e Logicos */
 "=="                            { return EQ; }
