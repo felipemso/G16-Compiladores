@@ -27,9 +27,14 @@ void yyerror(const char *s);
 %token EQ NEQ LEQ GEQ LT GT AND OR
 %token LPAREN RPAREN LBRACE RBRACE
 
-/* Regras de precedência para evitar avisos Shift/Reduce */
+/* Precedência de Operadores (da menor para a maior) */
+%left OR
+%left AND
+%left EQ NEQ
+%left LT LEQ GT GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
+%right UMINUS
 
 %%
 
@@ -58,11 +63,29 @@ comando:
   ;
 
 expressao:
-    NUM
-    | ID { free($1); }
-    | expressao PLUS expressao
-    | expressao MINUS expressao
-    ;
+    expressao OR expressao
+  | expressao AND expressao
+  | expressao EQ expressao
+  | expressao NEQ expressao
+  | expressao LT expressao
+  | expressao LEQ expressao
+  | expressao GT expressao
+  | expressao GEQ expressao
+  | expressao PLUS expressao
+  | expressao MINUS expressao
+  | expressao TIMES expressao
+  | expressao DIVIDE expressao
+  | MINUS expressao %prec UMINUS
+  | LPAREN expressao RPAREN
+  | atomo
+  ;
+
+atomo:
+    ID { free($1); }
+  | NUM
+  | STRING_VAL { free($1); }
+  | BOOLEAN_VAL
+  ;
 
 %%
 
