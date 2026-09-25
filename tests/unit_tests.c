@@ -61,6 +61,9 @@ int main(void) {
     total++; falhas += run_test("Comando console.log com literal", "console.log(\"teste\");", true);
     total++; falhas += run_test("Bloco de instrucoes delimitado", "{ let x = 1; console.log(x); }", true);
     total++; falhas += run_test("Instrucao vazia e comentarios", "// comentario\n; { ; }\n", true);
+    total++; falhas += run_test("If-else aninhado associa else ao if interno", "if (a) if (b) x = 1; else x = 2;", true);
+    total++; falhas += run_test("While com bloco", "while (contador < 10) { contador = contador + 1; }", true);
+    total++; falhas += run_test("For com declaracao e incremento", "for (let i = 0; i < 10; i = i + 1) { total = total + i; }", true);
     total++; falhas += run_test("Programa vazio", "", true);
     total++; falhas += run_test("Programa apenas com comentarios", "// linha\n/* bloco */\n", true);
     total++; falhas += run_test("Blocos aninhados", "{ { let a = 1; } }", true);

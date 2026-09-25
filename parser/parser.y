@@ -28,6 +28,8 @@ void yyerror(const char *s);
 %token LPAREN RPAREN LBRACE RBRACE
 
 /* Precedência de Operadores (da menor para a maior) */
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %left OR
 %left AND
 %left EQ NEQ
@@ -54,6 +56,9 @@ bloco:
 comando:
     declaracao_var
   | comando_atribuicao
+  | comando_if
+  | comando_while
+  | comando_for
   | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
@@ -101,6 +106,44 @@ comando_atribuicao:
         printf("AST: Atribuicao a variavel '%s' reconhecida.\n", $1);
         free($1);
     }
+  ;
+
+comando_if:
+    IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
+        printf("AST: Comando if reconhecido.\n");
+    }
+  | IF LPAREN expressao RPAREN comando ELSE comando {
+        printf("AST: Comando if-else reconhecido.\n");
+    }
+  ;
+
+comando_while:
+    WHILE LPAREN expressao RPAREN comando {
+        printf("AST: Comando while reconhecido.\n");
+    }
+  ;
+
+comando_for:
+    FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN comando {
+        printf("AST: Comando for reconhecido.\n");
+    }
+  ;
+
+for_init:
+    /* vazio */
+  | tipo_declarador lista_declaradores
+  | ID ASSIGN expressao { free($1); }
+  ;
+
+for_cond:
+    /* vazio */
+  | expressao
+  ;
+
+for_incr:
+    /* vazio */
+  | ID ASSIGN expressao { free($1); }
+  | expressao
   ;
 
 expressao:
