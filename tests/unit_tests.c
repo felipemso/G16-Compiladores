@@ -68,6 +68,37 @@ int main(void) {
     total++; falhas += run_test("Declaracao em cadeia com virgula pendente", "let a = 1, ;", false);
     total++; falhas += run_test("Atribuicao sem expressao", "x = ;", false);
 
+    /* Funcoes (T07) */
+    printf("\n--- Funcoes: Casos Validos ---\n");
+    total++; falhas += run_test("Funcao sem parametros", "function run() { console.log(1); }", true);
+    total++; falhas += run_test("Funcao com multiplos parametros", "function soma(a, b) { return a + b; }", true);
+    total++; falhas += run_test("Funcao com corpo vazio", "function nada() { }", true);
+    total++; falhas += run_test("Retorno vazio", "function sair() { return; }", true);
+    total++; falhas += run_test("Retorno dentro de bloco aninhado", "function f(x) { { return x * 2; } }", true);
+    total++; falhas += run_test("Funcao aninhada", "function ext() { function int() { return 1; } return int(); }", true);
+    total++; falhas += run_test("Chamada como comando", "soma(1, 2);", true);
+    total++; falhas += run_test("Chamada sem argumentos", "run();", true);
+    total++; falhas += run_test("Chamada encadeada em expressao", "let r = somar(x, 10) * 2;", true);
+    total++; falhas += run_test("Chamadas aninhadas como argumento", "let r = f(g(1), h(2, 3) + 4);", true);
+    total++; falhas += run_test("Chamada em condicao logica", "let ok = valido(x) && limite() > 0;", true);
+    total++; falhas += run_test("console.log com chamada", "console.log(soma(1, 2));", true);
+    total++; falhas += run_test("console.log com multiplos argumentos", "console.log(\"total:\", t, 1);", true);
+    total++; falhas += run_test("console.log sem argumentos", "console.log();", true);
+    total++; falhas += run_test("Funcoes intercaladas no escopo global", "let a = 1; function f() { return a; } a = f(); function g() { }", true);
+
+    printf("\n--- Funcoes: Casos Invalidos (Falha Sintatica Esperada) ---\n");
+    total++; falhas += run_test("Funcao sem nome", "function (a) { }", false);
+    total++; falhas += run_test("Funcao sem corpo", "function f(a);", false);
+    total++; falhas += run_test("Funcao com corpo sem chaves", "function f() return 1;", false);
+    total++; falhas += run_test("Parametro com virgula pendente", "function f(a, ) { }", false);
+    total++; falhas += run_test("Parametro que nao e identificador", "function f(1) { }", false);
+    total++; falhas += run_test("Argumento com virgula pendente", "f(1, );", false);
+    total++; falhas += run_test("Chamada sem ponto e virgula", "f(1)", false);
+    total++; falhas += run_test("Return sem ponto e virgula", "function f() { return 1 }", false);
+    total++; falhas += run_test("Return no escopo global", "return 1;", false);
+    total++; falhas += run_test("Return em bloco fora de funcao", "{ return; }", false);
+    total++; falhas += run_test("Return apos o fim da funcao", "function f() { } return;", false);
+
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
     printf("Sumario dos Testes em Memoria:\n");

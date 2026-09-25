@@ -5,6 +5,9 @@
 
 int yylex(void);
 void yyerror(const char *s);
+
+/* Quantas declaracoes de funcao envolvem o ponto atual (0 = escopo global) */
+static int profundidade_funcao = 0;
 %}
 
 /* Tipos semânticos suportados pelo analisador sintático */
@@ -39,7 +42,7 @@ void yyerror(const char *s);
 %%
 
 programa:
-    lista_comandos
+    { profundidade_funcao = 0; } lista_comandos
     ;
 
 lista_comandos:
@@ -54,7 +57,10 @@ bloco:
 comando:
     declaracao_var
   | comando_atribuicao
-  | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
+  | declaracao_funcao
+  | comando_retorno
+  | chamada_funcao SEMICOLON
+  | PRINT LPAREN args_opt RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
   | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
@@ -93,6 +99,52 @@ comando_atribuicao:
     }
   ;
 
+declaracao_funcao:
+    FUNCTION ID LPAREN params_opt RPAREN { profundidade_funcao++; } bloco {
+        profundidade_funcao--;
+        printf("AST: Declaracao de funcao '%s' reconhecida.\n", $2);
+        free($2);
+    }
+  ;
+
+params_opt:
+    /* vazio: funcao sem parametros */
+  | lista_params
+  ;
+
+lista_params:
+    ID { free($1); }
+  | lista_params COMMA ID { free($3); }
+  ;
+
+comando_retorno:
+    RETURN SEMICOLON {
+        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
+        else printf("AST: Comando de retorno reconhecido.\n");
+    }
+  | RETURN expressao SEMICOLON {
+        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
+        else printf("AST: Comando de retorno reconhecido.\n");
+    }
+  ;
+
+chamada_funcao:
+    ID LPAREN args_opt RPAREN {
+        printf("AST: Chamada de funcao '%s' reconhecida.\n", $1);
+        free($1);
+    }
+  ;
+
+args_opt:
+    /* vazio: chamada sem argumentos */
+  | lista_args
+  ;
+
+lista_args:
+    expressao
+  | lista_args COMMA expressao
+  ;
+
 expressao:
     expressao OR expressao
   | expressao AND expressao
@@ -113,6 +165,7 @@ expressao:
 
 atomo:
     ID { free($1); }
+  | chamada_funcao
   | NUM
   | STRING_VAL { free($1); }
   | BOOLEAN_VAL
