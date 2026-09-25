@@ -51,6 +51,11 @@ int main(void) {
     total++; falhas += run_test("Declaracoes em cadeia com virgula", "let a = 1, b = 2, c;", true);
     total++; falhas += run_test("Comando de reatribuicao simples", "x = y + 5;", true);
     total++; falhas += run_test("Reatribuicao com operacao", "contador = contador + 1;", true);
+    total++; falhas += run_test("Reatribuicao da propria variavel", "x = x + 1;", true);
+    total++; falhas += run_test("Declaracao em cadeia mista", "let a = 1, b, c = 3;", true);
+    total++; falhas += run_test("Declaracao em cadeia com var", "var i = 0, j;", true);
+    total++; falhas += run_test("Declaracao em cadeia com const", "const A = 1, B = A * 2;", true);
+    total++; falhas += run_test("Declaracao com string e booleano", "let s = 'ok', f = false;", true);
     total++; falhas += run_test("Expressao com precedencia de operadores", "let a = (10 + 20) * 3;", true);
     total++; falhas += run_test("Expressao relacional e logica", "let ok = 5 > 2 && 10 <= 20;", true);
     total++; falhas += run_test("Comando console.log com literal", "console.log(\"teste\");", true);
@@ -74,6 +79,11 @@ int main(void) {
     total++; falhas += run_test("Declaracao sem identificador", "let ;", false);
     total++; falhas += run_test("Declaracao em cadeia com virgula pendente", "let a = 1, ;", false);
     total++; falhas += run_test("Atribuicao sem expressao", "x = ;", false);
+    total++; falhas += run_test("Const sem inicializacao", "const PI;", false);
+    total++; falhas += run_test("Const em cadeia com item sem inicializacao", "const A = 1, B;", false);
+    total++; falhas += run_test("Declarador sem palavra-chave em cadeia", "a = 1, b = 2;", false);
+    total++; falhas += run_test("Atribuicao a literal", "10 = x;", false);
+    total++; falhas += run_test("Palavra-chave duplicada", "let let x = 1;", false);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
