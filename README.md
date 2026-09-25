@@ -1,46 +1,71 @@
-# Mini-JS Compiler
+# Compilador JavaScript Python
 
-Compilador educacional para um subconjunto estruturado de JavaScript (**Mini-JS**). O projeto está focado no desenvolvimento dos analisadores léxico e sintático (Flex e Bison), com suporte a declarações de variáveis, blocos `{ ... }`, gramática completa de expressões com precedência de operadores e suíte de testes automatizados.
+Projeto de Compilador proposto pelo professor Sérgio Freitas na disciplina de Compiladores I. Esse trabalho propõe a tradução de um subconjunto estruturado de JavaScript (Mini-JS) para Python. As informações detalhadas sobre arquitetura, escopo e demais considerações técnicas estão centralizadas na branch `docs`.
 
-> ℹ️ **Documentação Completa:** As informações detalhadas sobre a arquitetura do compilador, decisões de projeto e especificações de escopo estão centralizadas na branch **`docs`**.
+
+## Equipe (Grupo 16)
+
+| Foto | Membro | Matrícula | GitHub |
+| :---: | :--- | :---: | :--- |
+| <img src="https://github.com/augustogmedeiros.png" width="40" height="40"> | **Augusto Garcia Medeiros** | 232000697 | [@augustogmedeiros](https://github.com/augustogmedeiros) |
+| <img src="https://github.com/cadumotta.png" width="40" height="40"> | **Carlos Eduardo Deusdara Motta** | 241025194 | [@cadumotta](https://github.com/cadumotta) |
+| <img src="https://github.com/felipemso.png" width="40" height="40"> | **Felipe Melo de Sousa** | 242015370 | [@felipemso](https://github.com/felipemso) |
+| <img src="https://github.com/jevprado.png" width="40" height="40"> | **José Eduardo Vieira do Prado** | 221008202 | [@jevprado](https://github.com/jevprado) |
+| <img src="https://github.com/pedrogrocha13.png" width="40" height="40"> | **Pedro Gonçalves Rocha** | 241025363 | [@pedrogrocha13](https://github.com/pedrogrocha13) |
+
+
+## Estrutura do Repositório e Branches
+
+* `dev`: Código-fonte em C (analisadores léxico e sintático, testes e automação).
+* `docs`: Documentação completa do projeto em MkDocs.
+* `main`: Branch principal com versões estáveis.
+* `comp`: Guia organizacional da disciplina.
+* `gh-pages`: Publicação do site de documentação.
+
+### Organização de Arquivos (`dev`)
+
+```text
+cdev/
+├── lexer/
+│   └── lexer.l
+├── parser/
+│   └── parser.y
+├── src/
+│   └── main.c
+├── tests/
+│   ├── run_tests.ps1
+│   ├── unit_tests.c
+│   ├── validos/
+│   └── invalidos/
+├── Makefile
+└── README.md
+```
 
 ---
 
-## 🛠️ Como Compilar
-
-Certifique-se de ter o `gcc`, `flex`, `bison` e `make` instalados no ambiente. No terminal, execute:
+## Como Compilar
 
 ```bash
 make
 ```
 
-*(Alternativa sem Make: `bison -d parser/parser.y && flex lexer/lexer.l && gcc -o minijs parser.tab.c lex.yy.c src/main.c`)*
-
 ---
 
-## ▶️ Como Executar
+## Como Executar
 
-### 1. Analisando um arquivo `.js`:
+Analisando um arquivo:
 ```bash
 ./minijs caminho/para/arquivo.js
 ```
 
-### 2. Avaliando código via linha de comando (`-e`):
+Avaliando código diretamente:
 ```bash
 ./minijs -e "let x = (10 + 20) * 3; console.log(x);"
 ```
 
-### 3. Modo interativo (`stdin`):
-```bash
-./minijs
-```
-*(Digite as instruções e finalize com `Ctrl+D` no Linux/MSYS ou `Ctrl+Z` + `Enter` no Windows cmd)*
-
 ---
 
-## 🧪 Como Rodar os Testes
-
-Para executar toda a suíte de testes automatizados (testes em memória e validação de arquivos válidos e inválidos):
+## Como Rodar os Testes
 
 ```bash
 make test
@@ -48,9 +73,7 @@ make test
 
 ---
 
-## 📋 O que esperar de saída
-
-Para um código sintaticamente válido, o compilador reconhece as estruturas e finaliza com código de saída `0`:
+## Saída Esperada
 
 **Entrada (`teste.js`):**
 ```javascript
@@ -58,12 +81,10 @@ let total = (10 + 20) * 3;
 console.log(total);
 ```
 
-**Saída esperada:**
+**Saída:**
 ```text
 AST: Declaracao de variavel 'total' reconhecida.
 AST: Comando de impressao reconhecido.
 
 Compilacao bem-sucedida! Nao ha erros de sintaxe.
 ```
-
-Caso o código contenha erros de sintaxe, o compilador reporta as falhas no `stderr` e retorna código de saída `1`.
