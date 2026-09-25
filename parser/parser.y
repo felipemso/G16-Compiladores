@@ -31,6 +31,8 @@ static int profundidade_funcao = 0;
 %token LPAREN RPAREN LBRACE RBRACE
 
 /* Precedência de Operadores (da menor para a maior) */
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %left OR
 %left AND
 %left EQ NEQ
@@ -61,6 +63,10 @@ comando:
   | comando_retorno
   | chamada_funcao SEMICOLON
   | PRINT LPAREN args_opt RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
+  | comando_if
+  | comando_while
+  | comando_for
+  | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
   | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
@@ -68,11 +74,11 @@ comando:
 
 declaracao_var:
     tipo_declarador lista_declaradores SEMICOLON
+  | CONST lista_declaradores_const SEMICOLON
   ;
 
 tipo_declarador:
     LET
-  | CONST
   | VAR
   ;
 
@@ -86,7 +92,17 @@ item_declarador:
         printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
         free($1);
     }
-  | ID ASSIGN expressao {
+  | item_declarador_inicializado
+  ;
+
+/* const exige inicializacao em todos os itens (const x; e erro de sintaxe no JS) */
+lista_declaradores_const:
+    item_declarador_inicializado
+  | lista_declaradores_const COMMA item_declarador_inicializado
+  ;
+
+item_declarador_inicializado:
+    ID ASSIGN expressao {
         printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
         free($1);
     }
@@ -143,6 +159,42 @@ args_opt:
 lista_args:
     expressao
   | lista_args COMMA expressao
+comando_if:
+    IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
+        printf("AST: Comando if reconhecido.\n");
+    }
+  | IF LPAREN expressao RPAREN comando ELSE comando {
+        printf("AST: Comando if-else reconhecido.\n");
+    }
+  ;
+
+comando_while:
+    WHILE LPAREN expressao RPAREN comando {
+        printf("AST: Comando while reconhecido.\n");
+    }
+  ;
+
+comando_for:
+    FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN comando {
+        printf("AST: Comando for reconhecido.\n");
+    }
+  ;
+
+for_init:
+    /* vazio */
+  | tipo_declarador lista_declaradores
+  | ID ASSIGN expressao { free($1); }
+  ;
+
+for_cond:
+    /* vazio */
+  | expressao
+  ;
+
+for_incr:
+    /* vazio */
+  | ID ASSIGN expressao { free($1); }
+  | expressao
   ;
 
 expressao:
