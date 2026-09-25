@@ -52,14 +52,45 @@ bloco:
   ;
 
 comando:
-    LET ID ASSIGN expressao SEMICOLON { 
-        printf("AST: Declaracao de variavel '%s' reconhecida.\n", $2); 
-        free($2);
-    }
+    declaracao_var
+  | comando_atribuicao
   | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
   | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
+  ;
+
+declaracao_var:
+    tipo_declarador lista_declaradores SEMICOLON
+  ;
+
+tipo_declarador:
+    LET
+  | CONST
+  | VAR
+  ;
+
+lista_declaradores:
+    item_declarador
+  | lista_declaradores COMMA item_declarador
+  ;
+
+item_declarador:
+    ID {
+        printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
+        free($1);
+    }
+  | ID ASSIGN expressao {
+        printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
+        free($1);
+    }
+  ;
+
+comando_atribuicao:
+    ID ASSIGN expressao SEMICOLON {
+        printf("AST: Atribuicao a variavel '%s' reconhecida.\n", $1);
+        free($1);
+    }
   ;
 
 expressao:
