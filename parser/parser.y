@@ -34,22 +34,28 @@ void yyerror(const char *s);
 %%
 
 programa:
-    comandos
+    lista_comandos
     ;
 
-comandos:
-    comando
-    | comandos comando
-    ;
+lista_comandos:
+    /* vazio: programa pode iniciar vazio */
+  | lista_comandos comando
+  ;
+
+bloco:
+    LBRACE lista_comandos RBRACE
+  ;
 
 comando:
     LET ID ASSIGN expressao SEMICOLON { 
         printf("AST: Declaracao de variavel '%s' reconhecida.\n", $2); 
         free($2);
     }
-    | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
-    | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
-    ;
+  | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
+  | bloco
+  | SEMICOLON
+  | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
+  ;
 
 expressao:
     NUM
