@@ -3,6 +3,8 @@
 *.out
 minijs
 minijs.exe
+test_unit
+test_unit.exe
 
 # Arquivos objeto e bibliotecas
 *.o
