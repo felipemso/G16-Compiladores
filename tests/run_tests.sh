@@ -6,7 +6,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Localiza o binário do compilador
+# Localiza o binario do compilador
 MINIJS=""
 for candidate in "$BASE_DIR/minijs" "$BASE_DIR/minijs.exe" "./minijs" "./minijs.exe"; do
     if [ -x "$candidate" ] || [ -f "$candidate" ]; then
@@ -52,46 +52,51 @@ if [ -n "$TEST_UNIT" ]; then
     echo ""
 fi
 
-# 2. Casos de Teste Validos
-echo -e "\033[0;33m--- Executando Casos de Teste Validos ---\033[0m"
-VALIDOS_DIR="$SCRIPT_DIR/validos"
-if [ -d "$VALIDOS_DIR" ]; then
-    for arquivo in "$VALIDOS_DIR"/*.js; do
+# Funcao auxiliar parametrizada para iteracao sobre suites
+run_suite() {
+    local dir="$1"
+    local title="$2"
+    local expect_zero="$3"
+
+    echo -e "\033[0;33m--- $title ---\033[0m"
+    if [ ! -d "$dir" ]; then
+        return
+    fi
+
+    for arquivo in "$dir"/*.js; do
         [ -e "$arquivo" ] || continue
         TOTAL=$((TOTAL + 1))
+        local nome
         nome=$(basename "$arquivo")
         "$MINIJS" "$arquivo" > /dev/null 2>&1
-        code=$?
-        if [ $code -eq 0 ]; then
-            PASSARAM=$((PASSARAM + 1))
-            echo -e "  \033[0;32m[PASSOU]\033[0m $nome"
+        local code=$?
+
+        if [ "$expect_zero" -eq 1 ]; then
+            if [ $code -eq 0 ]; then
+                PASSARAM=$((PASSARAM + 1))
+                echo -e "  \033[0;32m[PASSOU]\033[0m $nome"
+            else
+                FALHARAM=$((FALHARAM + 1))
+                echo -e "  \033[0;31m[FALHOU]\033[0m $nome (esperava codigo 0, obteve $code)"
+            fi
         else
-            FALHARAM=$((FALHARAM + 1))
-            echo -e "  \033[0;31m[FALHOU]\033[0m $nome (esperava codigo 0, obteve $code)"
+            if [ $code -ne 0 ]; then
+                PASSARAM=$((PASSARAM + 1))
+                echo -e "  \033[0;32m[PASSOU]\033[0m $nome (falha sintatica esperada, codigo: $code)"
+            else
+                FALHARAM=$((FALHARAM + 1))
+                echo -e "  \033[0;31m[FALHOU]\033[0m $nome (esperava codigo != 0, mas retornou 0)"
+            fi
         fi
     done
-fi
+}
+
+# 2. Casos de Teste Validos
+run_suite "$SCRIPT_DIR/validos" "Executando Casos de Teste Validos" 1
 
 # 3. Casos de Teste Invalidos
 echo ""
-echo -e "\033[0;33m--- Executando Casos de Teste Invalidos (Falha Esperada) ---\033[0m"
-INVALIDOS_DIR="$SCRIPT_DIR/invalidos"
-if [ -d "$INVALIDOS_DIR" ]; then
-    for arquivo in "$INVALIDOS_DIR"/*.js; do
-        [ -e "$arquivo" ] || continue
-        TOTAL=$((TOTAL + 1))
-        nome=$(basename "$arquivo")
-        "$MINIJS" "$arquivo" > /dev/null 2>&1
-        code=$?
-        if [ $code -ne 0 ]; then
-            PASSARAM=$((PASSARAM + 1))
-            echo -e "  \033[0;32m[PASSOU]\033[0m $nome (falha sintatica esperada, codigo: $code)"
-        else
-            FALHARAM=$((FALHARAM + 1))
-            echo -e "  \033[0;31m[FALHOU]\033[0m $nome (esperava codigo != 0, mas retornou 0)"
-        fi
-    done
-fi
+run_suite "$SCRIPT_DIR/invalidos" "Executando Casos de Teste Invalidos (Falha Esperada)" 0
 
 # 4. Sumario Final
 echo ""

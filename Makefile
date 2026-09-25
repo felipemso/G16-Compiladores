@@ -34,7 +34,11 @@ $(LEX_C): $(LEXER_DIR)/lexer.l
 
 # Regra de execucao dos testes automatizados
 test: $(TARGET) $(TEST_UNIT)
+ifeq ($(OS),Windows_NT)
 	powershell -ExecutionPolicy Bypass -File tests/run_tests.ps1
+else
+	bash tests/run_tests.sh
+endif
 
 # Regra para limpar os temporarios gerados
 clean:

@@ -66,52 +66,51 @@ if ($TestUnit) {
     Write-Host ""
 }
 
-# 2. Casos de Teste Validos
-Write-Host "--- Executando Casos de Teste Validos ---" -ForegroundColor Yellow
-$ValidosDir = Join-Path $ScriptDir "validos"
-if (Test-Path $ValidosDir) {
-    $ArquivosValidos = Get-ChildItem -Path $ValidosDir -Filter "*.js" | Sort-Object Name
-    foreach ($arquivo in $ArquivosValidos) {
-        $Total++
-        $output = & $Minijs $arquivo.FullName 2>&1
+# Funcao auxiliar para execucao parametrizada de suites de testes
+function Invoke-TestSuite {
+    param (
+        [string]$Dir,
+        [string]$Titulo,
+        [bool]$ExpectSuccess
+    )
+
+    Write-Host "--- $Titulo ---" -ForegroundColor Yellow
+    if (-not (Test-Path $Dir)) {
+        Write-Host "  [AVISO] Diretorio nao encontrado: $Dir" -ForegroundColor DarkYellow
+        return
+    }
+
+    $arquivos = Get-ChildItem -Path $Dir -Filter "*.js" | Sort-Object Name
+    foreach ($arquivo in $arquivos) {
+        $script:Total++
+        $output = & $script:Minijs $arquivo.FullName 2>&1
         $code = $LASTEXITCODE
 
-        if ($code -eq 0) {
-            $Passaram++
-            Write-Host "  [PASSOU] $($arquivo.Name)" -ForegroundColor Green
+        $passou = ($code -eq 0) -eq $ExpectSuccess
+        if ($passou) {
+            $script:Passaram++
+            if ($ExpectSuccess) {
+                Write-Host "  [PASSOU] $($arquivo.Name)" -ForegroundColor Green
+            } else {
+                Write-Host "  [PASSOU] $($arquivo.Name) (falha sintatica esperada, codigo: $code)" -ForegroundColor Green
+            }
         } else {
-            $Falharam++
-            Write-Host "  [FALHOU] $($arquivo.Name) (esperava codigo 0, obteve $code)" -ForegroundColor Red
-            if ($output) {
-                Write-Host "           Saida: $($output -join ' ')" -ForegroundColor DarkGray
+            $script:Falharam++
+            if ($ExpectSuccess) {
+                Write-Host "  [FALHOU] $($arquivo.Name) (esperava codigo 0, obteve $code)" -ForegroundColor Red
+            } else {
+                Write-Host "  [FALHOU] $($arquivo.Name) (esperava codigo != 0, mas retornou 0)" -ForegroundColor Red
             }
         }
     }
-} else {
-    Write-Host "  [AVISO] Diretorio de casos validos nao encontrado: $ValidosDir" -ForegroundColor DarkYellow
 }
+
+# 2. Casos de Teste Validos
+Invoke-TestSuite -Dir (Join-Path $ScriptDir "validos") -Titulo "Executando Casos de Teste Validos" -ExpectSuccess $true
 
 # 3. Casos de Teste Invalidos
-Write-Host "`n--- Executando Casos de Teste Invalidos (Falha Esperada) ---" -ForegroundColor Yellow
-$InvalidosDir = Join-Path $ScriptDir "invalidos"
-if (Test-Path $InvalidosDir) {
-    $ArquivosInvalidos = Get-ChildItem -Path $InvalidosDir -Filter "*.js" | Sort-Object Name
-    foreach ($arquivo in $ArquivosInvalidos) {
-        $Total++
-        $output = & $Minijs $arquivo.FullName 2>&1
-        $code = $LASTEXITCODE
-
-        if ($code -ne 0) {
-            $Passaram++
-            Write-Host "  [PASSOU] $($arquivo.Name) (falha sintatica esperada, codigo: $code)" -ForegroundColor Green
-        } else {
-            $Falharam++
-            Write-Host "  [FALHOU] $($arquivo.Name) (esperava codigo de erro != 0, mas retornou 0)" -ForegroundColor Red
-        }
-    }
-} else {
-    Write-Host "  [AVISO] Diretorio de casos invalidos nao encontrado: $InvalidosDir" -ForegroundColor DarkYellow
-}
+Write-Host ""
+Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos") -Titulo "Executando Casos de Teste Invalidos (Falha Esperada)" -ExpectSuccess $false
 
 # 4. Sumario Final
 Write-Host "`n============================================================" -ForegroundColor Cyan
