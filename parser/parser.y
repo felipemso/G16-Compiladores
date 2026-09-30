@@ -5,6 +5,7 @@
 
 int yylex(void);
 void yyerror(const char *s);
+extern int yylineno;
 
 /* Quantas declaracoes de funcao envolvem o ponto atual (0 = escopo global) */
 static int profundidade_funcao = 0;
@@ -69,7 +70,16 @@ comando:
   | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
-  | error SEMICOLON { yyerrok; /* Permite que o parser se recupere de erros após um ponto e vírgula */ }
+  | error SEMICOLON {
+        yyerrok;
+        yyclearin;
+        fprintf(stderr, "[RECUPERACAO] Erro sintatico descartado ate ';'\n");
+    }
+  | error RBRACE {
+        yyerrok;
+        yyclearin;
+        fprintf(stderr, "[RECUPERACAO] Erro em bloco descartado ate '}'\n");
+    }
   ;
 
 declaracao_var:
@@ -226,5 +236,5 @@ atomo:
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintatico: %s\n", s);
+    fprintf(stderr, "Erro sintatico na linha %d: %s\n", yylineno, s);
 }

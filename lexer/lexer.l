@@ -6,7 +6,9 @@
 %}
 
 /* Evita a necessidade de linkar com a biblioteca do Flex (-lfl) no GCC */
-%option noyywrap 
+%option noyywrap
+/* Habilita o rastreio de numero de linha (yylineno) para mensagens de erro */
+%option yylineno
 
 %%
 

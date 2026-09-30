@@ -119,6 +119,21 @@ int main(void) {
     total++; falhas += run_test("Return em bloco fora de funcao", "{ return; }", false);
     total++; falhas += run_test("Return apos o fim da funcao", "function f() { } return;", false);
 
+    /* Recuperacao de erros sintaticos (T08) */
+    printf("\n--- Recuperacao de Erros Sintaticos ---\n");
+    total++; falhas += run_test(
+        "Recuperacao em nivel de comando (sincroniza no ';')",
+        "let a = 1; let b = ; let c = 2; console.log(c);",
+        false);
+    total++; falhas += run_test(
+        "Recuperacao em nivel de bloco (sincroniza no '}')",
+        "let x = 1; { let y = 5 } console.log(x);",
+        false);
+    total++; falhas += run_test(
+        "Multiplos erros consecutivos nao travam o parser",
+        "let a = ; let b = ; let c = ; let d = 4; console.log(d);",
+        false);
+
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
     printf("Sumario dos Testes em Memoria:\n");
