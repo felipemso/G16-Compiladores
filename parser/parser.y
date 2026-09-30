@@ -67,7 +67,6 @@ comando:
   | comando_if
   | comando_while
   | comando_for
-  | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
   | error SEMICOLON {
