@@ -71,4 +71,30 @@ typedef struct No {
     struct No *proximo;
 } No;
 
+No *no_numero(double valor, int linha);
+No *no_string(char *texto, int linha);
+No *no_booleano(int valor, int linha);
+No *no_id(char *nome, int linha);
+No *no_binario(Operador operador, No *esquerda, No *direita, int linha);
+No *no_unario(Operador operador, No *operando, int linha);
+No *no_programa(No *comandos, int linha);
+No *no_bloco(No *comandos, int linha);
+No *no_decl_var(Declarador declarador, char *nome, No *inicializador, int linha);
+No *no_atribuicao(char *nome, No *expressao, int linha);
+No *no_if(No *condicao, No *entao, No *senao, int linha);
+No *no_while(No *condicao, No *corpo, int linha);
+No *no_for(No *init, No *condicao, No *incremento, No *corpo, int linha);
+No *no_funcao(char *nome, No *parametros, No *corpo, int linha);
+No *no_parametro(char *nome, int linha);
+No *no_return(No *expressao, int linha);
+No *no_chamada(char *nome, No *argumentos, int linha);
+No *no_print(No *argumentos, int linha);
+No *no_vazio(int linha);
+
+No *no_lista_adiciona(No *lista, No *novo);
+
+void ast_imprime(const No *no);
+
+void ast_libera(No *no);
+
 #endif
