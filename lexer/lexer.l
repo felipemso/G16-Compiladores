@@ -30,6 +30,13 @@
 [0-9]+(\.[0-9]+)?               { yylval.valor_num = atof(yytext); return NUM; }
 \"[^\"]*\"|\'[^\']*\'           { yylval.texto = strdup(yytext); return STRING_VAL; } 
 
+ /* Palavras reservadas fora do escopo: antes da regra de identificadores */
+"do"|"switch"|"case"|"break"|"continue"|"try"|"catch"|"throw"|"class"|"extends"|"import"|"from"|"export"|"new"|"in"|"of"|"delete"|"default"|"finally"|"this"|"typeof"|"instanceof"|"void"|"super"|"with"|"yield"|"await"|"enum"|"debugger" {
+    fprintf(stderr, "palavra reservada '%s' fora do escopo na linha %d\n", yytext, yylineno);
+    /* Token invalido para o Bison registrar o erro, mesmo com recuperacao. */
+    return YYUNDEF;
+}
+
  /* 3. Identificadores */
 [a-zA-Z_][a-zA-Z0-9_]*          { yylval.texto = strdup(yytext); return ID; }
 
