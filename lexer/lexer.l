@@ -49,6 +49,7 @@
  /* 4. Operadores Relacionais e Logicos */
 "=="                            { return EQ; }
 "!="                            { return NEQ; }
+"!"                             { return NOT; }
 "<="                            { return LEQ; }
 ">="                            { return GEQ; }
 "<"                             { return LT; }
