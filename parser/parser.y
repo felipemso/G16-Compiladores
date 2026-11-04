@@ -167,6 +167,8 @@ args_opt:
 lista_args:
     expressao
   | lista_args COMMA expressao
+  ;
+
 comando_if:
     IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
         printf("AST: Comando if reconhecido.\n");
