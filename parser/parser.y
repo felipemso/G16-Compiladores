@@ -27,7 +27,7 @@ static int profundidade_funcao = 0;
 %token <booleano> BOOLEAN_VAL
 %token ASSIGN SEMICOLON COMMA
 %token PLUS MINUS TIMES DIVIDE
-%token EQ NEQ LEQ GEQ LT GT AND OR
+%token EQ NEQ LEQ GEQ LT GT AND OR NOT
 %token LPAREN RPAREN LBRACE RBRACE
 
 /* Precedência de Operadores (da menor para a maior) */
@@ -39,7 +39,7 @@ static int profundidade_funcao = 0;
 %left LT LEQ GT GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
-%right UMINUS
+%right UMINUS NOT
 
 %%
 
@@ -221,6 +221,7 @@ expressao:
   | expressao TIMES expressao
   | expressao DIVIDE expressao
   | MINUS expressao %prec UMINUS
+  | NOT expressao
   | LPAREN expressao RPAREN
   | atomo
   ;
