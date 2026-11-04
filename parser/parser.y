@@ -19,9 +19,8 @@ static int profundidade_funcao = 0;
 }
 
 /* Definição dos tokens exportados para o Flex */
-%token LET CONST VAR FUNCTION IF ELSE WHILE FOR DO SWITCH CASE
-%token BREAK CONTINUE RETURN TRY CATCH THROW
-%token CLASS EXTENDS IMPORT FROM EXPORT NEW IN OF DELETE
+%token LET CONST VAR FUNCTION IF ELSE WHILE FOR
+%token RETURN
 %token PRINT
 %token <texto> ID STRING_VAL
 %token <valor_num> NUM

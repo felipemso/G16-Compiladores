@@ -21,24 +21,7 @@
 "else"                  { return ELSE; }
 "while"                 { return WHILE; }
 "for"                   { return FOR; }
-"do"                    { return DO; }
-"switch"                { return SWITCH; }
-"case"                  { return CASE; }
-"break"                 { return BREAK; }
-"continue"              { return CONTINUE; }
 "return"                { return RETURN; }
-"try"                   { return TRY; }
-"catch"                 { return CATCH; }
-"throw"                 { return THROW; }
-"class"                 { return CLASS; }
-"extends"               { return EXTENDS; }
-"import"                { return IMPORT; }
-"from"                  { return FROM; }
-"export"                { return EXPORT; }
-"new"                   { return NEW; }
-"in"                    { return IN; }
-"of"                    { return OF; }
-"delete"                { return DELETE; }
 "console.log"           { return PRINT; }
 
  /* 2. Valores Literais */
