@@ -54,4 +54,21 @@ typedef enum {
     DECLARADOR_CONST
 } Declarador;
 
+#define NO_MAX_FILHOS 4
+
+typedef struct No {
+    TipoNo categoria;
+    TipoDado tipo_inferido;
+    int linha;
+    Operador operador;
+    Declarador declarador;
+    union {
+        double numero;
+        char *texto;
+        int booleano;
+    } valor;
+    struct No *filhos[NO_MAX_FILHOS];
+    struct No *proximo;
+} No;
+
 #endif
