@@ -28,7 +28,13 @@
 "true"                          { yylval.booleano = 1; return BOOLEAN_VAL; }
 "false"                         { yylval.booleano = 0; return BOOLEAN_VAL; }
 [0-9]+(\.[0-9]+)?               { yylval.valor_num = atof(yytext); return NUM; }
-\"[^\"]*\"|\'[^\']*\'           { yylval.texto = strdup(yytext); return STRING_VAL; } 
+\"[^\"\r\n]*\"|\'[^\'\r\n]*\' { yylval.texto = strdup(yytext); return STRING_VAL; }
+
+ /* Detecta a quebra sem consumi-la, preservando a linha inicial da string. */
+(\"[^\"\r\n]*|\'[^\'\r\n]*)/[\r\n] {
+    fprintf(stderr, "Erro lexico: string com quebra de linha na linha %d\n", yylineno);
+    return YYUNDEF;
+}
 
  /* Palavras reservadas fora do escopo: antes da regra de identificadores */
 "do"|"switch"|"case"|"break"|"continue"|"try"|"catch"|"throw"|"class"|"extends"|"import"|"from"|"export"|"new"|"in"|"of"|"delete"|"default"|"finally"|"this"|"typeof"|"instanceof"|"void"|"super"|"with"|"yield"|"await"|"enum"|"debugger" {
