@@ -78,6 +78,9 @@
 "/*"([^*]|\*+[^*/])*\*+"/"      { /* Ignora comentarios de bloco / multilinha */ }
 
  /* 8. Tratamento de Erro Lexico */
-.                       { printf("Erro lexico: Caractere invalido '%s'\n", yytext); }
+.                       {
+    fprintf(stderr, "Erro lexico: Caractere invalido '%s' na linha %d\n", yytext, yylineno);
+    return YYUNDEF;
+}
 
 %%
