@@ -8,6 +8,11 @@ LEXER_DIR = lexer
 PARSER_DIR = parser
 TESTS_DIR = tests
 
+AST_C = $(SRC_DIR)/ast.c
+AST_H = $(SRC_DIR)/ast.h
+
+CFLAGS = -I$(SRC_DIR)
+
 # Arquivos C gerados automaticamente pelo Flex e Bison
 LEX_C = lex.yy.c
 YACC_C = parser.tab.c
@@ -17,12 +22,12 @@ YACC_H = parser.tab.h
 all: $(TARGET)
 
 # Como gerar o executavel final (junta o main.c com os arquivos gerados)
-$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c
-	gcc -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c
+$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(AST_H)
+	gcc $(CFLAGS) -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C)
 
 # Como gerar o executavel de testes unitarios em memoria (diferencial)
-$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c
-	gcc -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c
+$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(AST_H)
+	gcc $(CFLAGS) -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C)
 
 # Como gerar os arquivos do Bison
 $(YACC_C): $(PARSER_DIR)/parser.y
