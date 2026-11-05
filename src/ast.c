@@ -156,3 +156,32 @@ No *no_lista_adiciona(No *lista, No *novo) {
     ultimo->proximo = novo;
     return lista;
 }
+
+static int usa_texto(TipoNo categoria) {
+    switch (categoria) {
+        case NO_DECL_VAR:
+        case NO_ATRIBUICAO:
+        case NO_FUNCAO:
+        case NO_PARAMETRO:
+        case NO_CHAMADA:
+        case NO_ID:
+        case NO_STRING:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+void ast_libera(No *no) {
+    while (no) {
+        No *proximo = no->proximo;
+        for (int i = 0; i < NO_MAX_FILHOS; i++) {
+            ast_libera(no->filhos[i]);
+        }
+        if (usa_texto(no->categoria)) {
+            free(no->valor.texto);
+        }
+        free(no);
+        no = proximo;
+    }
+}
