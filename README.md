@@ -58,11 +58,6 @@ Analisando um arquivo:
 ./minijs caminho/para/arquivo.js
 ```
 
-Avaliando código diretamente:
-```bash
-./minijs -e "let x = (10 + 20) * 3; console.log(x);"
-```
-
 ---
 
 ## Como Rodar os Testes
