@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include "ast.h"
 
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
@@ -29,6 +31,102 @@ static int run_test(const char *descricao, const char *codigo, bool deve_passar)
                sucesso ? "SUCESSO" : "ERRO");
         return 1;
     }
+}
+
+static int verifica(const char *descricao, bool ok) {
+    if (ok) {
+        printf("  [PASSOU] %s\n", descricao);
+        return 0;
+    }
+    printf("  [FALHOU] %s\n", descricao);
+    return 1;
+}
+
+static int testa_literais(void) {
+    char *texto = strdup("\"ola\"");
+    char *nome = strdup("x");
+    No *num = no_numero(3.5, 2);
+    No *str = no_string(texto, 3);
+    No *boo = no_booleano(5, 4);
+    No *id = no_id(nome, 5);
+    bool ok = num->categoria == NO_NUMERO && num->valor.numero == 3.5 && num->linha == 2
+        && num->tipo_inferido == TIPO_DESCONHECIDO && num->operador == OP_NENHUM
+        && num->filhos[0] == NULL && num->filhos[3] == NULL && num->proximo == NULL
+        && str->categoria == NO_STRING && str->valor.texto == texto && str->linha == 3
+        && boo->categoria == NO_BOOLEANO && boo->valor.booleano == 1
+        && id->categoria == NO_ID && id->valor.texto == nome && id->linha == 5;
+    int resultado = verifica("Literais e identificador guardam valor, linha e tipo desconhecido", ok);
+    ast_libera(num);
+    ast_libera(str);
+    ast_libera(boo);
+    ast_libera(id);
+    return resultado;
+}
+
+static int testa_precedencia(void) {
+    No *mult = no_binario(OP_MULTIPLICACAO, no_numero(2, 1), no_numero(3, 1), 1);
+    No *soma = no_binario(OP_SOMA, no_numero(1, 1), mult, 1);
+    bool ok = soma->categoria == NO_BINARIO && soma->operador == OP_SOMA
+        && soma->filhos[0]->valor.numero == 1 && soma->filhos[1] == mult
+        && mult->operador == OP_MULTIPLICACAO
+        && mult->filhos[0]->valor.numero == 2 && mult->filhos[1]->valor.numero == 3;
+    int resultado = verifica("1 + 2 * 3 monta +(1, *(2, 3))", ok);
+    ast_libera(soma);
+    return resultado;
+}
+
+static int testa_unario(void) {
+    No *nao = no_unario(OP_NAO, no_booleano(1, 7), 7);
+    No *neg = no_unario(OP_NEGATIVO, no_numero(4, 8), 8);
+    bool ok = nao->categoria == NO_UNARIO && nao->operador == OP_NAO
+        && nao->filhos[0]->categoria == NO_BOOLEANO && nao->filhos[1] == NULL
+        && neg->operador == OP_NEGATIVO && neg->filhos[0]->valor.numero == 4;
+    int resultado = verifica("Operadores unarios ! e - guardam o operando", ok);
+    ast_libera(nao);
+    ast_libera(neg);
+    return resultado;
+}
+
+static int testa_lista(void) {
+    No *a = no_numero(1, 1);
+    No *b = no_numero(2, 1);
+    No *c = no_numero(3, 1);
+    No *lista = no_lista_adiciona(NULL, a);
+    lista = no_lista_adiciona(lista, NULL);
+    lista = no_lista_adiciona(lista, b);
+    lista = no_lista_adiciona(lista, c);
+    bool ok = lista == a && a->proximo == b && b->proximo == c && c->proximo == NULL
+        && no_lista_adiciona(NULL, NULL) == NULL;
+    int resultado = verifica("Lista mantem a ordem e ignora NULL", ok);
+    ast_libera(lista);
+    return resultado;
+}
+
+static int testa_comandos(void) {
+    No *decl = no_decl_var(DECLARADOR_CONST, strdup("PI"), no_numero(3.14, 1), 1);
+    No *se = no_if(no_id(strdup("x"), 2), no_bloco(NULL, 2), NULL, 2);
+    No *laco = no_for(NULL, NULL, NULL, no_vazio(3), 3);
+    No *params = no_lista_adiciona(no_parametro(strdup("a"), 4), no_parametro(strdup("b"), 4));
+    No *corpo = no_bloco(no_return(no_binario(OP_SOMA, no_id(strdup("a"), 5), no_id(strdup("b"), 5), 5), 5), 4);
+    No *func = no_funcao(strdup("soma"), params, corpo, 4);
+    No *args = no_lista_adiciona(no_numero(1, 6), no_numero(2, 6));
+    No *print = no_print(no_chamada(strdup("soma"), args, 6), 6);
+    bool ok = decl->categoria == NO_DECL_VAR && decl->declarador == DECLARADOR_CONST
+        && strcmp(decl->valor.texto, "PI") == 0 && decl->filhos[0]->valor.numero == 3.14
+        && se->categoria == NO_IF && se->filhos[1]->categoria == NO_BLOCO && se->filhos[2] == NULL
+        && laco->categoria == NO_FOR && laco->filhos[0] == NULL && laco->filhos[3]->categoria == NO_VAZIO
+        && func->categoria == NO_FUNCAO && strcmp(func->valor.texto, "soma") == 0 && func->linha == 4
+        && func->filhos[0] == params && strcmp(params->proximo->valor.texto, "b") == 0
+        && func->filhos[1]->filhos[0]->categoria == NO_RETURN
+        && print->filhos[0]->categoria == NO_CHAMADA && print->filhos[0]->filhos[0]->proximo->valor.numero == 2;
+    No *programa = no_programa(NULL, 1);
+    programa->filhos[0] = no_lista_adiciona(no_lista_adiciona(no_lista_adiciona(decl, se), laco), no_lista_adiciona(func, print));
+    ok = ok && programa->categoria == NO_PROGRAMA && programa->filhos[0] == decl
+        && decl->proximo == se && se->proximo == laco && laco->proximo == func && func->proximo == print;
+    int resultado = verifica("Comandos montam filhos nas posicoes do contrato e a arvore e liberada", ok);
+    ast_libera(programa);
+    ast_libera(NULL);
+    return resultado;
 }
 
 int main(void) {
@@ -133,6 +231,13 @@ int main(void) {
         "Multiplos erros consecutivos nao travam o parser",
         "let a = ; let b = ; let c = ; let d = 4; console.log(d);",
         false);
+
+    printf("\n--- AST: Construtores e Liberacao ---\n");
+    total++; falhas += testa_literais();
+    total++; falhas += testa_precedencia();
+    total++; falhas += testa_unario();
+    total++; falhas += testa_lista();
+    total++; falhas += testa_comandos();
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
