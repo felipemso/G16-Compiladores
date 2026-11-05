@@ -110,3 +110,49 @@ No *no_return(No *expressao, int linha) {
 No *no_vazio(int linha) {
     return no_novo(NO_VAZIO, linha);
 }
+
+No *no_programa(No *comandos, int linha) {
+    No *no = no_novo(NO_PROGRAMA, linha);
+    no->filhos[0] = comandos;
+    return no;
+}
+
+No *no_bloco(No *comandos, int linha) {
+    No *no = no_novo(NO_BLOCO, linha);
+    no->filhos[0] = comandos;
+    return no;
+}
+
+No *no_parametro(char *nome, int linha) {
+    No *no = no_novo(NO_PARAMETRO, linha);
+    no->valor.texto = nome;
+    return no;
+}
+
+No *no_chamada(char *nome, No *argumentos, int linha) {
+    No *no = no_novo(NO_CHAMADA, linha);
+    no->valor.texto = nome;
+    no->filhos[0] = argumentos;
+    return no;
+}
+
+No *no_print(No *argumentos, int linha) {
+    No *no = no_novo(NO_PRINT, linha);
+    no->filhos[0] = argumentos;
+    return no;
+}
+
+No *no_lista_adiciona(No *lista, No *novo) {
+    if (!novo) {
+        return lista;
+    }
+    if (!lista) {
+        return novo;
+    }
+    No *ultimo = lista;
+    while (ultimo->proximo) {
+        ultimo = ultimo->proximo;
+    }
+    ultimo->proximo = novo;
+    return lista;
+}
