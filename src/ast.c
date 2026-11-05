@@ -38,3 +38,18 @@ No *no_id(char *nome, int linha) {
     no->valor.texto = nome;
     return no;
 }
+
+No *no_binario(Operador operador, No *esquerda, No *direita, int linha) {
+    No *no = no_novo(NO_BINARIO, linha);
+    no->operador = operador;
+    no->filhos[0] = esquerda;
+    no->filhos[1] = direita;
+    return no;
+}
+
+No *no_unario(Operador operador, No *operando, int linha) {
+    No *no = no_novo(NO_UNARIO, linha);
+    no->operador = operador;
+    no->filhos[0] = operando;
+    return no;
+}
