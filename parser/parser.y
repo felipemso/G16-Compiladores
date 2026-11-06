@@ -19,16 +19,15 @@ static int profundidade_funcao = 0;
 }
 
 /* Definição dos tokens exportados para o Flex */
-%token LET CONST VAR FUNCTION IF ELSE WHILE FOR DO SWITCH CASE
-%token BREAK CONTINUE RETURN TRY CATCH THROW
-%token CLASS EXTENDS IMPORT FROM EXPORT NEW IN OF DELETE
+%token LET CONST VAR FUNCTION IF ELSE WHILE FOR
+%token RETURN
 %token PRINT
 %token <texto> ID STRING_VAL
 %token <valor_num> NUM
 %token <booleano> BOOLEAN_VAL
 %token ASSIGN SEMICOLON COMMA
 %token PLUS MINUS TIMES DIVIDE
-%token EQ NEQ LEQ GEQ LT GT AND OR
+%token EQ NEQ LEQ GEQ LT GT AND OR NOT
 %token LPAREN RPAREN LBRACE RBRACE
 
 /* Precedência de Operadores (da menor para a maior) */
@@ -40,7 +39,7 @@ static int profundidade_funcao = 0;
 %left LT LEQ GT GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
-%right UMINUS
+%right UMINUS NOT
 
 %%
 
@@ -67,7 +66,6 @@ comando:
   | comando_if
   | comando_while
   | comando_for
-  | PRINT LPAREN expressao RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
   | bloco
   | SEMICOLON
   | error SEMICOLON {
@@ -169,6 +167,8 @@ args_opt:
 lista_args:
     expressao
   | lista_args COMMA expressao
+  ;
+
 comando_if:
     IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
         printf("AST: Comando if reconhecido.\n");
@@ -221,6 +221,7 @@ expressao:
   | expressao TIMES expressao
   | expressao DIVIDE expressao
   | MINUS expressao %prec UMINUS
+  | NOT expressao
   | LPAREN expressao RPAREN
   | atomo
   ;
