@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ast.h"
 
 int yylex(void);
 void yyerror(const char *s);
@@ -16,6 +17,7 @@ static int profundidade_funcao = 0;
     double valor_num;
     char *texto;
     int booleano;
+    struct No *no;
 }
 
 /* Definição dos tokens exportados para o Flex */
@@ -42,6 +44,8 @@ static int profundidade_funcao = 0;
 %right UMINUS NOT
 
 %locations
+
+%type <no> expressao atomo
 
 %%
 
@@ -222,18 +226,18 @@ expressao:
   | expressao MINUS expressao
   | expressao TIMES expressao
   | expressao DIVIDE expressao
-  | MINUS expressao %prec UMINUS
-  | NOT expressao
-  | LPAREN expressao RPAREN
+  | MINUS expressao %prec UMINUS { ast_libera($2); $$ = NULL; }
+  | NOT expressao { ast_libera($2); $$ = NULL; }
+  | LPAREN expressao RPAREN { $$ = $2; }
   | atomo
   ;
 
 atomo:
-    ID { free($1); }
-  | chamada_funcao
-  | NUM
-  | STRING_VAL { free($1); }
-  | BOOLEAN_VAL
+    ID { free($1); $$ = NULL; }
+  | chamada_funcao { $$ = NULL; }
+  | NUM { $$ = NULL; }
+  | STRING_VAL { free($1); $$ = NULL; }
+  | BOOLEAN_VAL { $$ = NULL; }
   ;
 
 %%
