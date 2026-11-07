@@ -41,6 +41,8 @@ static int profundidade_funcao = 0;
 %left TIMES DIVIDE
 %right UMINUS NOT
 
+%locations
+
 %%
 
 programa:
