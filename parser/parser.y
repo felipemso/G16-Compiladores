@@ -229,15 +229,15 @@ expressao:
   | MINUS expressao %prec UMINUS { ast_libera($2); $$ = NULL; }
   | NOT expressao { ast_libera($2); $$ = NULL; }
   | LPAREN expressao RPAREN { $$ = $2; }
-  | atomo
+  | atomo { $$ = $1; }
   ;
 
 atomo:
-    ID { free($1); $$ = NULL; }
+    ID { $$ = no_id($1, @1.first_line); }
   | chamada_funcao { $$ = NULL; }
-  | NUM { $$ = NULL; }
-  | STRING_VAL { free($1); $$ = NULL; }
-  | BOOLEAN_VAL { $$ = NULL; }
+  | NUM { $$ = no_numero($1, @1.first_line); }
+  | STRING_VAL { $$ = no_string($1, @1.first_line); }
+  | BOOLEAN_VAL { $$ = no_booleano($1, @1.first_line); }
   ;
 
 %%
