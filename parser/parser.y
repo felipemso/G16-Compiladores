@@ -216,16 +216,16 @@ for_incr:
 expressao:
     expressao OR expressao
   | expressao AND expressao
-  | expressao EQ expressao
-  | expressao NEQ expressao
-  | expressao LT expressao
-  | expressao LEQ expressao
-  | expressao GT expressao
-  | expressao GEQ expressao
-  | expressao PLUS expressao
-  | expressao MINUS expressao
-  | expressao TIMES expressao
-  | expressao DIVIDE expressao
+  | expressao EQ expressao { $$ = no_binario(OP_IGUAL, $1, $3, @1.first_line); }
+  | expressao NEQ expressao { $$ = no_binario(OP_DIFERENTE, $1, $3, @1.first_line); }
+  | expressao LT expressao { $$ = no_binario(OP_MENOR, $1, $3, @1.first_line); }
+  | expressao LEQ expressao { $$ = no_binario(OP_MENOR_IGUAL, $1, $3, @1.first_line); }
+  | expressao GT expressao { $$ = no_binario(OP_MAIOR, $1, $3, @1.first_line); }
+  | expressao GEQ expressao { $$ = no_binario(OP_MAIOR_IGUAL, $1, $3, @1.first_line); }
+  | expressao PLUS expressao { $$ = no_binario(OP_SOMA, $1, $3, @1.first_line); }
+  | expressao MINUS expressao { $$ = no_binario(OP_SUBTRACAO, $1, $3, @1.first_line); }
+  | expressao TIMES expressao { $$ = no_binario(OP_MULTIPLICACAO, $1, $3, @1.first_line); }
+  | expressao DIVIDE expressao { $$ = no_binario(OP_DIVISAO, $1, $3, @1.first_line); }
   | MINUS expressao %prec UMINUS { ast_libera($2); $$ = NULL; }
   | NOT expressao { ast_libera($2); $$ = NULL; }
   | LPAREN expressao RPAREN { $$ = $2; }
