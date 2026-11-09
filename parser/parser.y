@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ast.h"
 
 int yylex(void);
 void yyerror(const char *s);
@@ -12,12 +11,28 @@ extern int yylineno;
 static int profundidade_funcao = 0;
 %}
 
+%code requires {
+#include "ast.h"
+}
+
+%code {
+No *raiz_ast = NULL;
+
+static No *aplica_declarador(No *lista, Declarador declarador) {
+    for (No *no = lista; no; no = no->proximo) {
+        no->declarador = declarador;
+    }
+    return lista;
+}
+}
+
 /* Tipos semânticos suportados pelo analisador sintático */
 %union {
     double valor_num;
     char *texto;
     int booleano;
-    struct No *no;
+    No *no;
+    Declarador declarador;
 }
 
 /* Definição dos tokens exportados para o Flex */
@@ -32,6 +47,15 @@ static int profundidade_funcao = 0;
 %token EQ NEQ LEQ GEQ LT GT AND OR NOT
 %token LPAREN RPAREN LBRACE RBRACE
 
+%type <no> lista_comandos bloco comando declaracao_var lista_declaradores
+%type <no> item_declarador lista_declaradores_const item_declarador_inicializado
+%type <no> comando_atribuicao declaracao_funcao comando_retorno chamada_funcao
+%type <no> args_opt lista_args comando_if comando_while comando_for
+%type <no> for_init for_cond for_incr expressao atomo
+%type <declarador> tipo_declarador
+%destructor { free($$); } <texto>
+%destructor { ast_libera($$); } <no>
+
 /* Precedência de Operadores (da menor para a maior) */
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -45,21 +69,20 @@ static int profundidade_funcao = 0;
 
 %locations
 
-%type <no> expressao atomo
-
 %%
 
 programa:
-    { profundidade_funcao = 0; } lista_comandos
+    { profundidade_funcao = 0; ast_libera(raiz_ast); raiz_ast = NULL; } lista_comandos
+    { raiz_ast = no_programa($2, 1); }
     ;
 
 lista_comandos:
-    /* vazio: programa pode iniciar vazio */
-  | lista_comandos comando
+    /* vazio: programa pode iniciar vazio */ { $$ = NULL; }
+  | lista_comandos comando { $$ = no_lista_adiciona($1, $2); }
   ;
 
 bloco:
-    LBRACE lista_comandos RBRACE
+    LBRACE lista_comandos RBRACE { $$ = no_bloco($2, @1.first_line); }
   ;
 
 comando:
@@ -68,43 +91,47 @@ comando:
   | declaracao_funcao
   | comando_retorno
   | chamada_funcao SEMICOLON
-  | PRINT LPAREN args_opt RPAREN SEMICOLON { printf("AST: Comando de impressao reconhecido.\n"); }
+  | PRINT LPAREN args_opt RPAREN SEMICOLON { ast_libera($3); $$ = NULL; }
   | comando_if
   | comando_while
   | comando_for
   | bloco
-  | SEMICOLON
+  | SEMICOLON { $$ = no_vazio(@1.first_line); }
   | error SEMICOLON {
+        $$ = NULL;
         yyerrok;
-        yyclearin;
         fprintf(stderr, "[RECUPERACAO] Erro sintatico descartado ate ';'\n");
     }
   | error RBRACE {
+        $$ = NULL;
         yyerrok;
-        yyclearin;
         fprintf(stderr, "[RECUPERACAO] Erro em bloco descartado ate '}'\n");
     }
   ;
 
 declaracao_var:
-    tipo_declarador lista_declaradores SEMICOLON
-  | CONST lista_declaradores_const SEMICOLON
+    tipo_declarador lista_declaradores SEMICOLON {
+        $$ = aplica_declarador($2, $1);
+    }
+  | CONST lista_declaradores_const SEMICOLON {
+        $$ = aplica_declarador($2, DECLARADOR_CONST);
+    }
   ;
 
 tipo_declarador:
-    LET
-  | VAR
+    LET { $$ = DECLARADOR_LET; }
+  | VAR { $$ = DECLARADOR_VAR; }
   ;
 
 lista_declaradores:
     item_declarador
-  | lista_declaradores COMMA item_declarador
+  | lista_declaradores COMMA item_declarador { $$ = no_lista_adiciona($1, $3); }
   ;
 
+/* DECLARADOR_LET e provisorio; a regra pai define o declarador real via aplica_declarador */
 item_declarador:
     ID {
-        printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
-        free($1);
+        $$ = no_decl_var(DECLARADOR_LET, $1, NULL, @1.first_line);
     }
   | item_declarador_inicializado
   ;
@@ -112,28 +139,27 @@ item_declarador:
 /* const exige inicializacao em todos os itens (const x; e erro de sintaxe no JS) */
 lista_declaradores_const:
     item_declarador_inicializado
-  | lista_declaradores_const COMMA item_declarador_inicializado
+  | lista_declaradores_const COMMA item_declarador_inicializado { $$ = no_lista_adiciona($1, $3); }
   ;
 
 item_declarador_inicializado:
     ID ASSIGN expressao {
-        printf("AST: Declaracao de variavel '%s' reconhecida.\n", $1);
-        free($1);
+        $$ = no_decl_var(DECLARADOR_LET, $1, $3, @1.first_line);
     }
   ;
 
 comando_atribuicao:
     ID ASSIGN expressao SEMICOLON {
-        printf("AST: Atribuicao a variavel '%s' reconhecida.\n", $1);
-        free($1);
+        $$ = no_atribuicao($1, $3, @1.first_line);
     }
   ;
 
 declaracao_funcao:
     FUNCTION ID LPAREN params_opt RPAREN { profundidade_funcao++; } bloco {
         profundidade_funcao--;
-        printf("AST: Declaracao de funcao '%s' reconhecida.\n", $2);
         free($2);
+        ast_libera($7);
+        $$ = NULL;
     }
   ;
 
@@ -150,66 +176,81 @@ lista_params:
 comando_retorno:
     RETURN SEMICOLON {
         if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        else printf("AST: Comando de retorno reconhecido.\n");
+        $$ = NULL;
     }
   | RETURN expressao SEMICOLON {
         if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        else printf("AST: Comando de retorno reconhecido.\n");
+        ast_libera($2);
+        $$ = NULL;
     }
   ;
 
 chamada_funcao:
     ID LPAREN args_opt RPAREN {
-        printf("AST: Chamada de funcao '%s' reconhecida.\n", $1);
         free($1);
+        ast_libera($3);
+        $$ = NULL;
     }
   ;
 
 args_opt:
-    /* vazio: chamada sem argumentos */
+    /* vazio: chamada sem argumentos */ { $$ = NULL; }
   | lista_args
   ;
 
 lista_args:
     expressao
-  | lista_args COMMA expressao
+  | lista_args COMMA expressao { $$ = no_lista_adiciona($1, $3); }
   ;
 
 comando_if:
     IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
-        printf("AST: Comando if reconhecido.\n");
+        ast_libera($3);
+        ast_libera($5);
+        $$ = NULL;
     }
   | IF LPAREN expressao RPAREN comando ELSE comando {
-        printf("AST: Comando if-else reconhecido.\n");
+        ast_libera($3);
+        ast_libera($5);
+        ast_libera($7);
+        $$ = NULL;
     }
   ;
 
 comando_while:
     WHILE LPAREN expressao RPAREN comando {
-        printf("AST: Comando while reconhecido.\n");
+        ast_libera($3);
+        ast_libera($5);
+        $$ = NULL;
     }
   ;
 
 comando_for:
     FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN comando {
-        printf("AST: Comando for reconhecido.\n");
+        ast_libera($3);
+        ast_libera($5);
+        ast_libera($7);
+        ast_libera($9);
+        $$ = NULL;
     }
   ;
 
 for_init:
-    /* vazio */
-  | tipo_declarador lista_declaradores
-  | ID ASSIGN expressao { free($1); }
+    /* vazio */ { $$ = NULL; }
+  | tipo_declarador lista_declaradores {
+        $$ = aplica_declarador($2, $1);
+    }
+  | ID ASSIGN expressao { free($1); ast_libera($3); $$ = NULL; }
   ;
 
 for_cond:
-    /* vazio */
+    /* vazio */ { $$ = NULL; }
   | expressao
   ;
 
 for_incr:
-    /* vazio */
-  | ID ASSIGN expressao { free($1); }
+    /* vazio */ { $$ = NULL; }
+  | ID ASSIGN expressao { free($1); ast_libera($3); $$ = NULL; }
   | expressao
   ;
 
@@ -234,7 +275,7 @@ expressao:
 
 atomo:
     ID { $$ = no_id($1, @1.first_line); }
-  | chamada_funcao { $$ = NULL; }
+  | chamada_funcao
   | NUM { $$ = no_numero($1, @1.first_line); }
   | STRING_VAL { $$ = no_string($1, @1.first_line); }
   | BOOLEAN_VAL { $$ = no_booleano($1, @1.first_line); }
