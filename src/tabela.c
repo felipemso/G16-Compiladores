@@ -90,3 +90,53 @@ Simbolo *tabela_busca(const char *nome) {
     }
     return NULL;
 }
+
+static const char *nome_categoria(CategoriaSimbolo categoria) {
+    switch (categoria) {
+        case SIMBOLO_LET: return "let";
+        case SIMBOLO_VAR: return "var";
+        case SIMBOLO_CONST: return "const";
+        case SIMBOLO_FUNCAO: return "funcao";
+        case SIMBOLO_PARAMETRO: return "parametro";
+    }
+    return "?";
+}
+
+static const char *nome_tipo(TipoDado tipo) {
+    switch (tipo) {
+        case TIPO_DESCONHECIDO: return "desconhecido";
+        case TIPO_NUMERO: return "numero";
+        case TIPO_STRING: return "string";
+        case TIPO_BOOLEANO: return "booleano";
+    }
+    return "?";
+}
+
+void tabela_imprime(void) {
+    printf("%-6s %-20s %-10s %-13s %-6s %s\n", "Nivel", "Nome", "Categoria", "Tipo", "Linha", "Parametros");
+    for (const Simbolo *simbolo = primeiro_simbolo; simbolo; simbolo = simbolo->proximo_na_tabela) {
+        printf("%-6d %-20s %-10s %-13s %-6d ", simbolo->nivel_escopo, simbolo->nome,
+               nome_categoria(simbolo->categoria), nome_tipo(simbolo->tipo_inferido), simbolo->linha);
+        if (simbolo->categoria == SIMBOLO_FUNCAO) {
+            printf("%d\n", simbolo->num_parametros);
+        } else {
+            printf("-\n");
+        }
+    }
+}
+
+void tabela_libera(void) {
+    while (escopo_atual != &escopo_global) {
+        escopo_sai();
+    }
+    Simbolo *simbolo = primeiro_simbolo;
+    while (simbolo) {
+        Simbolo *proximo = simbolo->proximo_na_tabela;
+        free(simbolo->nome);
+        free(simbolo);
+        simbolo = proximo;
+    }
+    escopo_global.simbolos = NULL;
+    primeiro_simbolo = NULL;
+    ultimo_simbolo = NULL;
+}

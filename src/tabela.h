@@ -31,4 +31,7 @@ Simbolo *tabela_insere(const char *nome, CategoriaSimbolo categoria, TipoDado ti
 Simbolo *tabela_busca_local(const char *nome);
 Simbolo *tabela_busca(const char *nome);
 
+void tabela_imprime(void);
+void tabela_libera(void);
+
 #endif
