@@ -15,8 +15,34 @@ static void visita_filhos(No *no) {
     }
 }
 
+static CategoriaSimbolo categoria_do_declarador(Declarador declarador) {
+    switch (declarador) {
+        case DECLARADOR_VAR: return SIMBOLO_VAR;
+        case DECLARADOR_CONST: return SIMBOLO_CONST;
+        case DECLARADOR_LET: break;
+    }
+    return SIMBOLO_LET;
+}
+
+static void visita_declaracao(No *no) {
+    /* O inicializador vem antes da insercao: em "let x = x;" o x da direita ainda nao existe */
+    visita_filhos(no);
+    tabela_insere(no->valor.texto, categoria_do_declarador(no->declarador), TIPO_DESCONHECIDO, no->linha);
+}
+
 static void visita_funcao(No *no) {
+    /* A funcao entra antes do corpo, o que permite recursao */
+    Simbolo *funcao = tabela_insere(no->valor.texto, SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, no->linha);
+
     escopo_entra();
+    int num_parametros = 0;
+    for (No *parametro = no->filhos[0]; parametro; parametro = parametro->proximo) {
+        tabela_insere(parametro->valor.texto, SIMBOLO_PARAMETRO, TIPO_DESCONHECIDO, parametro->linha);
+        num_parametros++;
+    }
+    if (funcao) {
+        funcao->num_parametros = num_parametros;
+    }
 
     /* Parametros e corpo dividem o mesmo escopo: o bloco do corpo nao abre outro */
     No *corpo = no->filhos[1];
@@ -37,6 +63,9 @@ static void visita(No *no) {
             break;
         case NO_FUNCAO:
             visita_funcao(no);
+            break;
+        case NO_DECL_VAR:
+            visita_declaracao(no);
             break;
         default:
             visita_filhos(no);
