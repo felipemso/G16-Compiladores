@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 
 /* Declarações externas geradas pelo Flex e Bison */
 extern int yyparse(void);
 extern FILE *yyin;
 extern int yynerrs;
+extern No *raiz_ast;
 
 int main(int argc, char *argv[]) {
     if (argc > 1) {
@@ -26,5 +28,7 @@ int main(int argc, char *argv[]) {
         res = 1;
     }
 
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
     return res;
 }

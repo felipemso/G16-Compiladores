@@ -8,16 +8,27 @@
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
 extern int yynerrs;
+extern int yylineno;
+extern No *raiz_ast;
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE yy_scan_string(const char *str);
 extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
 
-static int run_test(const char *descricao, const char *codigo, bool deve_passar) {
+static int parse_string(const char *codigo) {
     yynerrs = 0;
+    yylineno = 1;
     YY_BUFFER_STATE buffer = yy_scan_string(codigo);
-    int parse_res = yyparse();
+    int resultado = yyparse();
     yy_delete_buffer(buffer);
+    return resultado;
+}
+
+static int run_test(const char *descricao, const char *codigo, bool deve_passar) {
+    int parse_res = parse_string(codigo);
+
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
 
     bool sucesso = (parse_res == 0 && yynerrs == 0);
     bool ok = (sucesso == deve_passar);
@@ -128,6 +139,78 @@ static int testa_comandos(void) {
     ast_libera(programa);
     ast_libera(NULL);
     return resultado;
+}
+
+static int testa_ast_parser(const char *descricao, const char *codigo, const TipoNo *esperado, size_t qtd, bool erro) {
+    int resultado = parse_string(codigo);
+    bool ok = resultado == 0 && (yynerrs > 0) == erro
+        && raiz_ast && raiz_ast->categoria == NO_PROGRAMA;
+    No *no = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    for (size_t i = 0; i < qtd; i++) {
+        ok = ok && no && no->categoria == esperado[i];
+        if (no) no = no->proximo;
+    }
+    ok = ok && no == NULL;
+    int falhas = verifica(descricao, ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
+static int testa_ast_linhas(void) {
+    const char *codigo =
+        "let a =\n"
+        "    10;\n"
+        "{\n"
+        "    x =\n"
+        "        20;\n"
+        "    ;\n"
+        "}\n";
+    int resultado = parse_string(codigo);
+    No *a = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *bloco = a ? a->proximo : NULL;
+    No *x = bloco ? bloco->filhos[0] : NULL;
+    No *vazio = x ? x->proximo : NULL;
+    bool ok = resultado == 0 && yynerrs == 0
+        && a && a->linha == 1
+        && bloco && bloco->linha == 3
+        && x && x->linha == 4
+        && vazio && vazio->linha == 6;
+    int falhas = verifica("Nos guardam a linha inicial mesmo com quebras de linha", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
+static int testa_ast_declaracoes(void) {
+    int resultado = parse_string("let a, b = 1 + 2 * 3; var c; const d = true, e = 'ok'; { a = -b; ; {} }");
+    No *a = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *b = a ? a->proximo : NULL;
+    No *c = b ? b->proximo : NULL;
+    No *d = c ? c->proximo : NULL;
+    No *e = d ? d->proximo : NULL;
+    No *bloco = e ? e->proximo : NULL;
+    No *atr = bloco ? bloco->filhos[0] : NULL;
+    No *vazio = atr ? atr->proximo : NULL;
+    No *interno = vazio ? vazio->proximo : NULL;
+    bool ok = resultado == 0 && yynerrs == 0 && a && b && c && d && e
+        && a->categoria == NO_DECL_VAR && !strcmp(a->valor.texto, "a") && !a->filhos[0]
+        && a->declarador == DECLARADOR_LET && b->declarador == DECLARADOR_LET
+        && b->filhos[0] && b->filhos[0]->operador == OP_SOMA
+        && b->filhos[0]->filhos[1]->operador == OP_MULTIPLICACAO
+        && c->declarador == DECLARADOR_VAR && !c->filhos[0]
+        && d->declarador == DECLARADOR_CONST && e->declarador == DECLARADOR_CONST
+        && d->filhos[0] && d->filhos[0]->valor.booleano == 1
+        && e->filhos[0] && !strcmp(e->filhos[0]->valor.texto, "'ok'")
+        && bloco && bloco->categoria == NO_BLOCO && !bloco->proximo
+        && atr && atr->categoria == NO_ATRIBUICAO && !strcmp(atr->valor.texto, "a")
+        && atr->filhos[0] && atr->filhos[0]->operador == OP_NEGATIVO
+        && vazio && vazio->categoria == NO_VAZIO
+        && interno && interno->categoria == NO_BLOCO && !interno->filhos[0] && !interno->proximo;
+    int falhas = verifica("Parser preserva declaradores, inicializadores, precedencia e blocos aninhados", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
 }
 
 static int testa_tabela_insere_busca(void) {
@@ -340,6 +423,18 @@ int main(void) {
     total++; falhas += testa_unario();
     total++; falhas += testa_lista();
     total++; falhas += testa_comandos();
+
+    printf("\n--- AST: Integracao com o Parser ---\n");
+    const TipoNo seq_comandos[] = { NO_DECL_VAR, NO_DECL_VAR, NO_ATRIBUICAO, NO_VAZIO, NO_BLOCO };
+    const TipoNo seq_uma_decl[] = { NO_DECL_VAR };
+    const TipoNo seq_duas_decl[] = { NO_DECL_VAR, NO_DECL_VAR };
+    total++; falhas += testa_ast_linhas();
+    total++; falhas += testa_ast_declaracoes();
+    total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
+    total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
+    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; function f() { return 1; } f(); console.log(1); let x;", seq_uma_decl, 1, false);
+    total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
+    total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
     printf("\n--- Tabela de Simbolos ---\n");
     total++; falhas += testa_tabela_insere_busca();
