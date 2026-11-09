@@ -214,6 +214,28 @@ static int testa_ast_declaracoes(void) {
     return falhas;
 }
 
+static int testa_ast_funcao(void) {
+    int resultado = parse_string("function soma(a,\n  b) {\n  let c = a + b;\n}\nfunction vazia() {}");
+    No *soma = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *vazia = soma ? soma->proximo : NULL;
+    No *a = soma ? soma->filhos[0] : NULL;
+    No *b = a ? a->proximo : NULL;
+    No *corpo = soma ? soma->filhos[1] : NULL;
+    bool ok = resultado == 0 && yynerrs == 0
+        && soma && soma->categoria == NO_FUNCAO && !strcmp(soma->valor.texto, "soma") && soma->linha == 1
+        && a && a->categoria == NO_PARAMETRO && !strcmp(a->valor.texto, "a") && a->linha == 1
+        && b && b->categoria == NO_PARAMETRO && !strcmp(b->valor.texto, "b") && b->linha == 2 && !b->proximo
+        && corpo && corpo->categoria == NO_BLOCO
+        && corpo->filhos[0] && corpo->filhos[0]->categoria == NO_DECL_VAR
+        && vazia && vazia->categoria == NO_FUNCAO && !strcmp(vazia->valor.texto, "vazia") && vazia->linha == 5
+        && !vazia->filhos[0] && vazia->filhos[1] && vazia->filhos[1]->categoria == NO_BLOCO
+        && !vazia->filhos[1]->filhos[0] && !vazia->proximo;
+    int falhas = verifica("Funcao guarda nome, parametros em ordem e corpo", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_tabela_insere_busca(void) {
     char nome[] = "x";
     Simbolo *s = tabela_insere(nome, SIMBOLO_LET, TIPO_NUMERO, 3);
@@ -573,9 +595,10 @@ int main(void) {
     const TipoNo seq_duas_decl[] = { NO_DECL_VAR, NO_DECL_VAR };
     total++; falhas += testa_ast_linhas();
     total++; falhas += testa_ast_declaracoes();
+    total++; falhas += testa_ast_funcao();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; function f() { return 1; } f(); console.log(1); let x;", seq_uma_decl, 1, false);
+    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; f(); console.log(1); let x;", seq_uma_decl, 1, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
