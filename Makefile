@@ -10,6 +10,8 @@ TESTS_DIR = tests
 
 AST_C = $(SRC_DIR)/ast.c
 AST_H = $(SRC_DIR)/ast.h
+TABELA_C = $(SRC_DIR)/tabela.c
+TABELA_H = $(SRC_DIR)/tabela.h
 
 CFLAGS = -I$(SRC_DIR)
 
@@ -22,12 +24,12 @@ YACC_H = parser.tab.h
 all: $(TARGET)
 
 # Como gerar o executavel final (junta o main.c com os arquivos gerados)
-$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(AST_H)
-	gcc $(CFLAGS) -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C)
+$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H)
+	gcc $(CFLAGS) -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(TABELA_C)
 
 # Como gerar o executavel de testes unitarios em memoria (diferencial)
-$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(AST_H)
-	gcc $(CFLAGS) -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C)
+$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H)
+	gcc $(CFLAGS) -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(TABELA_C)
 
 # Como gerar os arquivos do Bison
 $(YACC_C): $(PARSER_DIR)/parser.y
