@@ -22,4 +22,8 @@ typedef struct Simbolo {
     struct Simbolo *proximo_na_tabela;
 } Simbolo;
 
+void escopo_entra(void);
+void escopo_sai(void);
+int escopo_nivel(void);
+
 #endif
