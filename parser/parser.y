@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ast.h"
 
 int yylex(void);
 void yyerror(const char *s);
@@ -16,6 +17,7 @@ static int profundidade_funcao = 0;
     double valor_num;
     char *texto;
     int booleano;
+    struct No *no;
 }
 
 /* Definição dos tokens exportados para o Flex */
@@ -40,6 +42,10 @@ static int profundidade_funcao = 0;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right UMINUS NOT
+
+%locations
+
+%type <no> expressao atomo
 
 %%
 
@@ -208,30 +214,30 @@ for_incr:
   ;
 
 expressao:
-    expressao OR expressao
-  | expressao AND expressao
-  | expressao EQ expressao
-  | expressao NEQ expressao
-  | expressao LT expressao
-  | expressao LEQ expressao
-  | expressao GT expressao
-  | expressao GEQ expressao
-  | expressao PLUS expressao
-  | expressao MINUS expressao
-  | expressao TIMES expressao
-  | expressao DIVIDE expressao
-  | MINUS expressao %prec UMINUS
-  | NOT expressao
-  | LPAREN expressao RPAREN
-  | atomo
+    expressao OR expressao { $$ = no_binario(OP_OU, $1, $3, @1.first_line); }
+  | expressao AND expressao { $$ = no_binario(OP_E, $1, $3, @1.first_line); }
+  | expressao EQ expressao { $$ = no_binario(OP_IGUAL, $1, $3, @1.first_line); }
+  | expressao NEQ expressao { $$ = no_binario(OP_DIFERENTE, $1, $3, @1.first_line); }
+  | expressao LT expressao { $$ = no_binario(OP_MENOR, $1, $3, @1.first_line); }
+  | expressao LEQ expressao { $$ = no_binario(OP_MENOR_IGUAL, $1, $3, @1.first_line); }
+  | expressao GT expressao { $$ = no_binario(OP_MAIOR, $1, $3, @1.first_line); }
+  | expressao GEQ expressao { $$ = no_binario(OP_MAIOR_IGUAL, $1, $3, @1.first_line); }
+  | expressao PLUS expressao { $$ = no_binario(OP_SOMA, $1, $3, @1.first_line); }
+  | expressao MINUS expressao { $$ = no_binario(OP_SUBTRACAO, $1, $3, @1.first_line); }
+  | expressao TIMES expressao { $$ = no_binario(OP_MULTIPLICACAO, $1, $3, @1.first_line); }
+  | expressao DIVIDE expressao { $$ = no_binario(OP_DIVISAO, $1, $3, @1.first_line); }
+  | MINUS expressao %prec UMINUS { $$ = no_unario(OP_NEGATIVO, $2, @1.first_line); }
+  | NOT expressao { $$ = no_unario(OP_NAO, $2, @1.first_line); }
+  | LPAREN expressao RPAREN { $$ = $2; }
+  | atomo { $$ = $1; }
   ;
 
 atomo:
-    ID { free($1); }
-  | chamada_funcao
-  | NUM
-  | STRING_VAL { free($1); }
-  | BOOLEAN_VAL
+    ID { $$ = no_id($1, @1.first_line); }
+  | chamada_funcao { $$ = NULL; }
+  | NUM { $$ = no_numero($1, @1.first_line); }
+  | STRING_VAL { $$ = no_string($1, @1.first_line); }
+  | BOOLEAN_VAL { $$ = no_booleano($1, @1.first_line); }
   ;
 
 %%
