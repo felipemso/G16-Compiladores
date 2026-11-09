@@ -1,5 +1,19 @@
+#include <stdarg.h>
+#include <stdio.h>
 #include "semantico.h"
 #include "tabela.h"
+
+int erros_semanticos = 0;
+
+void erro_semantico(int linha, const char *formato, ...) {
+    va_list argumentos;
+    fprintf(stderr, "Erro semantico na linha %d: ", linha);
+    va_start(argumentos, formato);
+    vfprintf(stderr, formato, argumentos);
+    va_end(argumentos);
+    fprintf(stderr, "\n");
+    erros_semanticos++;
+}
 
 static void visita(No *no);
 
@@ -74,5 +88,6 @@ static void visita(No *no) {
 }
 
 void analisa(No *raiz) {
+    erros_semanticos = 0;
     visita_lista(raiz);
 }
