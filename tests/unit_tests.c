@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "ast.h"
+#include "tabela.h"
 
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
@@ -129,6 +130,107 @@ static int testa_comandos(void) {
     return resultado;
 }
 
+static int testa_tabela_insere_busca(void) {
+    char nome[] = "x";
+    Simbolo *s = tabela_insere(nome, SIMBOLO_LET, TIPO_NUMERO, 3);
+    nome[0] = 'y';
+    bool ok = s && strcmp(s->nome, "x") == 0 && s->categoria == SIMBOLO_LET
+        && s->tipo_inferido == TIPO_NUMERO && s->linha == 3 && s->num_parametros == 0
+        && s->nivel_escopo == 0 && tabela_busca_local("x") == s && tabela_busca("x") == s
+        && tabela_busca("y") == NULL && tabela_busca_local("y") == NULL;
+    int resultado = verifica("Insere copiando o nome e encontra pela busca local e global", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_funcao(void) {
+    Simbolo *f = tabela_insere("soma", SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, 1);
+    f->num_parametros = 2;
+    Simbolo *achado = tabela_busca("soma");
+    bool ok = achado == f && achado->categoria == SIMBOLO_FUNCAO && achado->num_parametros == 2;
+    int resultado = verifica("Funcao guarda o numero de parametros", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_redeclaracao(void) {
+    Simbolo *primeiro = tabela_insere("x", SIMBOLO_VAR, TIPO_NUMERO, 1);
+    Simbolo *segundo = tabela_insere("x", SIMBOLO_CONST, TIPO_STRING, 2);
+    bool ok = primeiro && segundo == NULL && tabela_busca("x") == primeiro
+        && primeiro->categoria == SIMBOLO_VAR && primeiro->linha == 1;
+    int resultado = verifica("Nome repetido no mesmo escopo e recusado e mantem o original", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_niveis(void) {
+    bool ok = escopo_nivel() == 0;
+    escopo_entra();
+    ok = ok && escopo_nivel() == 1;
+    escopo_entra();
+    Simbolo *s = tabela_insere("x", SIMBOLO_LET, TIPO_DESCONHECIDO, 1);
+    ok = ok && escopo_nivel() == 2 && s->nivel_escopo == 2;
+    escopo_sai();
+    ok = ok && escopo_nivel() == 1;
+    escopo_sai();
+    ok = ok && escopo_nivel() == 0;
+    escopo_sai();
+    ok = ok && escopo_nivel() == 0;
+    int resultado = verifica("Pilha de escopos controla o nivel e nao sai do global", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_busca_por_escopo(void) {
+    Simbolo *global = tabela_insere("g", SIMBOLO_LET, TIPO_NUMERO, 1);
+    escopo_entra();
+    Simbolo *local = tabela_insere("l", SIMBOLO_PARAMETRO, TIPO_DESCONHECIDO, 2);
+    escopo_entra();
+    bool ok = tabela_busca_local("g") == NULL && tabela_busca_local("l") == NULL
+        && tabela_busca("g") == global && tabela_busca("l") == local;
+    int resultado = verifica("Busca local ve so o escopo atual e a busca sobe ate o global", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_sair_escopo(void) {
+    escopo_entra();
+    tabela_insere("x", SIMBOLO_LET, TIPO_NUMERO, 1);
+    escopo_sai();
+    bool ok = tabela_busca("x") == NULL && tabela_busca_local("x") == NULL;
+    escopo_entra();
+    ok = ok && tabela_busca("x") == NULL && tabela_insere("x", SIMBOLO_LET, TIPO_NUMERO, 2) != NULL;
+    int resultado = verifica("Simbolo some ao sair do escopo e nao volta em escopo novo", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_mesmo_nome(void) {
+    Simbolo *externo = tabela_insere("x", SIMBOLO_LET, TIPO_NUMERO, 1);
+    escopo_entra();
+    Simbolo *interno = tabela_insere("x", SIMBOLO_PARAMETRO, TIPO_DESCONHECIDO, 2);
+    bool ok = interno && interno != externo && tabela_busca("x") == interno;
+    escopo_sai();
+    ok = ok && tabela_busca("x") == externo;
+    int resultado = verifica("Mesmo nome em escopo interno tem prioridade ate o escopo fechar", ok);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_tabela_libera(void) {
+    tabela_insere("g", SIMBOLO_LET, TIPO_NUMERO, 1);
+    escopo_entra();
+    escopo_entra();
+    tabela_insere("x", SIMBOLO_LET, TIPO_NUMERO, 2);
+    tabela_libera();
+    bool ok = escopo_nivel() == 0 && tabela_busca("g") == NULL && tabela_busca("x") == NULL
+        && tabela_insere("g", SIMBOLO_CONST, TIPO_STRING, 3) != NULL;
+    int resultado = verifica("Liberar fecha os escopos abertos e deixa a tabela reutilizavel", ok);
+    tabela_libera();
+    tabela_libera();
+    return resultado;
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -238,6 +340,16 @@ int main(void) {
     total++; falhas += testa_unario();
     total++; falhas += testa_lista();
     total++; falhas += testa_comandos();
+
+    printf("\n--- Tabela de Simbolos ---\n");
+    total++; falhas += testa_tabela_insere_busca();
+    total++; falhas += testa_tabela_funcao();
+    total++; falhas += testa_tabela_redeclaracao();
+    total++; falhas += testa_tabela_niveis();
+    total++; falhas += testa_tabela_busca_por_escopo();
+    total++; falhas += testa_tabela_sair_escopo();
+    total++; falhas += testa_tabela_mesmo_nome();
+    total++; falhas += testa_tabela_libera();
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
