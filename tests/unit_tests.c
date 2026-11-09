@@ -4,6 +4,7 @@
 #include <string.h>
 #include "ast.h"
 #include "tabela.h"
+#include "semantico.h"
 
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
@@ -314,6 +315,148 @@ static int testa_tabela_libera(void) {
     return resultado;
 }
 
+static No *decl(Declarador declarador, const char *nome, int linha) {
+    return no_decl_var(declarador, strdup(nome), NULL, linha);
+}
+
+static const Simbolo *simbolo_em(const char *nome, int nivel) {
+    for (const Simbolo *s = tabela_primeiro(); s; s = s->proximo_na_tabela) {
+        if (s->nivel_escopo == nivel && strcmp(s->nome, nome) == 0) {
+            return s;
+        }
+    }
+    return NULL;
+}
+
+static int termina_semantico(const char *descricao, bool ok, No *raiz) {
+    int resultado = verifica(descricao, ok && escopo_nivel() == 0 && erros_semanticos == 0);
+    ast_libera(raiz);
+    tabela_libera();
+    return resultado;
+}
+
+static int testa_semantico_variaveis(void) {
+    No *comandos = no_lista_adiciona(decl(DECLARADOR_LET, "a", 1), decl(DECLARADOR_VAR, "b", 2));
+    comandos = no_lista_adiciona(comandos, no_decl_var(DECLARADOR_CONST, strdup("c"), no_numero(1, 3), 3));
+    No *raiz = no_programa(comandos, 1);
+    analisa(raiz);
+    const Simbolo *a = simbolo_em("a", 0);
+    const Simbolo *b = simbolo_em("b", 0);
+    const Simbolo *c = simbolo_em("c", 0);
+    bool ok = a && a->categoria == SIMBOLO_LET && a->linha == 1
+        && b && b->categoria == SIMBOLO_VAR && b->linha == 2
+        && c && c->categoria == SIMBOLO_CONST && c->linha == 3;
+    return termina_semantico("Registra let, var e const no escopo global", ok, raiz);
+}
+
+static int testa_semantico_blocos(void) {
+    No *interno = no_bloco(decl(DECLARADOR_LET, "y", 2), 2);
+    No *externo = no_bloco(no_lista_adiciona(decl(DECLARADOR_LET, "x", 1), interno), 1);
+    No *raiz = no_programa(externo, 1);
+    analisa(raiz);
+    bool ok = simbolo_em("x", 1) && simbolo_em("y", 2) && tabela_busca("x") == NULL && tabela_busca("y") == NULL;
+    return termina_semantico("Blocos aninhados abrem e fecham um escopo cada", ok, raiz);
+}
+
+static int testa_semantico_var_de_bloco(void) {
+    No *raiz = no_programa(no_bloco(decl(DECLARADOR_VAR, "v", 1), 1), 1);
+    analisa(raiz);
+    bool ok = simbolo_em("v", 1) && simbolo_em("v", 0) == NULL && tabela_busca("v") == NULL;
+    return termina_semantico("var tem escopo de bloco, como let", ok, raiz);
+}
+
+static int testa_semantico_controle(void) {
+    No *cond_if = no_if(no_booleano(1, 1), no_bloco(decl(DECLARADOR_LET, "x", 1), 1),
+                        no_bloco(decl(DECLARADOR_LET, "y", 2), 2), 1);
+    No *cond_while = no_while(no_booleano(1, 3), no_bloco(decl(DECLARADOR_LET, "z", 3), 3), 3);
+    No *raiz = no_programa(no_lista_adiciona(cond_if, cond_while), 1);
+    analisa(raiz);
+    bool ok = simbolo_em("x", 1) && simbolo_em("y", 1) && simbolo_em("z", 1);
+    return termina_semantico("Blocos de if, else e while tem escopo proprio", ok, raiz);
+}
+
+static No *for_com_i(int linha) {
+    return no_for(decl(DECLARADOR_LET, "i", linha), NULL, NULL, no_bloco(decl(DECLARADOR_LET, "j", linha), linha), linha);
+}
+
+static int testa_semantico_for(void) {
+    No *raiz = no_programa(for_com_i(1), 1);
+    analisa(raiz);
+    bool ok = simbolo_em("i", 1) && simbolo_em("j", 2) && tabela_busca("i") == NULL;
+    return termina_semantico("for abre escopo proprio para o let da inicializacao", ok, raiz);
+}
+
+static int testa_semantico_dois_for(void) {
+    No *raiz = no_programa(no_lista_adiciona(for_com_i(1), for_com_i(2)), 1);
+    analisa(raiz);
+    const Simbolo *primeiro = simbolo_em("i", 1);
+    bool ok = primeiro && primeiro->linha == 1 && primeiro->proximo_na_tabela
+        && strcmp(primeiro->proximo_na_tabela->proximo_na_tabela->nome, "i") == 0
+        && primeiro->proximo_na_tabela->proximo_na_tabela->linha == 2;
+    return termina_semantico("Dois for seguidos registram cada i no seu escopo", ok, raiz);
+}
+
+static int testa_semantico_funcao(void) {
+    No *parametros = no_lista_adiciona(no_parametro(strdup("a"), 1), no_parametro(strdup("b"), 1));
+    No *corpo = no_bloco(decl(DECLARADOR_LET, "c", 2), 1);
+    No *raiz = no_programa(no_funcao(strdup("f"), parametros, corpo, 1), 1);
+    analisa(raiz);
+    const Simbolo *f = simbolo_em("f", 0);
+    const Simbolo *a = simbolo_em("a", 1);
+    const Simbolo *c = simbolo_em("c", 1);
+    bool ok = f && f->categoria == SIMBOLO_FUNCAO && f->num_parametros == 2
+        && a && a->categoria == SIMBOLO_PARAMETRO && simbolo_em("b", 1)
+        && c && c->categoria == SIMBOLO_LET && tabela_busca("a") == NULL && tabela_busca("f") == f;
+    return termina_semantico("Funcao, parametros e corpo ficam nos escopos certos", ok, raiz);
+}
+
+static int testa_semantico_funcao_antes_do_corpo(void) {
+    No *raiz = no_programa(no_funcao(strdup("f"), no_parametro(strdup("a"), 1), no_bloco(NULL, 1), 1), 1);
+    analisa(raiz);
+    const Simbolo *primeiro = tabela_primeiro();
+    bool ok = primeiro && strcmp(primeiro->nome, "f") == 0 && primeiro->proximo_na_tabela
+        && strcmp(primeiro->proximo_na_tabela->nome, "a") == 0;
+    return termina_semantico("Funcao entra na tabela antes do corpo", ok, raiz);
+}
+
+static int testa_semantico_nome_repetido(void) {
+    No *comandos = no_lista_adiciona(decl(DECLARADOR_LET, "x", 1), decl(DECLARADOR_LET, "x", 2));
+    comandos = no_lista_adiciona(comandos, no_funcao(strdup("f"), NULL, no_bloco(NULL, 3), 3));
+    comandos = no_lista_adiciona(comandos, no_funcao(strdup("f"), no_parametro(strdup("a"), 4), no_bloco(NULL, 4), 4));
+    No *raiz = no_programa(comandos, 1);
+    analisa(raiz);
+    const Simbolo *x = simbolo_em("x", 0);
+    const Simbolo *f = simbolo_em("f", 0);
+    bool ok = x && x->linha == 1 && f && f->linha == 3 && f->num_parametros == 0;
+    return termina_semantico("Nome repetido nao derruba a passada e mantem o primeiro", ok, raiz);
+}
+
+static int testa_semantico_com_parser(void) {
+    int resultado_parse = parse_string("let a = 1, b;\nconst c = 2;\n{\n  var d;\n  { let e; }\n}\n");
+    analisa(raiz_ast);
+    const Simbolo *a = simbolo_em("a", 0);
+    const Simbolo *c = simbolo_em("c", 0);
+    const Simbolo *d = simbolo_em("d", 1);
+    const Simbolo *e = simbolo_em("e", 2);
+    bool ok = resultado_parse == 0 && yynerrs == 0 && a && a->linha == 1 && simbolo_em("b", 0)
+        && c && c->categoria == SIMBOLO_CONST && c->linha == 2
+        && d && d->categoria == SIMBOLO_VAR && d->linha == 4 && e && e->linha == 5;
+    No *raiz = raiz_ast;
+    raiz_ast = NULL;
+    return termina_semantico("Popula a tabela a partir da AST gerada pelo parser", ok, raiz);
+}
+
+static int testa_semantico_erro(void) {
+    analisa(NULL);
+    bool zerado = erros_semanticos == 0;
+    erro_semantico(7, "nome '%s' invalido", "x");
+    erro_semantico(8, "outro erro");
+    bool contou = erros_semanticos == 2;
+    analisa(NULL);
+    return verifica("erro_semantico conta os erros e analisa zera o contador",
+                    zerado && contou && erros_semanticos == 0 && escopo_nivel() == 0);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -445,6 +588,19 @@ int main(void) {
     total++; falhas += testa_tabela_sair_escopo();
     total++; falhas += testa_tabela_mesmo_nome();
     total++; falhas += testa_tabela_libera();
+
+    printf("\n--- Passada Semantica ---\n");
+    total++; falhas += testa_semantico_variaveis();
+    total++; falhas += testa_semantico_blocos();
+    total++; falhas += testa_semantico_var_de_bloco();
+    total++; falhas += testa_semantico_controle();
+    total++; falhas += testa_semantico_for();
+    total++; falhas += testa_semantico_dois_for();
+    total++; falhas += testa_semantico_funcao();
+    total++; falhas += testa_semantico_funcao_antes_do_corpo();
+    total++; falhas += testa_semantico_nome_repetido();
+    total++; falhas += testa_semantico_com_parser();
+    total++; falhas += testa_semantico_erro();
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
