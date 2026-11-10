@@ -196,9 +196,7 @@ comando_retorno:
 
 chamada_funcao:
     ID LPAREN args_opt RPAREN {
-        free($1);
-        ast_libera($3);
-        $$ = NULL;
+        $$ = no_chamada($1, $3, @1.first_line);
     }
   ;
 

@@ -254,6 +254,33 @@ static int testa_ast_return(void) {
     return falhas;
 }
 
+static int testa_ast_chamada(void) {
+    int resultado = parse_string("function f(a, b) {\n  return f(a, 1 + 2);\n}\nf();\nlet x = f(1) * 2;");
+    No *f = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *comando = f ? f->proximo : NULL;
+    No *x = comando ? comando->proximo : NULL;
+    No *ret = f && f->filhos[1] ? f->filhos[1]->filhos[0] : NULL;
+    No *recursiva = ret ? ret->filhos[0] : NULL;
+    No *arg1 = recursiva ? recursiva->filhos[0] : NULL;
+    No *arg2 = arg1 ? arg1->proximo : NULL;
+    No *mult = x ? x->filhos[0] : NULL;
+    No *em_expressao = mult ? mult->filhos[0] : NULL;
+    bool ok = resultado == 0 && yynerrs == 0
+        && recursiva && recursiva->categoria == NO_CHAMADA && !strcmp(recursiva->valor.texto, "f")
+        && recursiva->linha == 2
+        && arg1 && arg1->categoria == NO_ID && !strcmp(arg1->valor.texto, "a")
+        && arg2 && arg2->operador == OP_SOMA && !arg2->proximo
+        && comando && comando->categoria == NO_CHAMADA && !comando->filhos[0] && comando->linha == 4
+        && mult && mult->operador == OP_MULTIPLICACAO
+        && em_expressao && em_expressao->categoria == NO_CHAMADA
+        && em_expressao->filhos[0] && em_expressao->filhos[0]->valor.numero == 1
+        && !em_expressao->filhos[0]->proximo && !x->proximo;
+    int falhas = verifica("Chamada guarda nome e argumentos como comando e dentro de expressao", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_tabela_insere_busca(void) {
     char nome[] = "x";
     Simbolo *s = tabela_insere(nome, SIMBOLO_LET, TIPO_NUMERO, 3);
@@ -615,9 +642,10 @@ int main(void) {
     total++; falhas += testa_ast_declaracoes();
     total++; falhas += testa_ast_funcao();
     total++; falhas += testa_ast_return();
+    total++; falhas += testa_ast_chamada();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; f(); console.log(1); let x;", seq_uma_decl, 1, false);
+    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; console.log(1); let x;", seq_uma_decl, 1, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
