@@ -6,6 +6,20 @@
 
 ---
 
+## Registro de Decisão: Redução de Escopo
+
+*   **Data:** 04/11/2026
+*   **Motivo:** Orientação do professor da disciplina.
+*   **Critério Adotado:** Permanecem apenas os recursos com tradução direta para Python. Quando JavaScript e Python se comportam de forma diferente, traduzir o recurso exigiria gerar código extra para imitar o JS; nesses casos, o recurso sai do escopo e o programa passa a ser rejeitado pelo compilador, em vez de gerar um Python com resultado diferente do original.
+*   **O que Saiu do Escopo:**
+    *   **Estruturas de dados:** arrays (criação e acesso por índice).
+    *   **Funções e escopo:** funções aninhadas, atribuição a variável global dentro de função, sombreamento de nomes (exceto parâmetro com o nome de uma global), declaração direto no corpo de `if`/`else`/`while`/`for`, chamada de função antes da declaração e número de argumentos diferente do de parâmetros; `var` passa a ser tratado como `let`.
+    *   **Tipos:** string com número ou booleano no `+`, string em operação aritmética e comparação entre tipos diferentes.
+    *   **Recursos léxicos:** palavras reservadas do JS fora do escopo (`switch`, `class`, `new`, etc.), `++`, `+=`, `%`, sequências de escape e notação científica.
+    *   **Etapas do compilador:** otimização e código intermediário; a AST passa a ser a representação intermediária, e o Python é gerado diretamente a partir dela.
+*   **O que Entrou:** o operador de negação lógica `!`, que tem equivalente direto em Python (`not`).
+*   **Impacto no Planejamento:** A decisão foi aplicada no léxico e no sintático antes do início da AST (tarefa T09, seção 1), passou a orientar as regras semânticas (seção 3) e foi registrada no documento de Escopo e Arquitetura, com a justificativa de cada corte (seção 4).
+
 ## 1. Ajuste de Escopo no Léxico e no Sintático
 Aplicar as decisões de redução de escopo antes do início da AST, para que a árvore seja construída sobre a gramática final.
 
