@@ -47,6 +47,17 @@ static Simbolo *busca_uso(const char *nome, int linha) {
     return simbolo;
 }
 
+/* Ponto unico de entrada de nomes na tabela: variaveis, funcoes e parametros.
+ * Retorna NULL quando a declaracao e invalida; o nome nao entra e o primeiro continua valendo. */
+static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, int linha) {
+    Simbolo *anterior = tabela_busca_local(nome);
+    if (anterior) {
+        erro_semantico(linha, "'%s' ja foi declarado neste escopo (linha %d)", nome, anterior->linha);
+        return NULL;
+    }
+    return tabela_insere(nome, categoria, TIPO_DESCONHECIDO, linha);
+}
+
 static void visita_atribuicao(No *no) {
     /* O lado direito vem antes, na ordem em que seria avaliado */
     visita_filhos(no);
@@ -56,17 +67,17 @@ static void visita_atribuicao(No *no) {
 static void visita_declaracao(No *no) {
     /* O inicializador vem antes da insercao: em "let x = x;" o x da direita ainda nao existe */
     visita_filhos(no);
-    tabela_insere(no->valor.texto, categoria_do_declarador(no->declarador), TIPO_DESCONHECIDO, no->linha);
+    declara(no->valor.texto, categoria_do_declarador(no->declarador), no->linha);
 }
 
 static void visita_funcao(No *no) {
     /* A funcao entra antes do corpo, o que permite recursao */
-    Simbolo *funcao = tabela_insere(no->valor.texto, SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, no->linha);
+    Simbolo *funcao = declara(no->valor.texto, SIMBOLO_FUNCAO, no->linha);
 
     escopo_entra();
     int num_parametros = 0;
     for (No *parametro = no->filhos[0]; parametro; parametro = parametro->proximo) {
-        tabela_insere(parametro->valor.texto, SIMBOLO_PARAMETRO, TIPO_DESCONHECIDO, parametro->linha);
+        declara(parametro->valor.texto, SIMBOLO_PARAMETRO, parametro->linha);
         num_parametros++;
     }
     if (funcao) {

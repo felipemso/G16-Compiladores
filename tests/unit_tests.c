@@ -415,11 +415,16 @@ static const Simbolo *simbolo_em(const char *nome, int nivel) {
     return NULL;
 }
 
-static int termina_semantico(const char *descricao, bool ok, No *raiz) {
-    int resultado = verifica(descricao, ok && escopo_nivel() == 0 && erros_semanticos == 0);
+static int termina_semantico_com_erros(const char *descricao, bool ok, No *raiz, int erros_esperados) {
+    int resultado = verifica(descricao, ok && escopo_nivel() == 0 && erros_semanticos == erros_esperados);
     ast_libera(raiz);
     tabela_libera();
+    erros_semanticos = 0;
     return resultado;
+}
+
+static int termina_semantico(const char *descricao, bool ok, No *raiz) {
+    return termina_semantico_com_erros(descricao, ok, raiz, 0);
 }
 
 static int testa_semantico_variaveis(void) {
@@ -515,7 +520,8 @@ static int testa_semantico_nome_repetido(void) {
     const Simbolo *x = simbolo_em("x", 0);
     const Simbolo *f = simbolo_em("f", 0);
     bool ok = x && x->linha == 1 && f && f->linha == 3 && f->num_parametros == 0;
-    return termina_semantico("Nome repetido nao derruba a passada e mantem o primeiro", ok, raiz);
+    /* T19: as duas repeticoes (x e f) agora sao erros de redeclaracao */
+    return termina_semantico_com_erros("Nome repetido gera erro e mantem o primeiro", ok, raiz, 2);
 }
 
 static int testa_semantico_com_parser(void) {
@@ -722,6 +728,16 @@ int main(void) {
     total++; falhas += testa_regra("Uso nao declarado dentro de funcao gera erro", "function f(a) { return a + b; }", 1);
     total++; falhas += testa_regra("Parametro nao existe fora da funcao", "function f(a) { return a; } let b = a;", 1);
     total++; falhas += testa_regra("Argumento nao declarado gera erro", "function f(a) { return a; } f(c);", 1);
+    total++; falhas += testa_regra("Redeclaracao de let no mesmo escopo gera erro", "let x = 1; let x = 2;", 1);
+    total++; falhas += testa_regra("Redeclaracao de var no mesmo escopo gera erro", "var x; var x;", 1);
+    total++; falhas += testa_regra("Redeclaracao entre declaradores diferentes gera erro", "let x; const x = 1;", 1);
+    total++; falhas += testa_regra("Redeclaracao na mesma lista gera erro", "let a = 1, a = 2;", 1);
+    total++; falhas += testa_regra("Redeclaracao dentro de bloco gera erro", "{ let x; let x; }", 1);
+    total++; falhas += testa_regra("Blocos irmaos podem repetir o nome", "{ let a = 1; } { let a = 2; }", 0);
+    total++; falhas += testa_regra("Parametro repetido gera erro", "function f(a, a) { return a; }", 1);
+    total++; falhas += testa_regra("Parametro redeclarado no corpo gera erro", "function f(a) { let a = 1; }", 1);
+    total++; falhas += testa_regra("Funcao com nome de variavel gera erro", "let f = 1; function f() { return 1; }", 1);
+    total++; falhas += testa_regra("Funcoes diferentes podem repetir parametros", "function f(a) { return a; } function g(a) { return a; }", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
