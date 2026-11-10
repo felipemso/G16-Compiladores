@@ -55,6 +55,12 @@ static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, int linha)
         erro_semantico(linha, "'%s' ja foi declarado neste escopo (linha %d)", nome, anterior->linha);
         return NULL;
     }
+    /* Sombreamento proibido (decisao de escopo). Excecao: parametro pode ter o nome de uma global */
+    Simbolo *externo = tabela_busca(nome);
+    if (externo && !(categoria == SIMBOLO_PARAMETRO && externo->nivel_escopo == 0)) {
+        erro_semantico(linha, "'%s' sombreia a declaracao da linha %d em escopo externo", nome, externo->linha);
+        return NULL;
+    }
     return tabela_insere(nome, categoria, TIPO_DESCONHECIDO, linha);
 }
 
