@@ -306,7 +306,7 @@ Assim, a regra assume a precedência de `UMINUS` (nível 1), e não a de `MINUS`
 
 ### 5.3 `LOWER_THAN_ELSE` e `ELSE`
 
-As duas primeiras linhas da declaração não envolvem operadores: elas resolvem o *dangling else*, a ambiguidade do `if` sem `else`. `LOWER_THAN_ELSE` também é um pseudo-token, usado na regra do `if` sem `else`.
+As duas primeiras linhas da declaração não envolvem operadores: elas resolvem o *dangling else*, a ambiguidade do `if` sem `else`. `LOWER_THAN_ELSE` também é um pseudo-token, usado na regra do `if` sem `else`. O funcionamento é detalhado na [seção 6](#6-dangling-else).
 
 ### 5.4 Implicações para a geração de Python
 
@@ -314,3 +314,163 @@ A ordem dos operadores em Python não é idêntica à do JavaScript. Por isso, o
 
 * **`!` × `not`:** em Python, `not` tem precedência **menor** que as comparações. `!a == b` é `(!a) == b` em JS, mas `not a == b` é `not (a == b)` em Python; a tradução correta é `(not a) == b`.
 * **Comparações encadeadas:** em JS, `a < b < c` é `(a < b) < c`, comparando o booleano `a < b` com `c`. Em Python, `a < b < c` significa `a < b and b < c`. Quando `c` é um número, a expressão já fica fora do escopo por comparar tipos diferentes ([Escopo e Arquitetura, seção 2.2](escopo-e-arq.md#22-o-que-nao-faz-parte-do-projeto)); mas o mesmo vale para `==` e `!=`, e `a == b == c` com três booleanos é válido no Mini-JS. Nesse caso, a tradução correta é `(a == b) == c`, e não `a == b == c`.
+
+---
+
+## 6. Dangling else
+
+### 6.1 O problema
+
+Como o corpo de um `if` pode ser outro `if`, e o `else` é opcional, um `else` depois de dois `if` aninhados pode pertencer a qualquer um deles:
+
+```javascript
+if (a)
+    if (b)
+        console.log("x");
+    else
+        console.log("y");
+```
+
+As duas leituras são válidas pela gramática:
+
+* **`else` do `if` interno:** `if (a) { if (b) ... else ... }`
+* **`else` do `if` externo:** `if (a) { if (b) ... } else ...`
+
+Para o parser, a dúvida surge quando ele já leu `if (a) if (b) comando` e o próximo token é `else`. Ele pode **reduzir** `if (b) comando` como um `if` sem `else` (e o `else` ficaria com o `if (a)`) ou **empilhar** o `else` (e ele ficaria com o `if (b)`). É um conflito de empilhar/reduzir (*shift/reduce*).
+
+### 6.2 A solução no `parser.y`
+
+A regra do `if` sem `else` recebe a precedência do pseudo-token `LOWER_THAN_ELSE`, declarado com prioridade menor que a de `ELSE`:
+
+```text
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
+comando_if ::= 'if' '(' expressao ')' comando                    %prec LOWER_THAN_ELSE
+             | 'if' '(' expressao ')' comando 'else' comando
+```
+
+No momento do conflito, o Bison compara a precedência da regra que poderia ser reduzida (`LOWER_THAN_ELSE`) com a do token seguinte (`ELSE`). Como `ELSE` tem precedência maior, o parser **empilha** o `else`, que fica associado ao **`if` mais próximo**, como no JavaScript (e no C e no Java). No exemplo acima, `console.log("y")` só executa quando `a` é verdadeiro e `b` é falso.
+
+Para associar o `else` ao `if` externo, basta usar chaves:
+
+```javascript
+if (a) {
+    if (b)
+        console.log("x");
+} else
+    console.log("y");
+```
+
+### 6.3 Verificação
+
+Com as declarações do `parser.y`, o Bison gera o parser sem nenhum conflito. Removendo o `%prec LOWER_THAN_ELSE` e as duas linhas `%nonassoc`, ele passa a relatar exatamente um conflito, no token `ELSE`, com este contraexemplo (`bison -Wcounterexamples`):
+
+```text
+warning: shift/reduce conflict on token ELSE [-Wcounterexamples]
+  Example: IF LPAREN expressao RPAREN IF LPAREN expressao RPAREN comando • ELSE comando
+```
+
+Sem as declarações, o Bison também escolheria empilhar (é o seu comportamento padrão em conflitos de empilhar/reduzir), mas emitiria o aviso a cada compilação. Com elas, a escolha fica explícita na gramática.
+
+---
+
+## 7. Recuperação de erros
+
+Sem recuperação, o parser pararia no primeiro erro de sintaxe. Para relatar vários erros em uma única execução, a regra `comando` tem duas produções com o token especial `error` do Bison:
+
+```text
+comando ::= ...
+          | error ';'
+          | error '}'
+```
+
+```c
+| error SEMICOLON {
+    yyerrok;
+    fprintf(stderr, "[RECUPERACAO] Erro sintatico descartado ate ';'\n");
+}
+| error RBRACE {
+    yyerrok;
+    fprintf(stderr, "[RECUPERACAO] Erro em bloco descartado ate '}'\n");
+}
+```
+
+### 7.1 Como funciona
+
+Quando o parser encontra um token que não se encaixa em nenhuma regra:
+
+1. **Relata o erro:** chama `yyerror`, que imprime `Erro sintatico na linha N: syntax error`, e incrementa o contador de erros (`yynerrs`).
+2. **Desempilha estados** até encontrar um em que o token `error` possa ser empilhado, ou seja, o início de um `comando`. Como `comando` aparece dentro de `lista_comandos`, isso acontece no nível do programa ou dentro do bloco `{ ... }` mais interno.
+3. **Descarta tokens da entrada** até encontrar um que possa vir depois de `error`: `;` ou `}`.
+4. **Reduz** `error ';'` ou `error '}'` a um `comando` e continua a análise normalmente a partir do próximo token.
+
+O trecho com erro é tratado como um comando descartado. Se o fim do arquivo for alcançado antes de um `;` ou `}`, a recuperação não é possível e a análise termina.
+
+Depois de um erro, o Bison normalmente omite as mensagens de novos erros até que três tokens tenham sido lidos com sucesso, para evitar uma cascata de mensagens sobre o mesmo problema. A macro `yyerrok`, chamada nas duas regras, encerra esse modo imediatamente, para que erros em comandos consecutivos sejam todos relatados.
+
+Os erros léxicos entram no mesmo mecanismo: o léxico devolve o token `YYUNDEF`, que não se encaixa em nenhuma regra e dispara a recuperação como qualquer erro de sintaxe.
+
+Mesmo quando todos os erros são recuperados, a compilação falha: se `yynerrs` for maior que zero, o `main.c` informa a fase e a quantidade de erros, e a análise semântica não é executada.
+
+### 7.2 Exemplos
+
+As saídas abaixo foram obtidas com os arquivos de teste de `tests/invalidos/`.
+
+**Erro em um comando (`08_erro_recuperado_comando.js`):** o `=` sem expressão gera um erro; o parser descarta até o `;` e analisa normalmente as linhas seguintes.
+
+```javascript
+let a = 1;
+let b = ;
+let c = 2;
+console.log(c);
+```
+
+```text
+Erro sintatico na linha 5: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (1 erro(s))
+```
+
+**Erros em série (`10_multiplos_erros_em_serie.js`):** graças ao `yyerrok`, cada comando com erro é relatado separadamente, e o parser chega ao fim do arquivo.
+
+```javascript
+let a = ;
+let b = ;
+let c = ;
+let d = 4;
+console.log(d);
+```
+
+```text
+Erro sintatico na linha 3: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Erro sintatico na linha 4: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Erro sintatico na linha 5: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (3 erro(s))
+```
+
+Os números de linha incluem as linhas de comentário do início dos arquivos de teste, omitidas acima.
+
+### 7.3 Limitação conhecida: erro sem `;` dentro de bloco
+
+Quando um comando dentro de um bloco termina sem `;`, o próximo token aceito pela recuperação é o `}` que fecharia o bloco. A regra `error '}'` consome esse `}` como fim do comando com erro, e o bloco continua aberto. Os comandos seguintes passam a ser lidos como parte do bloco e, no fim do arquivo, falta um `}`, o que gera um segundo erro. É o que acontece em `09_erro_recuperado_bloco.js`:
+
+```javascript
+let x = 1;
+{
+    let y = 5
+}
+console.log(x);
+```
+
+```text
+Erro sintatico na linha 6: syntax error
+[RECUPERACAO] Erro em bloco descartado ate '}'
+Erro sintatico na linha 8: syntax error
+Compilacao falhou na fase lexica/sintatica (2 erro(s))
+```
+
+O erro da linha 8 (o fim do arquivo) é consequência do primeiro, e não um erro do programa. A compilação falha corretamente, mas a contagem de erros fica maior que a real.
