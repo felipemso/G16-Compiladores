@@ -760,6 +760,10 @@ int main(void) {
     total++; falhas += testa_regra("Parametro com nome de parametro externo gera erro", "function f(a) { function g(a) { return a; } }", 1);
     total++; falhas += testa_arvore("Dois for seguidos podem repetir o let i", no_lista_adiciona(for_com_i(1), for_com_i(2)), 0);
     total++; falhas += testa_arvore("let no corpo do for com o nome do i gera erro", arvore_for_com_i_no_corpo(), 1);
+    total++; falhas += testa_regra("Atribuicao a const gera erro", "const LIMITE = 10; LIMITE = 20;", 1);
+    total++; falhas += testa_regra("Atribuicao a const dentro de bloco gera erro", "const c = 1; { c = c + 1; }", 1);
+    total++; falhas += testa_regra("const pode ser lido normalmente", "const c = 1; let d = c * 2;", 0);
+    total++; falhas += testa_regra("Atribuicao a let e var continua permitida", "let a = 1; var b = 2; a = b; b = a;", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

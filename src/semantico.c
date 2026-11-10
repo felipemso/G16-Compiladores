@@ -67,7 +67,10 @@ static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, int linha)
 static void visita_atribuicao(No *no) {
     /* O lado direito vem antes, na ordem em que seria avaliado */
     visita_filhos(no);
-    busca_uso(no->valor.texto, no->linha);
+    Simbolo *alvo = busca_uso(no->valor.texto, no->linha);
+    if (alvo && alvo->categoria == SIMBOLO_CONST) {
+        erro_semantico(no->linha, "atribuicao a constante '%s' (declarada na linha %d)", no->valor.texto, alvo->linha);
+    }
 }
 
 static void visita_declaracao(No *no) {
