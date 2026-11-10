@@ -92,7 +92,7 @@ comando:
   | declaracao_funcao
   | comando_retorno
   | chamada_funcao SEMICOLON
-  | PRINT LPAREN args_opt RPAREN SEMICOLON { ast_libera($3); $$ = NULL; }
+  | PRINT LPAREN args_opt RPAREN SEMICOLON { $$ = no_print($3, @1.first_line); }
   | comando_if
   | comando_while
   | comando_for

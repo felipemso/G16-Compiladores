@@ -281,6 +281,26 @@ static int testa_ast_chamada(void) {
     return falhas;
 }
 
+static int testa_ast_print(void) {
+    int resultado = parse_string("console.log();\nconsole.log(1, \"a\",\n  f(x) + 2);");
+    No *vazio = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *print = vazio ? vazio->proximo : NULL;
+    No *num = print ? print->filhos[0] : NULL;
+    No *str = num ? num->proximo : NULL;
+    No *soma = str ? str->proximo : NULL;
+    bool ok = resultado == 0 && yynerrs == 0
+        && vazio && vazio->categoria == NO_PRINT && !vazio->filhos[0] && vazio->linha == 1
+        && print && print->categoria == NO_PRINT && print->linha == 2 && !print->proximo
+        && num && num->categoria == NO_NUMERO && num->valor.numero == 1
+        && str && str->categoria == NO_STRING && !strcmp(str->valor.texto, "\"a\"")
+        && soma && soma->operador == OP_SOMA && soma->linha == 3 && !soma->proximo
+        && soma->filhos[0] && soma->filhos[0]->categoria == NO_CHAMADA;
+    int falhas = verifica("Console.log gera no de impressao com os argumentos em ordem", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_tabela_insere_busca(void) {
     char nome[] = "x";
     Simbolo *s = tabela_insere(nome, SIMBOLO_LET, TIPO_NUMERO, 3);
@@ -643,9 +663,10 @@ int main(void) {
     total++; falhas += testa_ast_funcao();
     total++; falhas += testa_ast_return();
     total++; falhas += testa_ast_chamada();
+    total++; falhas += testa_ast_print();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; console.log(1); let x;", seq_uma_decl, 1, false);
+    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_uma_decl, 1, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
