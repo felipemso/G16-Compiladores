@@ -52,6 +52,7 @@ static No *aplica_declarador(No *lista, Declarador declarador) {
 %type <no> comando_atribuicao declaracao_funcao comando_retorno chamada_funcao
 %type <no> args_opt lista_args comando_if comando_while comando_for
 %type <no> for_init for_cond for_incr expressao atomo
+%type <no> params_opt lista_params
 %type <declarador> tipo_declarador
 %destructor { free($$); } <texto>
 %destructor { ast_libera($$); } <no>
@@ -91,7 +92,7 @@ comando:
   | declaracao_funcao
   | comando_retorno
   | chamada_funcao SEMICOLON
-  | PRINT LPAREN args_opt RPAREN SEMICOLON { ast_libera($3); $$ = NULL; }
+  | PRINT LPAREN args_opt RPAREN SEMICOLON { $$ = no_print($3, @1.first_line); }
   | comando_if
   | comando_while
   | comando_for
@@ -157,39 +158,45 @@ comando_atribuicao:
 declaracao_funcao:
     FUNCTION ID LPAREN params_opt RPAREN { profundidade_funcao++; } bloco {
         profundidade_funcao--;
-        free($2);
-        ast_libera($7);
-        $$ = NULL;
+        $$ = no_funcao($2, $4, $7, @1.first_line);
     }
   ;
 
 params_opt:
-    /* vazio: funcao sem parametros */
+    /* vazio: funcao sem parametros */ { $$ = NULL; }
   | lista_params
   ;
 
 lista_params:
-    ID { free($1); }
-  | lista_params COMMA ID { free($3); }
+    ID { $$ = no_parametro($1, @1.first_line); }
+  | lista_params COMMA ID { $$ = no_lista_adiciona($1, no_parametro($3, @3.first_line)); }
   ;
 
 comando_retorno:
     RETURN SEMICOLON {
-        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        $$ = NULL;
+        if (profundidade_funcao == 0) {
+            yyerror("'return' fora de funcao");
+            yynerrs++;
+            $$ = NULL;
+        } else {
+            $$ = no_return(NULL, @1.first_line);
+        }
     }
   | RETURN expressao SEMICOLON {
-        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        ast_libera($2);
-        $$ = NULL;
+        if (profundidade_funcao == 0) {
+            yyerror("'return' fora de funcao");
+            yynerrs++;
+            ast_libera($2);
+            $$ = NULL;
+        } else {
+            $$ = no_return($2, @1.first_line);
+        }
     }
   ;
 
 chamada_funcao:
     ID LPAREN args_opt RPAREN {
-        free($1);
-        ast_libera($3);
-        $$ = NULL;
+        $$ = no_chamada($1, $3, @1.first_line);
     }
   ;
 
