@@ -1,0 +1,2067 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../escopo-e-arq/">
+      
+      
+        <link rel="next" href="../../sprints/sprint1/sprint1/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Gramática - Compiladores (G16)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gramatica-do-mini-js" class="md-skip">
+          Ir para o conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+<header class="custom-header md-header" data-md-component="header">
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Título navbar -->
+      <a href="./" class="brand">
+        <span class="brand-name">Compiladores</span>
+        <span class="brand-tag">(G16)</span>
+      </a>
+
+      <!-- Chaves navbar -->
+      <ul class="nav-links">
+        
+          <li>
+            
+              <a href="../.."
+                 >
+                Home
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../sobre/"
+                 >
+                Sobre
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../escopo-e-arq/"
+                 class="current">
+                Documentação
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../equipe/"
+                 >
+                Equipe
+              </a>
+            
+          </li>
+        
+      </ul>
+
+      <!-- Search — reuses Material's native search component -->
+      <div class="nav-search-wrap">
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando a pesquisa
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Compiladores (G16)
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sobre/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sobre
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentação
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentação
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../escopo-e-arq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escopo e Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gramática
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gramática
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-notacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Notação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-palavras-reservadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Palavras reservadas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-literais-e-identificadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Literais e identificadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-operadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Operadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-delimitadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Delimitadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-padroes-descartados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Padrões descartados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-erros-lexicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Erros léxicos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-gramatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Gramática
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Gramática">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-programa-blocos-e-comandos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Programa, blocos e comandos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-declaracoes-de-variaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Declarações de variáveis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-atribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Atribuição
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-funcoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Funções
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-estruturas-de-controle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Estruturas de controle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-observacoes-sobre-a-gramatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Observações sobre a gramática
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-precedencia-e-associatividade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Precedência e associatividade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Precedência e associatividade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-como-o-bison-aplica-a-tabela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Como o Bison aplica a tabela
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-menos-unario-uminus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Menos unário (UMINUS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-lower_than_else-e-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 LOWER_THAN_ELSE e ELSE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-implicacoes-para-a-geracao-de-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Implicações para a geração de Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dangling-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Dangling else
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Dangling else">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-o-problema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 O problema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-a-solucao-no-parsery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 A solução no parser.y
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-verificacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Verificação
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-recuperacao-de-erros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Recuperação de erros
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Recuperação de erros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-como-funciona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Como funciona
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-exemplos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Exemplos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-limitacao-conhecida-erro-sem-dentro-de-bloco" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Limitação conhecida: erro sem ; dentro de bloco
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint1/sprint1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint2/sprint2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint3/sprint3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../equipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-notacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Notação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-palavras-reservadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Palavras reservadas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-literais-e-identificadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Literais e identificadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-operadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Operadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-delimitadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Delimitadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-padroes-descartados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Padrões descartados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-erros-lexicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Erros léxicos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-gramatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Gramática
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Gramática">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-programa-blocos-e-comandos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Programa, blocos e comandos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-declaracoes-de-variaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Declarações de variáveis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-atribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Atribuição
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-funcoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Funções
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-estruturas-de-controle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Estruturas de controle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-observacoes-sobre-a-gramatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Observações sobre a gramática
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-precedencia-e-associatividade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Precedência e associatividade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Precedência e associatividade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-como-o-bison-aplica-a-tabela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Como o Bison aplica a tabela
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-menos-unario-uminus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Menos unário (UMINUS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-lower_than_else-e-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 LOWER_THAN_ELSE e ELSE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-implicacoes-para-a-geracao-de-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Implicações para a geração de Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dangling-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Dangling else
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Dangling else">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-o-problema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 O problema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-a-solucao-no-parsery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 A solução no parser.y
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-verificacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Verificação
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-recuperacao-de-erros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Recuperação de erros
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Recuperação de erros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-como-funciona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Como funciona
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-exemplos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Exemplos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-limitacao-conhecida-erro-sem-dentro-de-bloco" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Limitação conhecida: erro sem ; dentro de bloco
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="gramatica-do-mini-js">Gramática do Mini-JS</h1>
+<p>Esta página descreve a gramática livre de contexto aceita pelo analisador sintático do compilador. Ela é fiel ao arquivo <code>parser/parser.y</code> (Bison), na versão posterior ao ajuste de escopo léxico e sintático (T09): as regras, os nomes dos não-terminais e a ordem das alternativas são os mesmos do código.</p>
+<hr />
+<h2 id="1-notacao">1. Notação</h2>
+<p>A gramática está escrita em BNF, com as seguintes convenções:</p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Significado</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>::=</code></td>
+<td>"é definido como"</td>
+<td><code>bloco ::= '{' lista_comandos '}'</code></td>
+</tr>
+<tr>
+<td><code>|</code></td>
+<td>alternativa</td>
+<td><code>'let' | 'var'</code></td>
+</tr>
+<tr>
+<td><code>ε</code></td>
+<td>produção vazia (nenhum símbolo)</td>
+<td><code>params_opt ::= ε | lista_params</code></td>
+</tr>
+<tr>
+<td><code>minusculas</code></td>
+<td>não-terminal (mesmo nome usado no <code>parser.y</code>)</td>
+<td><code>expressao</code></td>
+</tr>
+<tr>
+<td><code>'texto'</code></td>
+<td>terminal com lexema fixo</td>
+<td><code>'while'</code>, <code>';'</code>, <code>'&amp;&amp;'</code></td>
+</tr>
+<tr>
+<td><code>MAIUSCULAS</code></td>
+<td>terminal cujo lexema varia (identificadores e literais)</td>
+<td><code>ID</code>, <code>NUM</code></td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>token especial do Bison usado na recuperação de erros</td>
+<td><code>error ';'</code></td>
+</tr>
+</tbody>
+</table>
+<p>Os terminais com lexema fixo aparecem pelo próprio texto para facilitar a leitura; no <code>parser.y</code>, cada um corresponde a um token nomeado (por exemplo, <code>'let'</code> é <code>LET</code> e <code>';'</code> é <code>SEMICOLON</code>), conforme a <a href="#2-tokens">tabela de tokens</a>. O único terminal fixo com mais de uma palavra é <code>'console.log'</code>, reconhecido pelo léxico como um token só (<code>PRINT</code>).</p>
+<p>Assim como no <code>parser.y</code>, as listas são escritas com <strong>recursão à esquerda</strong> (<code>lista ::= item | lista ',' item</code>), forma preferida pelo Bison por não acumular símbolos na pilha.</p>
+<hr />
+<h2 id="2-tokens">2. Tokens</h2>
+<p>Os tokens são reconhecidos pelo analisador léxico (<code>lexer/lexer.l</code>, Flex) e declarados no <code>parser.y</code> com <code>%token</code>. As expressões regulares abaixo estão na sintaxe do Flex, exatamente como no <code>lexer.l</code>: texto entre aspas é literal, <code>[...]</code> é uma classe de caracteres, <code>*</code> é "zero ou mais", <code>+</code> é "um ou mais" e <code>?</code> é "opcional".</p>
+<p>Quando mais de uma regra reconhece a entrada, o Flex escolhe a que consome <strong>o maior lexema</strong> e, em caso de empate, <strong>a que aparece primeiro</strong> no arquivo. Por isso as palavras reservadas vêm antes da regra de identificadores (<code>let</code> vira <code>LET</code>, mas <code>letra</code> vira <code>ID</code>), e <code>!=</code> é reconhecido como <code>NEQ</code>, e não como <code>NOT</code> seguido de <code>ASSIGN</code>.</p>
+<h3 id="21-palavras-reservadas">2.1 Palavras reservadas</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LET</code></td>
+<td><code>"let"</code></td>
+<td><code>let x = 1;</code></td>
+</tr>
+<tr>
+<td><code>CONST</code></td>
+<td><code>"const"</code></td>
+<td><code>const PI = 3.14;</code></td>
+</tr>
+<tr>
+<td><code>VAR</code></td>
+<td><code>"var"</code></td>
+<td><code>var total;</code></td>
+</tr>
+<tr>
+<td><code>FUNCTION</code></td>
+<td><code>"function"</code></td>
+<td><code>function soma(a, b) { ... }</code></td>
+</tr>
+<tr>
+<td><code>IF</code></td>
+<td><code>"if"</code></td>
+<td><code>if (x &gt; 0) { ... }</code></td>
+</tr>
+<tr>
+<td><code>ELSE</code></td>
+<td><code>"else"</code></td>
+<td><code>else { ... }</code></td>
+</tr>
+<tr>
+<td><code>WHILE</code></td>
+<td><code>"while"</code></td>
+<td><code>while (i &lt; 10) { ... }</code></td>
+</tr>
+<tr>
+<td><code>FOR</code></td>
+<td><code>"for"</code></td>
+<td><code>for (let i = 0; i &lt; 3; i = i + 1) { ... }</code></td>
+</tr>
+<tr>
+<td><code>RETURN</code></td>
+<td><code>"return"</code></td>
+<td><code>return a + b;</code></td>
+</tr>
+<tr>
+<td><code>PRINT</code></td>
+<td><code>"console.log"</code></td>
+<td><code>console.log("oi");</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-literais-e-identificadores">2.2 Literais e identificadores</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+<th>Valor enviado ao parser</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BOOLEAN_VAL</code></td>
+<td><code>"true"</code> e <code>"false"</code> (duas regras)</td>
+<td><code>true</code>, <code>false</code></td>
+<td><code>1</code> ou <code>0</code> (<code>booleano</code>)</td>
+</tr>
+<tr>
+<td><code>NUM</code></td>
+<td><code>[0-9]+(\.[0-9]+)?</code></td>
+<td><code>42</code>, <code>3.14</code></td>
+<td>o número convertido com <code>atof</code> (<code>valor_num</code>)</td>
+</tr>
+<tr>
+<td><code>STRING_VAL</code></td>
+<td><code>\"[^\"\r\n]*\"|\'[^\'\r\n]*\'</code></td>
+<td><code>"olá"</code>, <code>'mundo'</code></td>
+<td>o texto, com as aspas (<code>texto</code>)</td>
+</tr>
+<tr>
+<td><code>ID</code></td>
+<td><code>[a-zA-Z_][a-zA-Z0-9_]*</code></td>
+<td><code>soma</code>, <code>_total1</code></td>
+<td>o nome (<code>texto</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>O valor de cada literal é passado ao parser pelo <code>yylval</code>, no campo da <code>%union</code> indicado entre parênteses.</p>
+<h3 id="23-operadores">2.3 Operadores</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EQ</code></td>
+<td><code>"=="</code></td>
+<td><code>a == b</code></td>
+</tr>
+<tr>
+<td><code>NEQ</code></td>
+<td><code>"!="</code></td>
+<td><code>a != b</code></td>
+</tr>
+<tr>
+<td><code>NOT</code></td>
+<td><code>"!"</code></td>
+<td><code>!ativo</code></td>
+</tr>
+<tr>
+<td><code>LEQ</code></td>
+<td><code>"&lt;="</code></td>
+<td><code>a &lt;= b</code></td>
+</tr>
+<tr>
+<td><code>GEQ</code></td>
+<td><code>"&gt;="</code></td>
+<td><code>a &gt;= b</code></td>
+</tr>
+<tr>
+<td><code>LT</code></td>
+<td><code>"&lt;"</code></td>
+<td><code>a &lt; b</code></td>
+</tr>
+<tr>
+<td><code>GT</code></td>
+<td><code>"&gt;"</code></td>
+<td><code>a &gt; b</code></td>
+</tr>
+<tr>
+<td><code>AND</code></td>
+<td><code>"&amp;&amp;"</code></td>
+<td><code>a &amp;&amp; b</code></td>
+</tr>
+<tr>
+<td><code>OR</code></td>
+<td><code>"||"</code></td>
+<td><code>a || b</code></td>
+</tr>
+<tr>
+<td><code>ASSIGN</code></td>
+<td><code>"="</code></td>
+<td><code>x = 10;</code></td>
+</tr>
+<tr>
+<td><code>PLUS</code></td>
+<td><code>"+"</code></td>
+<td><code>a + b</code></td>
+</tr>
+<tr>
+<td><code>MINUS</code></td>
+<td><code>"-"</code></td>
+<td><code>a - b</code>, <code>-x</code></td>
+</tr>
+<tr>
+<td><code>TIMES</code></td>
+<td><code>"*"</code></td>
+<td><code>a * b</code></td>
+</tr>
+<tr>
+<td><code>DIVIDE</code></td>
+<td><code>"/"</code></td>
+<td><code>a / b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-delimitadores">2.4 Delimitadores</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SEMICOLON</code></td>
+<td><code>";"</code></td>
+<td><code>x = 1;</code></td>
+</tr>
+<tr>
+<td><code>LPAREN</code></td>
+<td><code>"("</code></td>
+<td><code>soma(1, 2)</code></td>
+</tr>
+<tr>
+<td><code>RPAREN</code></td>
+<td><code>")"</code></td>
+<td><code>soma(1, 2)</code></td>
+</tr>
+<tr>
+<td><code>LBRACE</code></td>
+<td><code>"{"</code></td>
+<td><code>{ let x; }</code></td>
+</tr>
+<tr>
+<td><code>RBRACE</code></td>
+<td><code>"}"</code></td>
+<td><code>{ let x; }</code></td>
+</tr>
+<tr>
+<td><code>COMMA</code></td>
+<td><code>","</code></td>
+<td><code>let a, b;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-padroes-descartados">2.5 Padrões descartados</h3>
+<p>Estes padrões são reconhecidos, mas não geram token: o léxico simplesmente os ignora.</p>
+<table>
+<thead>
+<tr>
+<th>Padrão</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Espaços em branco</td>
+<td><code>[ \t\n\r]+</code></td>
+<td>espaços, tabulações e quebras de linha</td>
+</tr>
+<tr>
+<td>Comentário de linha</td>
+<td><code>"//".*</code></td>
+<td><code>// comentário</code></td>
+</tr>
+<tr>
+<td>Comentário de bloco</td>
+<td><code>"/*"([^*]|\*+[^*/])*\*+"/"</code></td>
+<td><code>/* comentário */</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-erros-lexicos">2.6 Erros léxicos</h3>
+<p>Os padrões abaixo indicam erros. O léxico imprime uma mensagem com o número da linha e devolve o token especial <code>YYUNDEF</code>, que o parser trata como erro de sintaxe. Assim, os erros léxicos entram na contagem de erros e no mecanismo de recuperação de erros da análise sintática.</p>
+<table>
+<thead>
+<tr>
+<th>Situação</th>
+<th>Expressão regular</th>
+<th>Exemplo</th>
+<th>Mensagem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String com quebra de linha</td>
+<td><code>(\"[^\"\r\n]*|\'[^\'\r\n]*)/[\r\n]</code></td>
+<td><code>"abc</code> + quebra de linha</td>
+<td><code>Erro lexico: string com quebra de linha na linha N</code></td>
+</tr>
+<tr>
+<td>Palavra reservada fora do escopo</td>
+<td><code>"do"|"switch"|"case"|...|"debugger"</code></td>
+<td><code>switch (x) { ... }</code></td>
+<td><code>palavra reservada 'switch' fora do escopo na linha N</code></td>
+</tr>
+<tr>
+<td>Caractere inválido</td>
+<td><code>.</code> (qualquer caractere não reconhecido pelas regras anteriores)</td>
+<td><code>@</code>, <code>%</code>, <code>[</code></td>
+<td><code>Erro lexico: Caractere invalido '@' na linha N</code></td>
+</tr>
+</tbody>
+</table>
+<p>As palavras reservadas fora do escopo são: <code>do</code>, <code>switch</code>, <code>case</code>, <code>break</code>, <code>continue</code>, <code>try</code>, <code>catch</code>, <code>throw</code>, <code>class</code>, <code>extends</code>, <code>import</code>, <code>from</code>, <code>export</code>, <code>new</code>, <code>in</code>, <code>of</code>, <code>delete</code>, <code>default</code>, <code>finally</code>, <code>this</code>, <code>typeof</code>, <code>instanceof</code>, <code>void</code>, <code>super</code>, <code>with</code>, <code>yield</code>, <code>await</code>, <code>enum</code> e <code>debugger</code>. A regra delas aparece antes da regra de identificadores, para que não sejam aceitas como nomes de variáveis.</p>
+<p>Na regra de string com quebra de linha, o <code>/[\r\n]</code> é um <em>contexto à direita</em>: a quebra de linha é verificada, mas não é consumida, para que o erro seja relatado na linha em que a string começou.</p>
+<hr />
+<h2 id="3-gramatica">3. Gramática</h2>
+<p>O símbolo inicial é <code>programa</code>.</p>
+<h3 id="31-programa-blocos-e-comandos">3.1 Programa, blocos e comandos</h3>
+<pre><code class="language-text">programa        ::= lista_comandos
+
+lista_comandos  ::= ε
+                  | lista_comandos comando
+
+bloco           ::= '{' lista_comandos '}'
+
+comando         ::= declaracao_var
+                  | comando_atribuicao
+                  | declaracao_funcao
+                  | comando_retorno
+                  | chamada_funcao ';'
+                  | 'console.log' '(' args_opt ')' ';'
+                  | comando_if
+                  | comando_while
+                  | comando_for
+                  | bloco
+                  | ';'
+                  | error ';'
+                  | error '}'
+</code></pre>
+<h3 id="32-declaracoes-de-variaveis">3.2 Declarações de variáveis</h3>
+<pre><code class="language-text">declaracao_var               ::= tipo_declarador lista_declaradores ';'
+                               | 'const' lista_declaradores_const ';'
+
+tipo_declarador              ::= 'let'
+                               | 'var'
+
+lista_declaradores           ::= item_declarador
+                               | lista_declaradores ',' item_declarador
+
+item_declarador              ::= ID
+                               | item_declarador_inicializado
+
+lista_declaradores_const     ::= item_declarador_inicializado
+                               | lista_declaradores_const ',' item_declarador_inicializado
+
+item_declarador_inicializado ::= ID '=' expressao
+</code></pre>
+<h3 id="33-atribuicao">3.3 Atribuição</h3>
+<pre><code class="language-text">comando_atribuicao ::= ID '=' expressao ';'
+</code></pre>
+<h3 id="34-funcoes">3.4 Funções</h3>
+<pre><code class="language-text">declaracao_funcao ::= 'function' ID '(' params_opt ')' bloco
+
+params_opt        ::= ε
+                    | lista_params
+
+lista_params      ::= ID
+                    | lista_params ',' ID
+
+comando_retorno   ::= 'return' ';'
+                    | 'return' expressao ';'
+
+chamada_funcao    ::= ID '(' args_opt ')'
+
+args_opt          ::= ε
+                    | lista_args
+
+lista_args        ::= expressao
+                    | lista_args ',' expressao
+</code></pre>
+<h3 id="35-estruturas-de-controle">3.5 Estruturas de controle</h3>
+<pre><code class="language-text">comando_if    ::= 'if' '(' expressao ')' comando
+                | 'if' '(' expressao ')' comando 'else' comando
+
+comando_while ::= 'while' '(' expressao ')' comando
+
+comando_for   ::= 'for' '(' for_init ';' for_cond ';' for_incr ')' comando
+
+for_init      ::= ε
+                | tipo_declarador lista_declaradores
+                | ID '=' expressao
+
+for_cond      ::= ε
+                | expressao
+
+for_incr      ::= ε
+                | ID '=' expressao
+                | expressao
+</code></pre>
+<h3 id="36-expressoes">3.6 Expressões</h3>
+<pre><code class="language-text">expressao ::= expressao '||' expressao
+            | expressao '&amp;&amp;' expressao
+            | expressao '==' expressao
+            | expressao '!=' expressao
+            | expressao '&lt;'  expressao
+            | expressao '&lt;=' expressao
+            | expressao '&gt;'  expressao
+            | expressao '&gt;=' expressao
+            | expressao '+'  expressao
+            | expressao '-'  expressao
+            | expressao '*'  expressao
+            | expressao '/'  expressao
+            | '-' expressao
+            | '!' expressao
+            | '(' expressao ')'
+            | atomo
+
+atomo     ::= ID
+            | chamada_funcao
+            | NUM
+            | STRING_VAL
+            | BOOLEAN_VAL
+</code></pre>
+<hr />
+<h2 id="4-observacoes-sobre-a-gramatica">4. Observações sobre a gramática</h2>
+<ul>
+<li><strong>Ambiguidade resolvida fora das regras:</strong> a regra <code>expressao</code> é ambígua de propósito (<code>a - b * c</code> pode ser agrupado de duas formas), e o mesmo vale para o <code>if</code> sem <code>else</code> (<em>dangling else</em>). O Bison resolve as duas ambiguidades com as declarações de <a href="#5-precedencia-e-associatividade">precedência e associatividade</a> do <code>parser.y</code>, sem que seja preciso reescrever a gramática em vários níveis.</li>
+<li><strong>Atribuição é comando, não expressão:</strong> <code>x = 1</code> só aparece em <code>comando_atribuicao</code>, <code>for_init</code> e <code>for_incr</code>. Construções como <code>a = b = 0;</code> ou <code>if (x = 1)</code> são erros de sintaxe.</li>
+<li><strong><code>const</code> exige valor inicial:</strong> <code>lista_declaradores_const</code> só aceita <code>item_declarador_inicializado</code>, então <code>const x;</code> é rejeitado pela própria gramática.</li>
+<li><strong><code>const</code> não pode iniciar um <code>for</code>:</strong> <code>for_init</code> usa <code>tipo_declarador</code>, que só aceita <code>let</code> e <code>var</code>.</li>
+<li><strong><code>console.log</code> é um comando:</strong> a impressão não é uma expressão e não pode ser usada como valor, por exemplo em <code>let x = console.log(1);</code>.</li>
+<li><strong>Chamada de função:</strong> pode ser usada como comando (<code>soma(1, 2);</code>) ou dentro de uma expressão, por meio de <code>atomo</code>.</li>
+<li><strong><code>return</code> fora de função:</strong> a gramática aceita <code>comando_retorno</code> em qualquer lugar onde cabe um <code>comando</code>, e a restrição é verificada por uma ação semântica do próprio parser, que relata o erro <code>'return' fora de funcao</code>.</li>
+<li><strong>Corpo das estruturas de controle:</strong> o corpo de <code>if</code>, <code>else</code>, <code>while</code> e <code>for</code> é um <code>comando</code> qualquer, com ou sem chaves. Por isso, a gramática aceita uma declaração direto no corpo (<code>if (c) let x = 1;</code>), embora isso esteja fora do escopo do projeto (<a href="../escopo-e-arq/#22-o-que-nao-faz-parte-do-projeto">Escopo e Arquitetura, seção 2.2</a>); essa restrição não é imposta pelo parser.</li>
+<li><strong>Ações intermediárias omitidas:</strong> o <code>parser.y</code> tem ações no meio de algumas regras (em <code>programa</code>, para reiniciar o estado, e em <code>declaracao_funcao</code>, para controlar se o parser está dentro de uma função). Elas não alteram a linguagem aceita e foram omitidas da notação.</li>
+</ul>
+<hr />
+<h2 id="5-precedencia-e-associatividade">5. Precedência e associatividade</h2>
+<p>A regra <code>expressao</code> é ambígua: <code>a + b * c</code> poderia ser lida como <code>(a + b) * c</code> ou como <code>a + (b * c)</code>. Em vez de reescrever a gramática com um não-terminal para cada nível de prioridade, o <code>parser.y</code> declara a precedência e a associatividade dos operadores, e o Bison usa essas declarações para resolver os conflitos da tabela de análise:</p>
+<pre><code class="language-text">%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+%left OR
+%left AND
+%left EQ NEQ
+%left LT LEQ GT GEQ
+%left PLUS MINUS
+%left TIMES DIVIDE
+%right UMINUS NOT
+</code></pre>
+<p>No Bison, as declarações estão em ordem <strong>crescente</strong> de precedência: cada linha tem prioridade maior que a anterior, e os tokens da mesma linha têm a mesma prioridade. A tabela abaixo lista os operadores na ordem inversa, do que agrupa primeiro para o que agrupa por último.</p>
+<table>
+<thead>
+<tr>
+<th>Nível</th>
+<th>Operadores</th>
+<th>Tokens</th>
+<th>Associatividade</th>
+<th>Exemplo</th>
+<th>Agrupamento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (maior)</td>
+<td><code>-</code> unário, <code>!</code></td>
+<td><code>UMINUS</code>, <code>NOT</code></td>
+<td>direita</td>
+<td><code>-a * b</code><br><code>!!ok</code></td>
+<td><code>(-a) * b</code><br><code>!(!ok)</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>*</code>, <code>/</code></td>
+<td><code>TIMES</code>, <code>DIVIDE</code></td>
+<td>esquerda</td>
+<td><code>a / b * c</code></td>
+<td><code>(a / b) * c</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>+</code>, <code>-</code></td>
+<td><code>PLUS</code>, <code>MINUS</code></td>
+<td>esquerda</td>
+<td><code>a - b - c</code><br><code>a + b * c</code></td>
+<td><code>(a - b) - c</code><br><code>a + (b * c)</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td>
+<td><code>LT</code>, <code>LEQ</code>, <code>GT</code>, <code>GEQ</code></td>
+<td>esquerda</td>
+<td><code>a + 1 &lt; b</code></td>
+<td><code>(a + 1) &lt; b</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>==</code>, <code>!=</code></td>
+<td><code>EQ</code>, <code>NEQ</code></td>
+<td>esquerda</td>
+<td><code>a &lt; b == c &lt; d</code></td>
+<td><code>(a &lt; b) == (c &lt; d)</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>&amp;&amp;</code></td>
+<td><code>AND</code></td>
+<td>esquerda</td>
+<td><code>a == b &amp;&amp; c</code></td>
+<td><code>(a == b) &amp;&amp; c</code></td>
+</tr>
+<tr>
+<td>7 (menor)</td>
+<td><code>||</code></td>
+<td><code>OR</code></td>
+<td>esquerda</td>
+<td><code>a || b &amp;&amp; c</code></td>
+<td><code>a || (b &amp;&amp; c)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Os parênteses (<code>'(' expressao ')'</code>) sempre têm prioridade sobre a tabela: <code>(a + b) * c</code> é agrupado como está escrito. A ordem dos níveis é a mesma do JavaScript.</p>
+<h3 id="51-como-o-bison-aplica-a-tabela">5.1 Como o Bison aplica a tabela</h3>
+<p>Considere <code>a + b * c</code>. Depois de ler <code>a + b</code>, o parser poderia <strong>reduzir</strong> <code>expressao '+' expressao</code> ou <strong>empilhar</strong> o <code>*</code> que vem a seguir. O Bison compara a precedência da regra (a do seu último terminal, <code>PLUS</code>) com a do token seguinte (<code>TIMES</code>):</p>
+<ul>
+<li>se o token seguinte tem precedência <strong>maior</strong>, ele é empilhado: <code>a + (b * c)</code>;</li>
+<li>se tem precedência <strong>menor</strong>, a regra é reduzida: em <code>a * b + c</code>, o resultado é <code>(a * b) + c</code>;</li>
+<li>se a precedência é <strong>igual</strong>, decide a associatividade: <code>%left</code> reduz, gerando <code>(a - b) - c</code>, e <code>%right</code> empilha.</li>
+</ul>
+<h3 id="52-menos-unario-uminus">5.2 Menos unário (<code>UMINUS</code>)</h3>
+<p>O token <code>MINUS</code> é o mesmo para a subtração e para o menos unário, mas os dois precisam de prioridades diferentes. Por isso, o <code>parser.y</code> declara <code>UMINUS</code>, um <strong>pseudo-token</strong> que o léxico nunca produz e que existe apenas para carregar uma precedência. A regra do menos unário o utiliza com <code>%prec</code>:</p>
+<pre><code class="language-text">expressao ::= '-' expressao   %prec UMINUS
+</code></pre>
+<p>Assim, a regra assume a precedência de <code>UMINUS</code> (nível 1), e não a de <code>MINUS</code> (nível 3): <code>-a * b</code> é agrupado como <code>(-a) * b</code>. O <code>!</code> (<code>NOT</code>) não precisa desse recurso, porque é usado apenas como operador unário.</p>
+<h3 id="53-lower_than_else-e-else">5.3 <code>LOWER_THAN_ELSE</code> e <code>ELSE</code></h3>
+<p>As duas primeiras linhas da declaração não envolvem operadores: elas resolvem o <em>dangling else</em>, a ambiguidade do <code>if</code> sem <code>else</code>. <code>LOWER_THAN_ELSE</code> também é um pseudo-token, usado na regra do <code>if</code> sem <code>else</code>. O funcionamento é detalhado na <a href="#6-dangling-else">seção 6</a>.</p>
+<h3 id="54-implicacoes-para-a-geracao-de-python">5.4 Implicações para a geração de Python</h3>
+<p>A ordem dos operadores em Python não é idêntica à do JavaScript. Por isso, o gerador de código deverá emitir parênteses a partir da estrutura da AST, em vez de copiar a expressão como foi escrita:</p>
+<ul>
+<li><strong><code>!</code> × <code>not</code>:</strong> em Python, <code>not</code> tem precedência <strong>menor</strong> que as comparações. <code>!a == b</code> é <code>(!a) == b</code> em JS, mas <code>not a == b</code> é <code>not (a == b)</code> em Python; a tradução correta é <code>(not a) == b</code>.</li>
+<li><strong>Comparações encadeadas:</strong> em JS, <code>a &lt; b &lt; c</code> é <code>(a &lt; b) &lt; c</code>, comparando o booleano <code>a &lt; b</code> com <code>c</code>. Em Python, <code>a &lt; b &lt; c</code> significa <code>a &lt; b and b &lt; c</code>. Quando <code>c</code> é um número, a expressão já fica fora do escopo por comparar tipos diferentes (<a href="../escopo-e-arq/#22-o-que-nao-faz-parte-do-projeto">Escopo e Arquitetura, seção 2.2</a>); mas o mesmo vale para <code>==</code> e <code>!=</code>, e <code>a == b == c</code> com três booleanos é válido no Mini-JS. Nesse caso, a tradução correta é <code>(a == b) == c</code>, e não <code>a == b == c</code>.</li>
+</ul>
+<hr />
+<h2 id="6-dangling-else">6. Dangling else</h2>
+<h3 id="61-o-problema">6.1 O problema</h3>
+<p>Como o corpo de um <code>if</code> pode ser outro <code>if</code>, e o <code>else</code> é opcional, um <code>else</code> depois de dois <code>if</code> aninhados pode pertencer a qualquer um deles:</p>
+<pre><code class="language-javascript">if (a)
+    if (b)
+        console.log(&quot;x&quot;);
+    else
+        console.log(&quot;y&quot;);
+</code></pre>
+<p>As duas leituras são válidas pela gramática:</p>
+<ul>
+<li><strong><code>else</code> do <code>if</code> interno:</strong> <code>if (a) { if (b) ... else ... }</code></li>
+<li><strong><code>else</code> do <code>if</code> externo:</strong> <code>if (a) { if (b) ... } else ...</code></li>
+</ul>
+<p>Para o parser, a dúvida surge quando ele já leu <code>if (a) if (b) comando</code> e o próximo token é <code>else</code>. Ele pode <strong>reduzir</strong> <code>if (b) comando</code> como um <code>if</code> sem <code>else</code> (e o <code>else</code> ficaria com o <code>if (a)</code>) ou <strong>empilhar</strong> o <code>else</code> (e ele ficaria com o <code>if (b)</code>). É um conflito de empilhar/reduzir (<em>shift/reduce</em>).</p>
+<h3 id="62-a-solucao-no-parsery">6.2 A solução no <code>parser.y</code></h3>
+<p>A regra do <code>if</code> sem <code>else</code> recebe a precedência do pseudo-token <code>LOWER_THAN_ELSE</code>, declarado com prioridade menor que a de <code>ELSE</code>:</p>
+<pre><code class="language-text">%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
+comando_if ::= 'if' '(' expressao ')' comando                    %prec LOWER_THAN_ELSE
+             | 'if' '(' expressao ')' comando 'else' comando
+</code></pre>
+<p>No momento do conflito, o Bison compara a precedência da regra que poderia ser reduzida (<code>LOWER_THAN_ELSE</code>) com a do token seguinte (<code>ELSE</code>). Como <code>ELSE</code> tem precedência maior, o parser <strong>empilha</strong> o <code>else</code>, que fica associado ao <strong><code>if</code> mais próximo</strong>, como no JavaScript (e no C e no Java). No exemplo acima, <code>console.log("y")</code> só executa quando <code>a</code> é verdadeiro e <code>b</code> é falso.</p>
+<p>Para associar o <code>else</code> ao <code>if</code> externo, basta usar chaves:</p>
+<pre><code class="language-javascript">if (a) {
+    if (b)
+        console.log(&quot;x&quot;);
+} else
+    console.log(&quot;y&quot;);
+</code></pre>
+<h3 id="63-verificacao">6.3 Verificação</h3>
+<p>Com as declarações do <code>parser.y</code>, o Bison gera o parser sem nenhum conflito. Removendo o <code>%prec LOWER_THAN_ELSE</code> e as duas linhas <code>%nonassoc</code>, ele passa a relatar exatamente um conflito, no token <code>ELSE</code>, com este contraexemplo (<code>bison -Wcounterexamples</code>):</p>
+<pre><code class="language-text">warning: shift/reduce conflict on token ELSE [-Wcounterexamples]
+  Example: IF LPAREN expressao RPAREN IF LPAREN expressao RPAREN comando • ELSE comando
+</code></pre>
+<p>Sem as declarações, o Bison também escolheria empilhar (é o seu comportamento padrão em conflitos de empilhar/reduzir), mas emitiria o aviso a cada compilação. Com elas, a escolha fica explícita na gramática.</p>
+<hr />
+<h2 id="7-recuperacao-de-erros">7. Recuperação de erros</h2>
+<p>Sem recuperação, o parser pararia no primeiro erro de sintaxe. Para relatar vários erros em uma única execução, a regra <code>comando</code> tem duas produções com o token especial <code>error</code> do Bison:</p>
+<pre><code class="language-text">comando ::= ...
+          | error ';'
+          | error '}'
+</code></pre>
+<pre><code class="language-c">| error SEMICOLON {
+    yyerrok;
+    fprintf(stderr, &quot;[RECUPERACAO] Erro sintatico descartado ate ';'\n&quot;);
+}
+| error RBRACE {
+    yyerrok;
+    fprintf(stderr, &quot;[RECUPERACAO] Erro em bloco descartado ate '}'\n&quot;);
+}
+</code></pre>
+<h3 id="71-como-funciona">7.1 Como funciona</h3>
+<p>Quando o parser encontra um token que não se encaixa em nenhuma regra:</p>
+<ol>
+<li><strong>Relata o erro:</strong> chama <code>yyerror</code>, que imprime <code>Erro sintatico na linha N: syntax error</code>, e incrementa o contador de erros (<code>yynerrs</code>).</li>
+<li><strong>Desempilha estados</strong> até encontrar um em que o token <code>error</code> possa ser empilhado, ou seja, o início de um <code>comando</code>. Como <code>comando</code> aparece dentro de <code>lista_comandos</code>, isso acontece no nível do programa ou dentro do bloco <code>{ ... }</code> mais interno.</li>
+<li><strong>Descarta tokens da entrada</strong> até encontrar um que possa vir depois de <code>error</code>: <code>;</code> ou <code>}</code>.</li>
+<li><strong>Reduz</strong> <code>error ';'</code> ou <code>error '}'</code> a um <code>comando</code> e continua a análise normalmente a partir do próximo token.</li>
+</ol>
+<p>O trecho com erro é tratado como um comando descartado. Se o fim do arquivo for alcançado antes de um <code>;</code> ou <code>}</code>, a recuperação não é possível e a análise termina.</p>
+<p>Depois de um erro, o Bison normalmente omite as mensagens de novos erros até que três tokens tenham sido lidos com sucesso, para evitar uma cascata de mensagens sobre o mesmo problema. A macro <code>yyerrok</code>, chamada nas duas regras, encerra esse modo imediatamente, para que erros em comandos consecutivos sejam todos relatados.</p>
+<p>Os erros léxicos entram no mesmo mecanismo: o léxico devolve o token <code>YYUNDEF</code>, que não se encaixa em nenhuma regra e dispara a recuperação como qualquer erro de sintaxe.</p>
+<p>Mesmo quando todos os erros são recuperados, a compilação falha: se <code>yynerrs</code> for maior que zero, o <code>main.c</code> informa a fase e a quantidade de erros, e a análise semântica não é executada.</p>
+<h3 id="72-exemplos">7.2 Exemplos</h3>
+<p>As saídas abaixo foram obtidas com os arquivos de teste de <code>tests/invalidos/</code>.</p>
+<p><strong>Erro em um comando (<code>08_erro_recuperado_comando.js</code>):</strong> o <code>=</code> sem expressão gera um erro; o parser descarta até o <code>;</code> e analisa normalmente as linhas seguintes.</p>
+<pre><code class="language-javascript">let a = 1;
+let b = ;
+let c = 2;
+console.log(c);
+</code></pre>
+<pre><code class="language-text">Erro sintatico na linha 5: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (1 erro(s))
+</code></pre>
+<p><strong>Erros em série (<code>10_multiplos_erros_em_serie.js</code>):</strong> graças ao <code>yyerrok</code>, cada comando com erro é relatado separadamente, e o parser chega ao fim do arquivo.</p>
+<pre><code class="language-javascript">let a = ;
+let b = ;
+let c = ;
+let d = 4;
+console.log(d);
+</code></pre>
+<pre><code class="language-text">Erro sintatico na linha 3: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Erro sintatico na linha 4: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Erro sintatico na linha 5: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (3 erro(s))
+</code></pre>
+<p>Os números de linha incluem as linhas de comentário do início dos arquivos de teste, omitidas acima.</p>
+<h3 id="73-limitacao-conhecida-erro-sem-dentro-de-bloco">7.3 Limitação conhecida: erro sem <code>;</code> dentro de bloco</h3>
+<p>Quando um comando dentro de um bloco termina sem <code>;</code>, o próximo token aceito pela recuperação é o <code>}</code> que fecharia o bloco. A regra <code>error '}'</code> consome esse <code>}</code> como fim do comando com erro, e o bloco continua aberto. Os comandos seguintes passam a ser lidos como parte do bloco e, no fim do arquivo, falta um <code>}</code>, o que gera um segundo erro. É o que acontece em <code>09_erro_recuperado_bloco.js</code>:</p>
+<pre><code class="language-javascript">let x = 1;
+{
+    let y = 5
+}
+console.log(x);
+</code></pre>
+<pre><code class="language-text">Erro sintatico na linha 6: syntax error
+[RECUPERACAO] Erro em bloco descartado ate '}'
+Erro sintatico na linha 8: syntax error
+Compilacao falhou na fase lexica/sintatica (2 erro(s))
+</code></pre>
+<p>O erro da linha 8 (o fim do arquivo) é consequência do primeiro, e não um erro do programa. A compilação falha corretamente, mas a contagem de erros fica maior que a real.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Grupo 16, Compiladores(T01)
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
