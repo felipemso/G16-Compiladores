@@ -69,14 +69,20 @@ O critério de corte é a tradução direta: quando um recurso se comporta de fo
 
 ## 3. Arquitetura do Compilador
 
-O fluxo de compilação acontece em 4 etapas lineares:
+O fluxo de compilação acontece em 5 etapas:
 
-1. **Léxico (Flex):** lê o texto em JS, gera os tokens e descarta comentários e espaços.
-2. **Sintático (Bison):** valida a estrutura do código e as regras gramaticais.
-3. **Árvore Sintática (AST):** organiza o programa validado em uma estrutura de árvore na memória.
-4. **Emissão de Código:** percorre a árvore e gera o arquivo `.py` correspondente, devidamente identado.
+**Léxico → Sintático → AST → Semântico → [Geração de Python, próxima etapa]**
+
+1. **Léxico (Flex):** lê o texto em JS, gera os tokens e descarta comentários e espaços. Caracteres inválidos, strings com quebra de linha e palavras reservadas fora do escopo são relatados como erro léxico, com o número da linha.
+2. **Sintático (Bison):** valida a estrutura do código e as regras gramaticais, pedindo os tokens ao léxico conforme precisa. Em caso de erro, o parser se recupera descartando a entrada até o próximo `;` ou `}` e continua a análise, para relatar vários erros em uma única execução.
+3. **Árvore Sintática (AST):** organiza o programa em uma estrutura de árvore na memória (`ast.c`). Os nós são construídos pelas ações semânticas do Bison, durante a própria análise sintática, e cada nó guarda a linha de origem para as mensagens de erro.
+4. **Semântico:** percorre a AST e preenche a tabela de símbolos (`semantico.c` e `tabela.c`), registrando variáveis, funções e parâmetros com uma pilha de escopos (global, função, bloco e `for`). Essa fase só roda quando o léxico e o sintático terminam sem erros, isto é, sobre uma AST completa. A opção `--tabela` imprime a tabela de símbolos ao final.
+5. **Geração de Python (próxima etapa):** percorrerá a AST já validada e gerará o arquivo `.py` correspondente, devidamente indentado. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST.
+
+Quando a compilação falha, o compilador informa em qual fase ocorreu a falha (`lexica/sintatica` ou `semantica`) e a quantidade de erros. Os erros léxicos chegam ao parser como tokens inválidos, por isso as duas primeiras fases são relatadas juntas.
 
 ### Tecnologias
 * **Linguagem:** C
-* **Ferramentas:** Flex (`lexer.l`) e Bison (`parser.y`)
-* **Comunicação:** arquivo `parser.tab.h` (tokens) e estrutura `%union` / `yylval` para troca de dados entre léxico e sintático.
+* **Ferramentas:** Flex (`lexer/lexer.l`) e Bison (`parser/parser.y`)
+* **Módulos:** `src/ast.c` (AST), `src/tabela.c` (tabela de símbolos e escopos), `src/semantico.c` (análise semântica) e `src/main.c` (orquestra as fases)
+* **Comunicação:** arquivo `parser.tab.h` (tokens) e estrutura `%union` / `yylval` para troca de dados entre léxico e sintático; a raiz da AST (`raiz_ast`) é entregue pelo parser à fase semântica.
