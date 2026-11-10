@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -769,25 +769,25 @@
 <p>O compilador traduz apenas comandos de JavaScript que possuem equivalente direto em Python.</p>
 <h3 id="21-o-que-o-compilador-suporta">2.1 O que o Compilador Suporta</h3>
 <ul>
-<li><strong>Variáveis:</strong> declarações com <code>let</code>, <code>const</code> e <code>var</code>, com ou sem valor inicial.</li>
+<li><strong>Variáveis:</strong> declarações com <code>let</code>, <code>const</code> e <code>var</code>, com ou sem valor inicial (<code>const</code> exige valor inicial). Várias variáveis podem ser declaradas em uma única instrução: <code>let a = 1, b = 2;</code>.</li>
 <li><strong>Atribuição:</strong> comandos simples de atribuição (<code>x = 10;</code>).</li>
 <li><strong>Condicionais:</strong> <code>if</code> e <code>else</code>.</li>
-<li><strong>Repetição:</strong> laços <code>while</code> e laços <code>for</code> tradicionais.</li>
-<li><strong>Funções Básicas:</strong> </li>
+<li><strong>Repetição:</strong> laços <code>while</code> e laços <code>for</code> tradicionais (<code>for (let i = 0; i &lt; n; i = i + 1) { ... }</code>).</li>
+<li><strong>Funções Básicas:</strong></li>
 <li>Declaração de funções com nome e parâmetros: <code>function soma(a, b) { ... }</code>.</li>
-<li>Retorno de valor com <code>return</code>.</li>
-<li>Chamada de funções: <code>soma(2, 3)</code>.</li>
+<li>Retorno com <code>return;</code> ou <code>return expressao;</code> (apenas dentro de funções).</li>
+<li>Chamada de funções, como comando ou dentro de expressões: <code>soma(2, 3)</code>.</li>
 <li><strong>Expressões e Operadores:</strong></li>
 <li>Matemática: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> e <code>-</code> unário.</li>
 <li>Comparação: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>.</li>
-<li>Lógica: <code>&amp;&amp;</code> (e), <code>||</code> (ou), <code>!</code> (não).</li>
+<li>Lógica: <code>&amp;&amp;</code> (e), <code>||</code> (ou) e <code>!</code> (negação lógica unária, traduzida para <code>not</code> em Python).</li>
 <li>Parênteses para prioridade: <code>(a + b) * c</code>.</li>
 <li><strong>Tipos de Dados:</strong></li>
 <li>Números (inteiros e decimais).</li>
-<li>Textos (strings com aspas simples ou duplas).</li>
+<li>Textos (strings com aspas simples ou duplas, em uma única linha).</li>
 <li>Booleanos (<code>true</code> e <code>false</code>).</li>
-<li>Listas/Arrays: criação (<code>[1, 2, 3]</code>) e acesso por índice (<code>lista[0]</code>).</li>
-<li><strong>Saída:</strong> comando <code>console.log(...)</code> (traduzido diretamente para <code>print(...)</code>).</li>
+<li><strong>Saída:</strong> comando <code>console.log(...)</code> com zero ou mais argumentos separados por vírgula (traduzido diretamente para <code>print(...)</code>).</li>
+<li><strong>Comentários:</strong> de linha (<code>// ...</code>) e de bloco (<code>/* ... */</code>), descartados pelo analisador léxico.</li>
 </ul>
 <h3 id="22-o-que-nao-faz-parte-do-projeto">2.2 O que NÃO Faz Parte do Projeto</h3>
 <ul>
@@ -858,10 +858,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>
