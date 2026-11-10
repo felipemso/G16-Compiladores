@@ -91,6 +91,10 @@ Simbolo *tabela_busca(const char *nome) {
     return NULL;
 }
 
+const Simbolo *tabela_primeiro(void) {
+    return primeiro_simbolo;
+}
+
 static const char *nome_categoria(CategoriaSimbolo categoria) {
     switch (categoria) {
         case SIMBOLO_LET: return "let";

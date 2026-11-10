@@ -31,6 +31,9 @@ Simbolo *tabela_insere(const char *nome, CategoriaSimbolo categoria, TipoDado ti
 Simbolo *tabela_busca_local(const char *nome);
 Simbolo *tabela_busca(const char *nome);
 
+/* Primeiro simbolo inserido; os demais seguem por proximo_na_tabela. */
+const Simbolo *tabela_primeiro(void);
+
 void tabela_imprime(void);
 void tabela_libera(void);
 
