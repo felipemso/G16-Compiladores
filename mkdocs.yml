@@ -27,6 +27,7 @@ nav:
   - Sobre: sobre.md
   - Documentação:
       - Escopo e Arquitetura: tech-docs/escopo-e-arq.md
+      - Gramática: tech-docs/gramatica.md
       - Sprints:
           - Sprint 1: sprints/sprint1/sprint1.md
           - Sprint 2: sprints/sprint2/sprint2.md
