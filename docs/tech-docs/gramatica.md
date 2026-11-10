@@ -244,7 +244,7 @@ atomo     ::= ID
 
 ## 4. Observações sobre a gramática
 
-* **Ambiguidade resolvida fora das regras:** a regra `expressao` é ambígua de propósito (`a - b * c` pode ser agrupado de duas formas), e o mesmo vale para o `if` sem `else` (*dangling else*). O Bison resolve as duas ambiguidades com as declarações de precedência e associatividade do `parser.y`, sem que seja preciso reescrever a gramática em vários níveis.
+* **Ambiguidade resolvida fora das regras:** a regra `expressao` é ambígua de propósito (`a - b * c` pode ser agrupado de duas formas), e o mesmo vale para o `if` sem `else` (*dangling else*). O Bison resolve as duas ambiguidades com as declarações de [precedência e associatividade](#5-precedencia-e-associatividade) do `parser.y`, sem que seja preciso reescrever a gramática em vários níveis.
 * **Atribuição é comando, não expressão:** `x = 1` só aparece em `comando_atribuicao`, `for_init` e `for_incr`. Construções como `a = b = 0;` ou `if (x = 1)` são erros de sintaxe.
 * **`const` exige valor inicial:** `lista_declaradores_const` só aceita `item_declarador_inicializado`, então `const x;` é rejeitado pela própria gramática.
 * **`const` não pode iniciar um `for`:** `for_init` usa `tipo_declarador`, que só aceita `let` e `var`.
@@ -253,3 +253,64 @@ atomo     ::= ID
 * **`return` fora de função:** a gramática aceita `comando_retorno` em qualquer lugar onde cabe um `comando`, e a restrição é verificada por uma ação semântica do próprio parser, que relata o erro `'return' fora de funcao`.
 * **Corpo das estruturas de controle:** o corpo de `if`, `else`, `while` e `for` é um `comando` qualquer, com ou sem chaves. Por isso, a gramática aceita uma declaração direto no corpo (`if (c) let x = 1;`), embora isso esteja fora do escopo do projeto ([Escopo e Arquitetura, seção 2.2](escopo-e-arq.md#22-o-que-nao-faz-parte-do-projeto)); essa restrição não é imposta pelo parser.
 * **Ações intermediárias omitidas:** o `parser.y` tem ações no meio de algumas regras (em `programa`, para reiniciar o estado, e em `declaracao_funcao`, para controlar se o parser está dentro de uma função). Elas não alteram a linguagem aceita e foram omitidas da notação.
+
+---
+
+## 5. Precedência e associatividade
+
+A regra `expressao` é ambígua: `a + b * c` poderia ser lida como `(a + b) * c` ou como `a + (b * c)`. Em vez de reescrever a gramática com um não-terminal para cada nível de prioridade, o `parser.y` declara a precedência e a associatividade dos operadores, e o Bison usa essas declarações para resolver os conflitos da tabela de análise:
+
+```text
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+%left OR
+%left AND
+%left EQ NEQ
+%left LT LEQ GT GEQ
+%left PLUS MINUS
+%left TIMES DIVIDE
+%right UMINUS NOT
+```
+
+No Bison, as declarações estão em ordem **crescente** de precedência: cada linha tem prioridade maior que a anterior, e os tokens da mesma linha têm a mesma prioridade. A tabela abaixo lista os operadores na ordem inversa, do que agrupa primeiro para o que agrupa por último.
+
+| Nível | Operadores | Tokens | Associatividade | Exemplo | Agrupamento |
+|---|---|---|---|---|---|
+| 1 (maior) | `-` unário, `!` | `UMINUS`, `NOT` | direita | `-a * b`<br>`!!ok` | `(-a) * b`<br>`!(!ok)` |
+| 2 | `*`, `/` | `TIMES`, `DIVIDE` | esquerda | `a / b * c` | `(a / b) * c` |
+| 3 | `+`, `-` | `PLUS`, `MINUS` | esquerda | `a - b - c`<br>`a + b * c` | `(a - b) - c`<br>`a + (b * c)` |
+| 4 | `<`, `<=`, `>`, `>=` | `LT`, `LEQ`, `GT`, `GEQ` | esquerda | `a + 1 < b` | `(a + 1) < b` |
+| 5 | `==`, `!=` | `EQ`, `NEQ` | esquerda | `a < b == c < d` | `(a < b) == (c < d)` |
+| 6 | `&&` | `AND` | esquerda | `a == b && c` | `(a == b) && c` |
+| 7 (menor) | `||` | `OR` | esquerda | `a || b && c` | `a || (b && c)` |
+
+Os parênteses (`'(' expressao ')'`) sempre têm prioridade sobre a tabela: `(a + b) * c` é agrupado como está escrito. A ordem dos níveis é a mesma do JavaScript.
+
+### 5.1 Como o Bison aplica a tabela
+
+Considere `a + b * c`. Depois de ler `a + b`, o parser poderia **reduzir** `expressao '+' expressao` ou **empilhar** o `*` que vem a seguir. O Bison compara a precedência da regra (a do seu último terminal, `PLUS`) com a do token seguinte (`TIMES`):
+
+* se o token seguinte tem precedência **maior**, ele é empilhado: `a + (b * c)`;
+* se tem precedência **menor**, a regra é reduzida: em `a * b + c`, o resultado é `(a * b) + c`;
+* se a precedência é **igual**, decide a associatividade: `%left` reduz, gerando `(a - b) - c`, e `%right` empilha.
+
+### 5.2 Menos unário (`UMINUS`)
+
+O token `MINUS` é o mesmo para a subtração e para o menos unário, mas os dois precisam de prioridades diferentes. Por isso, o `parser.y` declara `UMINUS`, um **pseudo-token** que o léxico nunca produz e que existe apenas para carregar uma precedência. A regra do menos unário o utiliza com `%prec`:
+
+```text
+expressao ::= '-' expressao   %prec UMINUS
+```
+
+Assim, a regra assume a precedência de `UMINUS` (nível 1), e não a de `MINUS` (nível 3): `-a * b` é agrupado como `(-a) * b`. O `!` (`NOT`) não precisa desse recurso, porque é usado apenas como operador unário.
+
+### 5.3 `LOWER_THAN_ELSE` e `ELSE`
+
+As duas primeiras linhas da declaração não envolvem operadores: elas resolvem o *dangling else*, a ambiguidade do `if` sem `else`. `LOWER_THAN_ELSE` também é um pseudo-token, usado na regra do `if` sem `else`.
+
+### 5.4 Implicações para a geração de Python
+
+A ordem dos operadores em Python não é idêntica à do JavaScript. Por isso, o gerador de código deverá emitir parênteses a partir da estrutura da AST, em vez de copiar a expressão como foi escrita:
+
+* **`!` × `not`:** em Python, `not` tem precedência **menor** que as comparações. `!a == b` é `(!a) == b` em JS, mas `not a == b` é `not (a == b)` em Python; a tradução correta é `(not a) == b`.
+* **Comparações encadeadas:** em JS, `a < b < c` é `(a < b) < c`, comparando o booleano `a < b` com `c`. Em Python, `a < b < c` significa `a < b and b < c`. Quando `c` é um número, a expressão já fica fora do escopo por comparar tipos diferentes ([Escopo e Arquitetura, seção 2.2](escopo-e-arq.md#22-o-que-nao-faz-parte-do-projeto)); mas o mesmo vale para `==` e `!=`, e `a == b == c` com três booleanos é válido no Mini-JS. Nesse caso, a tradução correta é `(a == b) == c`, e não `a == b == c`.
