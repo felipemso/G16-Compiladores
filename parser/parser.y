@@ -174,13 +174,23 @@ lista_params:
 
 comando_retorno:
     RETURN SEMICOLON {
-        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        $$ = NULL;
+        if (profundidade_funcao == 0) {
+            yyerror("'return' fora de funcao");
+            yynerrs++;
+            $$ = NULL;
+        } else {
+            $$ = no_return(NULL, @1.first_line);
+        }
     }
   | RETURN expressao SEMICOLON {
-        if (profundidade_funcao == 0) { yyerror("'return' fora de funcao"); yynerrs++; }
-        ast_libera($2);
-        $$ = NULL;
+        if (profundidade_funcao == 0) {
+            yyerror("'return' fora de funcao");
+            yynerrs++;
+            ast_libera($2);
+            $$ = NULL;
+        } else {
+            $$ = no_return($2, @1.first_line);
+        }
     }
   ;
 

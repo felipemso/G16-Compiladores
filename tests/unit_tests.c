@@ -236,6 +236,24 @@ static int testa_ast_funcao(void) {
     return falhas;
 }
 
+static int testa_ast_return(void) {
+    int resultado = parse_string("function f() {\n  return;\n}\nfunction g(a) {\n  return a + 1;\n}\nreturn 2;\nlet x;");
+    No *f = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *g = f ? f->proximo : NULL;
+    No *x = g ? g->proximo : NULL;
+    No *vazio = f && f->filhos[1] ? f->filhos[1]->filhos[0] : NULL;
+    No *soma = g && g->filhos[1] ? g->filhos[1]->filhos[0] : NULL;
+    bool ok = resultado == 0 && yynerrs == 1
+        && vazio && vazio->categoria == NO_RETURN && vazio->linha == 2 && !vazio->filhos[0]
+        && soma && soma->categoria == NO_RETURN && soma->linha == 5
+        && soma->filhos[0] && soma->filhos[0]->operador == OP_SOMA
+        && x && x->categoria == NO_DECL_VAR && !x->proximo;
+    int falhas = verifica("Return guarda a expressao e return fora de funcao nao entra na arvore", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_tabela_insere_busca(void) {
     char nome[] = "x";
     Simbolo *s = tabela_insere(nome, SIMBOLO_LET, TIPO_NUMERO, 3);
@@ -596,6 +614,7 @@ int main(void) {
     total++; falhas += testa_ast_linhas();
     total++; falhas += testa_ast_declaracoes();
     total++; falhas += testa_ast_funcao();
+    total++; falhas += testa_ast_return();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
     total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; f(); console.log(1); let x;", seq_uma_decl, 1, false);
