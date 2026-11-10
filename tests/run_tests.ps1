@@ -71,7 +71,12 @@ function Invoke-TestSuite {
     param (
         [string]$Dir,
         [string]$Titulo,
-        [bool]$ExpectSuccess
+        [bool]$ExpectSuccess,
+        # Fase da falha esperada, usada na mensagem
+        [string]$Fase = "sintatica",
+        # Texto que deve aparecer na saida da falha. Sem ele, um erro de outra
+        # fase (ex.: sintaxe num teste semantico) passaria so pelo codigo de saida.
+        [string]$Marcador = ""
     )
 
     Write-Host "--- $Titulo ---" -ForegroundColor Yellow
@@ -85,14 +90,18 @@ function Invoke-TestSuite {
         $script:Total++
         $output = & $script:Minijs $arquivo.FullName 2>&1
         $code = $LASTEXITCODE
+        $texto = ($output | ForEach-Object { "$_" }) -join "`n"
 
         $passou = ($code -eq 0) -eq $ExpectSuccess
-        if ($passou) {
+        if ($Marcador -and $code -ne 0 -and -not $texto.Contains($Marcador)) {
+            $script:Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (falhou com codigo $code, mas sem '$Marcador' na saida)" -ForegroundColor Red
+        } elseif ($passou) {
             $script:Passaram++
             if ($ExpectSuccess) {
                 Write-Host "  [PASSOU] $($arquivo.Name)" -ForegroundColor Green
             } else {
-                Write-Host "  [PASSOU] $($arquivo.Name) (falha sintatica esperada, codigo: $code)" -ForegroundColor Green
+                Write-Host "  [PASSOU] $($arquivo.Name) (falha $Fase esperada, codigo: $code)" -ForegroundColor Green
             }
         } else {
             $script:Falharam++
@@ -112,7 +121,11 @@ Invoke-TestSuite -Dir (Join-Path $ScriptDir "validos") -Titulo "Executando Casos
 Write-Host ""
 Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos") -Titulo "Executando Casos de Teste Invalidos (Falha Esperada)" -ExpectSuccess $false
 
-# 4. Sumario Final
+# 4. Casos de Teste Invalidos Semanticos (sintaxe valida, erro semantico esperado)
+Write-Host ""
+Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos_semanticos") -Titulo "Executando Casos de Teste Invalidos Semanticos (Falha Esperada)" -ExpectSuccess $false -Fase "semantica" -Marcador "Erro semantico"
+
+# 5. Sumario Final
 Write-Host "`n============================================================" -ForegroundColor Cyan
 Write-Host "                   SUMARIO DOS TESTES                      " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
