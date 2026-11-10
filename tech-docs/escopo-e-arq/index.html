@@ -421,6 +421,78 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2.2 O que NÃO Faz Parte do Projeto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paradigma-e-sintaxe-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paradigma e sintaxe geral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#estruturas-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estruturas de dados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#funcoes-e-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Funções e escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tipos-e-operacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tipos e operações
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursos-lexicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recursos léxicos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etapas-do-compilador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Etapas do compilador
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -709,6 +781,78 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2.2 O que NÃO Faz Parte do Projeto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paradigma-e-sintaxe-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paradigma e sintaxe geral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#estruturas-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estruturas de dados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#funcoes-e-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Funções e escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tipos-e-operacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tipos e operações
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursos-lexicos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recursos léxicos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etapas-do-compilador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Etapas do compilador
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -790,10 +934,43 @@
 <li><strong>Comentários:</strong> de linha (<code>// ...</code>) e de bloco (<code>/* ... */</code>), descartados pelo analisador léxico.</li>
 </ul>
 <h3 id="22-o-que-nao-faz-parte-do-projeto">2.2 O que NÃO Faz Parte do Projeto</h3>
+<p>O critério de corte é a tradução direta: quando um recurso se comporta de forma diferente em JavaScript e em Python, traduzi-lo exigiria gerar código extra para imitar o comportamento do JS. Nesses casos, o recurso fica fora do escopo e o programa é rejeitado, em vez de gerar um Python que rode com resultado diferente do JS original.</p>
+<h4 id="paradigma-e-sintaxe-geral">Paradigma e sintaxe geral</h4>
 <ul>
 <li><strong>Sem Orientação a Objetos:</strong> o projeto é estritamente procedural. Não usamos classes (<code>class</code>), instanciação (<code>new</code>) nem <code>this</code>.</li>
 <li><strong>Sem Funções Complexas:</strong> nada de <em>arrow functions</em> (<code>() =&gt; {}</code>), funções anônimas, funções dentro de variáveis ou <em>callbacks</em>. Apenas funções declaradas tradicionais são aceitas.</li>
 <li><strong>Ponto e Vírgula Obrigatório:</strong> toda instrução deve terminar com <code>;</code> (sem inserção automática de <code>;</code>).</li>
+</ul>
+<h4 id="estruturas-de-dados">Estruturas de dados</h4>
+<ul>
+<li><strong>Arrays:</strong> <code>[1, 2, 3]</code> e <code>lista[0]</code> não são aceitos. Arrays do JS e listas do Python divergem em pontos básicos: em JS, ler um índice inexistente devolve <code>undefined</code> e atribuir além do fim cria "buracos" no array; em Python, as duas operações geram <code>IndexError</code>. O tamanho também é obtido de formas diferentes (<code>lista.length</code> × <code>len(lista)</code>).</li>
+</ul>
+<h4 id="funcoes-e-escopo">Funções e escopo</h4>
+<ul>
+<li><strong>Funções aninhadas:</strong> funções só podem ser declaradas no nível global. Em JS, uma função interna altera livremente as variáveis da função externa; em Python, isso exige declarar <code>nonlocal</code>, senão a atribuição cria uma variável local nova.</li>
+<li><strong>Atribuição a variável global dentro de função:</strong> uma função pode <strong>ler</strong> uma variável global, mas não <strong>atribuir</strong> a ela. Em JS, <code>x = 1;</code> dentro da função altera o <code>x</code> global; em Python, a mesma atribuição cria um <code>x</code> local (e uma leitura anterior dele gera <code>UnboundLocalError</code>), a menos que se declare <code>global x</code>.</li>
+<li><strong>Sombreamento de nomes:</strong> não é permitido declarar, em um bloco interno, uma variável com o mesmo nome de outra já visível. Em JS, <code>let</code> tem escopo de bloco, então o <code>x</code> interno é uma variável nova e o externo continua intacto; em Python, <code>if</code>, <code>while</code> e <code>for</code> não criam escopo, então o <code>x</code> interno sobrescreveria o externo. <strong>Exceção:</strong> um parâmetro pode ter o mesmo nome de uma variável global, porque parâmetros são locais à função nas duas linguagens e o comportamento é o mesmo.</li>
+<li><strong><code>var</code> tratado como <code>let</code>:</strong> <code>var</code> é aceito, mas segue as mesmas regras de <code>let</code>. O <code>var</code> original do JS tem escopo de função e sofre <em>hoisting</em> (pode ser usado antes da linha da declaração, valendo <code>undefined</code>); Python não tem nada equivalente.</li>
+<li><strong>Declaração direto no corpo de <code>if</code>/<code>else</code>/<code>while</code>/<code>for</code>:</strong> uma declaração não pode ser o corpo inteiro de uma estrutura de controle, como em <code>if (c) let x = 1;</code>; ela precisa estar dentro de um bloco com <code>{ }</code>. O próprio JS proíbe isso para <code>let</code> e <code>const</code> (é erro de sintaxe), e, como <code>var</code> é tratado como <code>let</code>, a regra vale para os três.</li>
+<li><strong>Número de argumentos diferente do número de parâmetros:</strong> <code>soma(1)</code> ou <code>soma(1, 2, 3)</code> para <code>function soma(a, b)</code> são rejeitados. Em JS, argumentos faltantes viram <code>undefined</code> e os excedentes são ignorados; em Python, os dois casos geram <code>TypeError</code>.</li>
+<li><strong>Chamada de função antes da declaração:</strong> a função deve ser declarada antes de ser chamada (recursão é permitida, pois a função já existe dentro do próprio corpo). Em JS, declarações de função sofrem <em>hoisting</em> e podem ser chamadas antes da linha onde aparecem; em Python, o <code>def</code> só passa a existir quando é executado, e a chamada antecipada gera <code>NameError</code>.</li>
+</ul>
+<h4 id="tipos-e-operacoes">Tipos e operações</h4>
+<ul>
+<li><strong>String com número ou booleano no <code>+</code>:</strong> <code>"total: " + 10</code> é rejeitado. Em JS, o número é convertido para texto (<code>"total: 10"</code>); em Python, somar <code>str</code> com <code>int</code>/<code>bool</code> gera <code>TypeError</code>.</li>
+<li><strong>String em operação aritmética:</strong> <code>"3" * 2</code> e <code>"a" - 1</code> são rejeitados. Em JS, a string é convertida para número (<code>6</code> e <code>NaN</code>); em Python, <code>"3" * 2</code> repete o texto (<code>"33"</code>) e <code>"a" - 1</code> gera <code>TypeError</code>.</li>
+<li><strong>Comparação entre tipos diferentes:</strong> <code>1 == "1"</code> e <code>1 &lt; "2"</code> são rejeitados. Em JS, os operandos são convertidos antes da comparação (<code>true</code> nos dois casos); em Python, <code>1 == "1"</code> é <code>False</code> e <code>1 &lt; "2"</code> gera <code>TypeError</code>.</li>
+</ul>
+<h4 id="recursos-lexicos">Recursos léxicos</h4>
+<ul>
+<li><strong>Palavras reservadas fora do escopo:</strong> <code>do</code>, <code>switch</code>, <code>case</code>, <code>break</code>, <code>continue</code>, <code>try</code>, <code>catch</code>, <code>throw</code>, <code>class</code>, <code>new</code>, <code>this</code>, <code>import</code>, <code>export</code>, <code>typeof</code>, entre outras. Elas pertencem a construções não suportadas e são rejeitadas com uma mensagem própria, em vez de serem aceitas como identificadores comuns.</li>
+<li><strong><code>++</code>, <code>+=</code> e <code>%</code>:</strong> apenas a atribuição simples é aceita (<code>i = i + 1;</code>). Python não tem <code>++</code> (e <code>++x</code> é válido em Python, mas significa <code>+(+x)</code>, sem incrementar nada). O <code>%</code> tem resultado diferente para números negativos: <code>-7 % 3</code> vale <code>-1</code> em JS e <code>2</code> em Python. O <code>+=</code> ficou fora para manter uma única forma de atribuição na gramática.</li>
+<li><strong>Sequências de escape em strings:</strong> <code>\n</code>, <code>\t</code>, <code>\"</code>, <code>\u{...}</code> etc. não são tratadas. Os conjuntos de escapes do JS e do Python não são idênticos (por exemplo, <code>\u{1F600}</code> só existe em JS, e escapes desconhecidos como <code>\d</code> são tratados de forma diferente).</li>
+<li><strong>Notação científica:</strong> <code>1e3</code> e <code>2.5E-4</code> não são reconhecidos; os números aceitos são inteiros (<code>42</code>) e decimais (<code>3.14</code>). É uma simplificação do analisador léxico.</li>
+</ul>
+<h4 id="etapas-do-compilador">Etapas do compilador</h4>
+<ul>
+<li><strong>Otimização e código intermediário:</strong> o compilador não gera código intermediário (como código de três endereços) nem aplica otimizações. A própria AST serve como representação intermediária, e o Python é gerado diretamente a partir dela. Como Python é uma linguagem de alto nível, com estruturas equivalentes às do Mini-JS, uma representação de nível mais baixo não traria ganho para a tradução.</li>
 </ul>
 <hr />
 <h2 id="3-arquitetura-do-compilador">3. Arquitetura do Compilador</h2>
