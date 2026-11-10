@@ -544,6 +544,22 @@ static int testa_semantico_erro(void) {
                     zerado && contou && erros_semanticos == 0 && escopo_nivel() == 0);
 }
 
+/* Passa o codigo pelo parser e pela semantica e confere quantos erros semanticos surgiram */
+static int testa_regra(const char *descricao, const char *codigo, int erros_esperados) {
+    int resultado = parse_string(codigo);
+    bool sintaxe_ok = resultado == 0 && yynerrs == 0;
+    if (sintaxe_ok) {
+        analisa(raiz_ast);
+    }
+    bool ok = sintaxe_ok && erros_semanticos == erros_esperados && escopo_nivel() == 0;
+    int falhas = verifica(descricao, ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    tabela_libera();
+    erros_semanticos = 0;
+    return falhas;
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -692,6 +708,20 @@ int main(void) {
     total++; falhas += testa_semantico_nome_repetido();
     total++; falhas += testa_semantico_com_parser();
     total++; falhas += testa_semantico_erro();
+
+    printf("\n--- Regras Semanticas: Declaracao e Uso ---\n");
+    total++; falhas += testa_regra("Uso de variavel declarada nao gera erro", "let a = 1; let b = a + 1; b = a;", 0);
+    total++; falhas += testa_regra("Uso de variavel nao declarada gera erro", "let a = b + 1;", 1);
+    total++; falhas += testa_regra("Atribuicao a variavel nao declarada gera erro", "x = 1;", 1);
+    total++; falhas += testa_regra("Cada uso nao declarado conta um erro", "x = y + z;", 3);
+    total++; falhas += testa_regra("Inicializador nao enxerga a propria variavel", "let x = x + 1;", 1);
+    total++; falhas += testa_regra("Variavel de bloco nao existe depois do bloco", "{ let a = 1; } let b = a;", 1);
+    total++; falhas += testa_regra("Bloco interno enxerga variavel externa", "let a = 1; { { a = a + 1; } }", 0);
+    total++; falhas += testa_regra("Uso nao declarado em console.log gera erro", "{ let a = 1; } console.log(a);", 1);
+    total++; falhas += testa_regra("Funcao enxerga parametros e globais", "let g = 1; function f(a) { return a + g; }", 0);
+    total++; falhas += testa_regra("Uso nao declarado dentro de funcao gera erro", "function f(a) { return a + b; }", 1);
+    total++; falhas += testa_regra("Parametro nao existe fora da funcao", "function f(a) { return a; } let b = a;", 1);
+    total++; falhas += testa_regra("Argumento nao declarado gera erro", "function f(a) { return a; } f(c);", 1);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

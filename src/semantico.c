@@ -38,6 +38,21 @@ static CategoriaSimbolo categoria_do_declarador(Declarador declarador) {
     return SIMBOLO_LET;
 }
 
+/* Uso de um nome: precisa existir no escopo atual ou em algum escopo externo */
+static Simbolo *busca_uso(const char *nome, int linha) {
+    Simbolo *simbolo = tabela_busca(nome);
+    if (!simbolo) {
+        erro_semantico(linha, "identificador '%s' nao declarado", nome);
+    }
+    return simbolo;
+}
+
+static void visita_atribuicao(No *no) {
+    /* O lado direito vem antes, na ordem em que seria avaliado */
+    visita_filhos(no);
+    busca_uso(no->valor.texto, no->linha);
+}
+
 static void visita_declaracao(No *no) {
     /* O inicializador vem antes da insercao: em "let x = x;" o x da direita ainda nao existe */
     visita_filhos(no);
@@ -81,7 +96,14 @@ static void visita(No *no) {
         case NO_DECL_VAR:
             visita_declaracao(no);
             break;
+        case NO_ATRIBUICAO:
+            visita_atribuicao(no);
+            break;
+        case NO_ID:
+            busca_uso(no->valor.texto, no->linha);
+            break;
         default:
+            /* NO_CHAMADA: o nome da funcao e checado pela T20; aqui so os argumentos */
             visita_filhos(no);
             break;
     }
