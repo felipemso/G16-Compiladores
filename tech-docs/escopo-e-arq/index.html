@@ -974,18 +974,22 @@
 </ul>
 <hr />
 <h2 id="3-arquitetura-do-compilador">3. Arquitetura do Compilador</h2>
-<p>O fluxo de compilação acontece em 4 etapas lineares:</p>
+<p>O fluxo de compilação acontece em 5 etapas:</p>
+<p><strong>Léxico → Sintático → AST → Semântico → [Geração de Python, próxima etapa]</strong></p>
 <ol>
-<li><strong>Léxico (Flex):</strong> lê o texto em JS, gera os tokens e descarta comentários e espaços.</li>
-<li><strong>Sintático (Bison):</strong> valida a estrutura do código e as regras gramaticais.</li>
-<li><strong>Árvore Sintática (AST):</strong> organiza o programa validado em uma estrutura de árvore na memória.</li>
-<li><strong>Emissão de Código:</strong> percorre a árvore e gera o arquivo <code>.py</code> correspondente, devidamente identado.</li>
+<li><strong>Léxico (Flex):</strong> lê o texto em JS, gera os tokens e descarta comentários e espaços. Caracteres inválidos, strings com quebra de linha e palavras reservadas fora do escopo são relatados como erro léxico, com o número da linha.</li>
+<li><strong>Sintático (Bison):</strong> valida a estrutura do código e as regras gramaticais, pedindo os tokens ao léxico conforme precisa. Em caso de erro, o parser se recupera descartando a entrada até o próximo <code>;</code> ou <code>}</code> e continua a análise, para relatar vários erros em uma única execução.</li>
+<li><strong>Árvore Sintática (AST):</strong> organiza o programa em uma estrutura de árvore na memória (<code>ast.c</code>). Os nós são construídos pelas ações semânticas do Bison, durante a própria análise sintática, e cada nó guarda a linha de origem para as mensagens de erro.</li>
+<li><strong>Semântico:</strong> percorre a AST e preenche a tabela de símbolos (<code>semantico.c</code> e <code>tabela.c</code>), registrando variáveis, funções e parâmetros com uma pilha de escopos (global, função, bloco e <code>for</code>). Essa fase só roda quando o léxico e o sintático terminam sem erros, isto é, sobre uma AST completa. A opção <code>--tabela</code> imprime a tabela de símbolos ao final.</li>
+<li><strong>Geração de Python (próxima etapa):</strong> percorrerá a AST já validada e gerará o arquivo <code>.py</code> correspondente, devidamente indentado. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST.</li>
 </ol>
+<p>Quando a compilação falha, o compilador informa em qual fase ocorreu a falha (<code>lexica/sintatica</code> ou <code>semantica</code>) e a quantidade de erros. Os erros léxicos chegam ao parser como tokens inválidos, por isso as duas primeiras fases são relatadas juntas.</p>
 <h3 id="tecnologias">Tecnologias</h3>
 <ul>
 <li><strong>Linguagem:</strong> C</li>
-<li><strong>Ferramentas:</strong> Flex (<code>lexer.l</code>) e Bison (<code>parser.y</code>)</li>
-<li><strong>Comunicação:</strong> arquivo <code>parser.tab.h</code> (tokens) e estrutura <code>%union</code> / <code>yylval</code> para troca de dados entre léxico e sintático.</li>
+<li><strong>Ferramentas:</strong> Flex (<code>lexer/lexer.l</code>) e Bison (<code>parser/parser.y</code>)</li>
+<li><strong>Módulos:</strong> <code>src/ast.c</code> (AST), <code>src/tabela.c</code> (tabela de símbolos e escopos), <code>src/semantico.c</code> (análise semântica) e <code>src/main.c</code> (orquestra as fases)</li>
+<li><strong>Comunicação:</strong> arquivo <code>parser.tab.h</code> (tokens) e estrutura <code>%union</code> / <code>yylval</code> para troca de dados entre léxico e sintático; a raiz da AST (<code>raiz_ast</code>) é entregue pelo parser à fase semântica.</li>
 </ul>
 
 
