@@ -53,10 +53,16 @@ if [ -n "$TEST_UNIT" ]; then
 fi
 
 # Funcao auxiliar parametrizada para iteracao sobre suites
+#   $4 (opcional): fase da falha esperada, usada na mensagem (padrao: sintatica)
+#   $5 (opcional): texto que deve aparecer na saida da falha. Sem ele, um erro
+#                  de outra fase (ex.: sintaxe num teste semantico) passaria so
+#                  pelo codigo de saida.
 run_suite() {
     local dir="$1"
     local title="$2"
     local expect_zero="$3"
+    local fase="${4:-sintatica}"
+    local marcador="$5"
 
     echo -e "\033[0;33m--- $title ---\033[0m"
     if [ ! -d "$dir" ]; then
@@ -68,10 +74,14 @@ run_suite() {
         TOTAL=$((TOTAL + 1))
         local nome
         nome=$(basename "$arquivo")
-        "$MINIJS" "$arquivo" > /dev/null 2>&1
+        local saida
+        saida=$("$MINIJS" "$arquivo" 2>&1)
         local code=$?
 
-        if [ "$expect_zero" -eq 1 ]; then
+        if [ -n "$marcador" ] && [ $code -ne 0 ] && ! grep -qF "$marcador" <<< "$saida"; then
+            FALHARAM=$((FALHARAM + 1))
+            echo -e "  \033[0;31m[FALHOU]\033[0m $nome (falhou com codigo $code, mas sem '$marcador' na saida)"
+        elif [ "$expect_zero" -eq 1 ]; then
             if [ $code -eq 0 ]; then
                 PASSARAM=$((PASSARAM + 1))
                 echo -e "  \033[0;32m[PASSOU]\033[0m $nome"
@@ -82,7 +92,7 @@ run_suite() {
         else
             if [ $code -ne 0 ]; then
                 PASSARAM=$((PASSARAM + 1))
-                echo -e "  \033[0;32m[PASSOU]\033[0m $nome (falha sintatica esperada, codigo: $code)"
+                echo -e "  \033[0;32m[PASSOU]\033[0m $nome (falha $fase esperada, codigo: $code)"
             else
                 FALHARAM=$((FALHARAM + 1))
                 echo -e "  \033[0;31m[FALHOU]\033[0m $nome (esperava codigo != 0, mas retornou 0)"
@@ -98,7 +108,11 @@ run_suite "$SCRIPT_DIR/validos" "Executando Casos de Teste Validos" 1
 echo ""
 run_suite "$SCRIPT_DIR/invalidos" "Executando Casos de Teste Invalidos (Falha Esperada)" 0
 
-# 4. Sumario Final
+# 4. Casos de Teste Invalidos Semanticos (sintaxe valida, erro semantico esperado)
+echo ""
+run_suite "$SCRIPT_DIR/invalidos_semanticos" "Executando Casos de Teste Invalidos Semanticos (Falha Esperada)" 0 "semantica" "Erro semantico"
+
+# 5. Sumario Final
 echo ""
 echo -e "\033[0;36m============================================================\033[0m"
 echo -e "\033[0;36m                   SUMARIO DOS TESTES                      \033[0m"
