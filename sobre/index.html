@@ -640,8 +640,10 @@
 <p><img alt="Fluxo de Compilação" src="../assets/FluxoCompilador.png" /></p>
 <ol>
 <li><strong>Analisador Léxico:</strong> Desenvolvido em C utilizando o <strong>Flex</strong>. É responsável por fazer a varredura do código-fonte em JavaScript, descartando espaços em branco e comentários e convertendo o texto em uma sequência de tokens válidos.</li>
-<li><strong>Analisador Sintático:</strong> Implementado em C utilizando o <strong>Bison</strong>. Esta etapa recebe os tokens gerados no processo léxico, valida a estrutura das instruções contra a gramática livre de contexto da linguagem e constrói a Árvore Sintática Abstrata (AST).</li>
-<li><strong>Gerador de Código Final:</strong> Responsável por percorrer a representação intermediária estruturada na AST e emitir o código correspondente em <strong>Python (<code>.py</code>)</strong>, devidamente identado e pronto para execução.</li>
+<li><strong>Analisador Sintático:</strong> Implementado em C utilizando o <strong>Bison</strong>. Esta etapa recebe os tokens gerados no processo léxico e valida a estrutura das instruções contra a gramática livre de contexto da linguagem.</li>
+<li><strong>Árvore Sintática Abstrata (AST):</strong> Construída pelo Bison durante a própria análise sintática, organiza o programa em uma estrutura de árvore na memória. É a representação intermediária do compilador, usada pelas etapas seguintes.</li>
+<li><strong>Analisador Semântico:</strong> Percorre a AST e registra variáveis, funções e parâmetros na <strong>tabela de símbolos</strong>, controlando os escopos (global, função, bloco e <code>for</code>). Só é executado quando as fases léxica e sintática terminam sem erros.</li>
+<li><strong>Gerador de Código Final (próxima etapa):</strong> Responsável por percorrer a AST validada e emitir o código correspondente em <strong>Python (<code>.py</code>)</strong>, devidamente indentado e pronto para execução.</li>
 </ol>
 
 
