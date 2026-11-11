@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "semantico.h"
 #include "tabela.h"
@@ -78,6 +79,57 @@ static TipoDado tipo_do_simbolo(const Simbolo *simbolo) {
     return simbolo->tipo_inferido;
 }
 
+static bool conhecido(TipoDado tipo) {
+    return tipo != TIPO_DESCONHECIDO;
+}
+
+/* + : soma entre numeros/booleanos ou concatenacao entre strings */
+static TipoDado tipo_soma(TipoDado esquerda, TipoDado direita) {
+    if (esquerda == TIPO_STRING || direita == TIPO_STRING) {
+        /* Em JS, string + qualquer coisa e string */
+        return TIPO_STRING;
+    }
+    if (conhecido(esquerda) && conhecido(direita)) {
+        return TIPO_NUMERO;
+    }
+    return TIPO_DESCONHECIDO;
+}
+
+static TipoDado tipo_binario(No *no) {
+    TipoDado esquerda = expressao(no->filhos[0]);
+    TipoDado direita = expressao(no->filhos[1]);
+    switch (no->operador) {
+        case OP_SOMA:
+            return tipo_soma(esquerda, direita);
+        case OP_SUBTRACAO:
+        case OP_MULTIPLICACAO:
+        case OP_DIVISAO:
+            /* O resultado aritmetico e sempre numero (NaN tambem e numero em JS) */
+            return TIPO_NUMERO;
+        case OP_IGUAL:
+        case OP_DIFERENTE:
+        case OP_MENOR:
+        case OP_MENOR_IGUAL:
+        case OP_MAIOR:
+        case OP_MAIOR_IGUAL:
+            return TIPO_BOOLEANO;
+        case OP_E:
+        case OP_OU:
+            /* && e || devolvem um dos operandos: o tipo so e conhecido se os dois forem iguais */
+            return esquerda == direita ? esquerda : TIPO_DESCONHECIDO;
+        default:
+            return TIPO_DESCONHECIDO;
+    }
+}
+
+static TipoDado tipo_unario(No *no) {
+    expressao(no->filhos[0]);
+    if (no->operador == OP_NAO) {
+        return TIPO_BOOLEANO;
+    }
+    return TIPO_NUMERO;
+}
+
 /* Visita uma expressao e devolve o tipo inferido */
 static TipoDado expressao(No *no) {
     TipoDado tipo = TIPO_DESCONHECIDO;
@@ -96,8 +148,14 @@ static TipoDado expressao(No *no) {
             tipo = simbolo ? tipo_do_simbolo(simbolo) : TIPO_DESCONHECIDO;
             break;
         }
+        case NO_BINARIO:
+            tipo = tipo_binario(no);
+            break;
+        case NO_UNARIO:
+            tipo = tipo_unario(no);
+            break;
         default:
-            /* Operacoes e chamadas ficam como desconhecido; os operandos e argumentos sao visitados */
+            /* NO_CHAMADA: o retorno de funcao conta como desconhecido; os argumentos sao visitados */
             visita_filhos(no);
             break;
     }

@@ -807,6 +807,17 @@ int main(void) {
     total++; falhas += testa_tipo_variavel("let externo lido dentro de funcao e desconhecido", "let g = 1; function f() { let c = g; }", "c", 1, TIPO_DESCONHECIDO);
     total++; falhas += testa_tipo_variavel("const externo lido dentro de funcao mantem o tipo", "const k = 1; function f() { let c = k; }", "c", 1, TIPO_NUMERO);
     total++; falhas += testa_tipo_variavel("Variavel da propria funcao mantem o tipo", "function f() { let a = 1; let c = a; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Soma de numeros e numero", "let x = 1 + 2;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Operacoes aritmeticas dao numero", "let x = 1 - 2 * 3 / 4;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Concatenacao de strings e string", "let s = \"a\" + \"b\";", "s", 0, TIPO_STRING);
+    total++; falhas += testa_tipo_variavel("Soma com booleano e numero", "let x = true + 1;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Soma com desconhecido e desconhecida", "function f(p) { let c = p + 1; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Aritmetica com desconhecido ainda e numero", "function f(p) { let c = p * 2; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Comparacao da booleano", "let b = 1 < 2;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Negacao logica da booleano", "let b = !1;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Menos unario da numero", "let n = -1;", "n", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("&& entre booleanos e booleano", "let b = true && false;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("|| entre tipos diferentes e desconhecido", "let x = 1 || \"a\";", "x", 0, TIPO_DESCONHECIDO);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
