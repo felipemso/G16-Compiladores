@@ -1,0 +1,45 @@
+NO_PROGRAMA
+  NO_DECL_VAR let x
+    NO_NUMERO 0
+  NO_IF
+    NO_BOOLEANO true
+    NO_IF
+      NO_BOOLEANO false
+      NO_ATRIBUICAO x
+        NO_NUMERO 1
+      NO_ATRIBUICAO x
+        NO_NUMERO 2
+  NO_WHILE
+    NO_BINARIO <
+      NO_ID x
+      NO_NUMERO 3
+    NO_BLOCO
+      NO_ATRIBUICAO x
+        NO_BINARIO +
+          NO_ID x
+          NO_NUMERO 1
+  NO_FOR
+    NO_DECL_VAR let i
+      NO_NUMERO 0
+    NO_BINARIO <
+      NO_ID i
+      NO_NUMERO 2
+    NO_ATRIBUICAO i
+      NO_BINARIO +
+        NO_ID i
+        NO_NUMERO 1
+    NO_BLOCO
+      NO_PRINT
+        NO_ID i
+  NO_FOR
+    NO_VAZIO
+  NO_FOR
+    NO_BOOLEANO false
+    NO_BLOCO
+  NO_FOR
+    NO_ATRIBUICAO x
+      NO_NUMERO 0
+    NO_BINARIO +
+      NO_ID x
+      NO_NUMERO 1
+    NO_VAZIO
