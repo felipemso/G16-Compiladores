@@ -178,6 +178,20 @@ static TipoDado tipo_unario(No *no) {
     return TIPO_NUMERO;
 }
 
+/* A funcao chamada precisa ja estar na tabela: chamar antes da declaracao e erro (decisao de escopo).
+ * A recursao funciona porque a funcao entra na tabela antes do corpo. */
+static void visita_chamada(No *no) {
+    for (No *argumento = no->filhos[0]; argumento; argumento = argumento->proximo) {
+        expressao(argumento);
+    }
+    Simbolo *funcao = tabela_busca(no->valor.texto);
+    if (!funcao) {
+        erro_semantico(no->linha, "funcao '%s' nao declarada antes da chamada", no->valor.texto);
+    } else if (funcao->categoria != SIMBOLO_FUNCAO) {
+        erro_semantico(no->linha, "'%s' nao e uma funcao (declarado na linha %d)", no->valor.texto, funcao->linha);
+    }
+}
+
 /* Visita uma expressao, guarda o tipo inferido no proprio no e devolve esse tipo */
 static TipoDado expressao(No *no) {
     TipoDado tipo = TIPO_DESCONHECIDO;
@@ -202,8 +216,11 @@ static TipoDado expressao(No *no) {
         case NO_UNARIO:
             tipo = tipo_unario(no);
             break;
+        case NO_CHAMADA:
+            /* O retorno de funcao conta como desconhecido */
+            visita_chamada(no);
+            break;
         default:
-            /* NO_CHAMADA: o retorno de funcao conta como desconhecido; os argumentos sao visitados */
             visita_filhos(no);
             break;
     }
@@ -290,7 +307,6 @@ static void visita(No *no) {
         case NO_BINARIO:
         case NO_UNARIO:
         case NO_CHAMADA:
-            /* NO_CHAMADA: o nome da funcao e checado pela T20; aqui so os argumentos */
             expressao(no);
             break;
         default:
