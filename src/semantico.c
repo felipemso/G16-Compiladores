@@ -153,6 +153,10 @@ static TipoDado tipo_binario(No *no) {
         case OP_MENOR_IGUAL:
         case OP_MAIOR:
         case OP_MAIOR_IGUAL:
+            if (conhecido(esquerda) && conhecido(direita) && esquerda != direita) {
+                erro_semantico(no->linha, "comparacao '%s' entre tipos diferentes (%s e %s)",
+                               nome_operador(no->operador), nome_tipo(esquerda), nome_tipo(direita));
+            }
             return TIPO_BOOLEANO;
         case OP_E:
         case OP_OU:

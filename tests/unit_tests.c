@@ -877,6 +877,14 @@ int main(void) {
     total++; falhas += testa_regra("Menos unario em string gera erro", "let x = -\"a\";", 1);
     total++; falhas += testa_regra("Aritmetica com booleano nao gera erro", "let x = true - 1;", 0);
     total++; falhas += testa_regra("Aritmetica com parametro nao gera erro", "function f(p) { return p * 2; }", 0);
+    total++; falhas += testa_regra("Comparacao entre numero e string gera erro", "let b = 1 == \"1\";", 1);
+    total++; falhas += testa_regra("Comparacao entre booleano e numero gera erro", "let b = true < 1;", 1);
+    total++; falhas += testa_regra("Comparacao de resultado booleano com numero gera erro", "let b = (1 < 2) == 1;", 1);
+    total++; falhas += testa_regra("Comparacao entre strings nao gera erro", "let b = \"a\" != \"b\";", 0);
+    total++; falhas += testa_regra("Comparacao entre numeros nao gera erro", "let b = 1 >= 2;", 0);
+    total++; falhas += testa_regra("Comparacao entre booleanos nao gera erro", "let b = (1 < 2) == true;", 0);
+    total++; falhas += testa_regra("Comparacao com parametro nao gera erro", "function f(p) { return p == 1; }", 0);
+    total++; falhas += testa_regra("Comparacao com variavel reatribuida nao gera erro", "let a = 1; a = \"x\"; let b = a == 1;", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
