@@ -94,9 +94,51 @@ Quando há erros no programa, a última mensagem informa a fase e a quantidade d
 
 ## Como Rodar os Testes
 
+Os testes usam as mesmas ferramentas da compilação: `gcc`, `make`, `flex` e `bison`, disponíveis no `PATH`. O comando é o mesmo nos dois sistemas:
+
 ```bash
 make test
 ```
+
+O `make test` compila o `minijs` e o executável de testes unitários (`test_unit`) e depois chama o script de testes adequado ao sistema operacional.
+
+### Linux
+
+No Ubuntu/Debian, as ferramentas podem ser instaladas com:
+
+```bash
+sudo apt install gcc make flex bison
+```
+
+No Linux, o `make test` executa o script Bash `tests/run_tests.sh`. Depois de compilar com `make` e `make test_unit`, o script também pode ser executado diretamente:
+
+```bash
+bash tests/run_tests.sh
+```
+
+### Windows
+
+No Windows, o `make test` executa o script PowerShell `tests/run_tests.ps1`, que procura os executáveis `minijs.exe` e `test_unit.exe`. É preciso ter `gcc`, `make`, `flex` e `bison` instalados e no `PATH` (por exemplo, via MSYS2 ou MinGW). Depois de compilar, o script também pode ser executado diretamente:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tests/run_tests.ps1
+```
+
+### O que é Testado
+
+Os dois scripts executam as mesmas etapas:
+
+| Etapa | O que verifica |
+|---|---|
+| Testes unitários (`tests/unit_tests.c`) | Parser, construção da AST, tabela de símbolos e regras semânticas, analisando trechos de código diretamente em memória |
+| `tests/validos/` | Programas que devem compilar sem erros (código de saída `0`) |
+| `tests/invalidos/` | Programas com erro léxico ou sintático, que devem falhar |
+| `tests/invalidos_semanticos/` | Programas com erro semântico, que devem falhar com a mensagem `Erro semantico` (assim, um erro de sintaxe acidental no teste não passa despercebido) |
+| `tests/ast/` | Compara a saída de `./minijs --ast` com o arquivo `.esperado` correspondente e confere que, sem a opção, nada é impresso |
+
+Ao final, o script mostra o total de testes que passaram e falharam e retorna código de saída diferente de zero se algum teste falhar.
+
+Para adicionar um caso de teste, basta criar um arquivo `.js` na pasta correspondente; para a AST, crie também o `.esperado` com a saída esperada. Para remover os arquivos gerados na compilação, use `make clean`.
 
 ---
 
