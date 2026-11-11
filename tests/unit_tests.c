@@ -222,6 +222,66 @@ static int testa_ast_while(void) {
     return falhas;
 }
 
+static int testa_ast_for(void) {
+    int falhas = 0;
+    /* Todas as combinacoes de presenca das tres partes opcionais. */
+    for (int partes = 0; partes < 8; partes++) {
+        char codigo[160];
+        snprintf(codigo, sizeof(codigo), "\nfor (%s; %s; %s) ; let fim;",
+                 partes & 1 ? "i = 0" : "",
+                 partes & 2 ? "i < 10" : "",
+                 partes & 4 ? "i = i + 1" : "");
+        int resultado = parse_string(codigo);
+        No *laco = raiz_ast ? raiz_ast->filhos[0] : NULL;
+        bool ok = resultado == 0 && yynerrs == 0
+            && categoria(laco, NO_FOR) && laco->linha == 2;
+        for (int i = 0; ok && i < 3; i++) {
+            if (partes & (1 << i)) {
+                No *filho = laco->filhos[i];
+                ok = categoria(filho, i == 1 ? NO_BINARIO : NO_ATRIBUICAO);
+                if (ok && i != 1) {
+                    ok = strcmp(filho->valor.texto, "i") == 0
+                        && categoria(filho->filhos[0], i == 0 ? NO_NUMERO : NO_BINARIO);
+                }
+            } else {
+                ok = laco->filhos[i] == NULL;
+            }
+        }
+        ok = ok && categoria(laco->filhos[3], NO_VAZIO)
+            && categoria(laco->proximo, NO_DECL_VAR) && laco->proximo->proximo == NULL;
+        falhas += verifica("For preserva partes opcionais e corpo vazio na ordem init/cond/incr/corpo", ok);
+        ast_libera(raiz_ast);
+        raiz_ast = NULL;
+    }
+    /* A recuperacao de um comando invalido pode fornecer um corpo nulo. */
+    int recuperado = parse_string("for (;;) x = ; let fim;");
+    No *rec = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    falhas += verifica("For aceita os quatro filhos nulos durante recuperacao de erro",
+        recuperado == 0 && yynerrs > 0 && categoria(rec, NO_FOR)
+        && rec->filhos[0] == NULL && rec->filhos[1] == NULL
+        && rec->filhos[2] == NULL && rec->filhos[3] == NULL
+        && categoria(rec->proximo, NO_DECL_VAR));
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    int resultado = parse_string("for (var i = 0, j = 1; i < j; i + 1) { while (false) ; }");
+    No *laco = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *init = laco ? laco->filhos[0] : NULL;
+    bool ok = resultado == 0 && yynerrs == 0 && categoria(laco, NO_FOR)
+        && categoria(init, NO_DECL_VAR) && init->declarador == DECLARADOR_VAR
+        && strcmp(init->valor.texto, "i") == 0 && init->filhos[0]->valor.numero == 0
+        && categoria(init->proximo, NO_DECL_VAR) && init->proximo->declarador == DECLARADOR_VAR
+        && strcmp(init->proximo->valor.texto, "j") == 0 && init->proximo->filhos[0]->valor.numero == 1
+        && init->proximo->proximo == NULL
+        && categoria(laco->filhos[1], NO_BINARIO) && laco->filhos[1]->operador == OP_MENOR
+        && categoria(laco->filhos[2], NO_BINARIO) && laco->filhos[2]->operador == OP_SOMA
+        && categoria(laco->filhos[3], NO_BLOCO)
+        && categoria(laco->filhos[3]->filhos[0], NO_WHILE);
+    falhas += verifica("For preserva lista de declaracoes, incremento expressao e corpo aninhado", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_ast_linhas(void) {
     const char *codigo =
         "let a =\n"
@@ -820,10 +880,11 @@ int main(void) {
 
     printf("\n--- AST: Integracao com o Parser ---\n");
     const TipoNo seq_comandos[] = { NO_DECL_VAR, NO_DECL_VAR, NO_ATRIBUICAO, NO_VAZIO, NO_BLOCO };
-    const TipoNo seq_controle[] = { NO_IF, NO_WHILE, NO_DECL_VAR };
+    const TipoNo seq_controle[] = { NO_IF, NO_WHILE, NO_FOR, NO_DECL_VAR };
     const TipoNo seq_duas_decl[] = { NO_DECL_VAR, NO_DECL_VAR };
     total++; falhas += testa_ast_if();
     total++; falhas += testa_ast_while();
+    total++; falhas += testa_ast_for();
     total++; falhas += testa_ast_linhas();
     total++; falhas += testa_ast_declaracoes();
     total++; falhas += testa_ast_funcao();
@@ -832,7 +893,7 @@ int main(void) {
     total++; falhas += testa_ast_print();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Controles de fluxo permanecem na lista de comandos", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_controle, 3, false);
+    total++; falhas += testa_ast_parser("Controles de fluxo permanecem na lista de comandos", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_controle, 4, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
@@ -899,6 +960,10 @@ int main(void) {
     total++; falhas += testa_regra("If e else visitam os dois corpos", "if (true) { x = 1; } else { y = 2; }", 2);
 
     total++; falhas += testa_regra("While visita condicao e corpo", "while (x) { y = 1; }", 2);
+
+    total++; falhas += testa_regra("For visita init, condicao, incremento e corpo", "for (i = 0; x; j = 1) { y = 1; }", 4);
+    total++; falhas += testa_regra("For permite repetir i e restringe seu escopo", "for (let i = 0; i < 2; i = i + 1) {} for (let i = 0;;) {} let x = i;", 1);
+    total++; falhas += testa_regra("Declaracao direta no corpo e rejeitada via parser", "if (true) let x; while (false) const y = 1; for (;;) var z;", 3);
 
     printf("\n--- Verificacao de Tipos ---\n");
     total++; falhas += testa_tipo_variavel("Literal numerico da tipo numero", "let n = 1;", "n", 0, TIPO_NUMERO);

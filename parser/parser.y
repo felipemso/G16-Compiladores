@@ -227,11 +227,7 @@ comando_while:
 
 comando_for:
     FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN comando {
-        ast_libera($3);
-        ast_libera($5);
-        ast_libera($7);
-        ast_libera($9);
-        $$ = NULL;
+        $$ = no_for($3, $5, $7, $9, @1.first_line);
     }
   ;
 
@@ -240,7 +236,7 @@ for_init:
   | tipo_declarador lista_declaradores {
         $$ = aplica_declarador($2, $1);
     }
-  | ID ASSIGN expressao { free($1); ast_libera($3); $$ = NULL; }
+  | ID ASSIGN expressao { $$ = no_atribuicao($1, $3, @1.first_line); }
   ;
 
 for_cond:
@@ -250,7 +246,7 @@ for_cond:
 
 for_incr:
     /* vazio */ { $$ = NULL; }
-  | ID ASSIGN expressao { free($1); ast_libera($3); $$ = NULL; }
+  | ID ASSIGN expressao { $$ = no_atribuicao($1, $3, @1.first_line); }
   | expressao
   ;
 
