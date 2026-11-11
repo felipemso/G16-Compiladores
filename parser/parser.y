@@ -221,9 +221,7 @@ comando_if:
 
 comando_while:
     WHILE LPAREN expressao RPAREN comando {
-        ast_libera($3);
-        ast_libera($5);
-        $$ = NULL;
+        $$ = no_while($3, $5, @1.first_line);
     }
   ;
 

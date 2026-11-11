@@ -198,6 +198,30 @@ static int testa_ast_if(void) {
     return falhas;
 }
 
+static int testa_ast_while(void) {
+    int resultado = parse_string(
+        "\nwhile (x < 10) { if (true) x = x + 1; }\n"
+        "while (false);\nlet fim;");
+    No *laco = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *vazio = laco ? laco->proximo : NULL;
+    bool ok = resultado == 0 && yynerrs == 0
+        && categoria(laco, NO_WHILE) && laco->linha == 2
+        && categoria(laco->filhos[0], NO_BINARIO)
+        && laco->filhos[0]->operador == OP_MENOR
+        && categoria(laco->filhos[1], NO_BLOCO)
+        && categoria(laco->filhos[1]->filhos[0], NO_IF)
+        && laco->filhos[2] == NULL && laco->filhos[3] == NULL
+        && categoria(vazio, NO_WHILE) && vazio->linha == 3
+        && categoria(vazio->filhos[0], NO_BOOLEANO)
+        && categoria(vazio->filhos[1], NO_VAZIO)
+        && categoria(vazio->proximo, NO_DECL_VAR)
+        && vazio->proximo->proximo == NULL;
+    int falhas = verifica("While preserva condicao, corpo aninhado ou vazio e linha", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_ast_linhas(void) {
     const char *codigo =
         "let a =\n"
@@ -796,9 +820,10 @@ int main(void) {
 
     printf("\n--- AST: Integracao com o Parser ---\n");
     const TipoNo seq_comandos[] = { NO_DECL_VAR, NO_DECL_VAR, NO_ATRIBUICAO, NO_VAZIO, NO_BLOCO };
-    const TipoNo seq_controle[] = { NO_IF, NO_DECL_VAR };
+    const TipoNo seq_controle[] = { NO_IF, NO_WHILE, NO_DECL_VAR };
     const TipoNo seq_duas_decl[] = { NO_DECL_VAR, NO_DECL_VAR };
     total++; falhas += testa_ast_if();
+    total++; falhas += testa_ast_while();
     total++; falhas += testa_ast_linhas();
     total++; falhas += testa_ast_declaracoes();
     total++; falhas += testa_ast_funcao();
@@ -807,7 +832,7 @@ int main(void) {
     total++; falhas += testa_ast_print();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Controles de fluxo permanecem na lista de comandos", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_controle, 2, false);
+    total++; falhas += testa_ast_parser("Controles de fluxo permanecem na lista de comandos", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_controle, 3, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
@@ -872,6 +897,8 @@ int main(void) {
     total++; falhas += testa_regra("Atribuicao a let e var continua permitida", "let a = 1; var b = 2; a = b; b = a;", 0);
 
     total++; falhas += testa_regra("If e else visitam os dois corpos", "if (true) { x = 1; } else { y = 2; }", 2);
+
+    total++; falhas += testa_regra("While visita condicao e corpo", "while (x) { y = 1; }", 2);
 
     printf("\n--- Verificacao de Tipos ---\n");
     total++; falhas += testa_tipo_variavel("Literal numerico da tipo numero", "let n = 1;", "n", 0, TIPO_NUMERO);
