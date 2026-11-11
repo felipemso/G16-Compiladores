@@ -243,6 +243,9 @@ static void visita_atribuicao(No *no) {
     }
     if (alvo->categoria == SIMBOLO_CONST) {
         erro_semantico(no->linha, "atribuicao a constante '%s' (declarada na linha %d)", no->valor.texto, alvo->linha);
+    } else if (nivel_funcao > 0 && alvo->nivel_escopo < nivel_funcao) {
+        /* Decisao de escopo: funcao nao altera global. Parametro com nome de global e local e pode ser alterado */
+        erro_semantico(no->linha, "atribuicao a variavel global '%s' dentro de funcao", no->valor.texto);
     } else if (alvo->tipo_inferido != tipo) {
         /* Reatribuida com outro tipo: daqui em diante o tipo deixa de ser conhecido */
         alvo->tipo_inferido = TIPO_DESCONHECIDO;
