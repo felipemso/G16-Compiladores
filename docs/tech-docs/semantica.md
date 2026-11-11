@@ -142,3 +142,249 @@ O que a tabela mostra:
 *   **`for`:** o `i` de cada laço fica no escopo do `for` (nível `1`), e `dobro` fica no bloco do corpo (nível `2`). Os dois `i` são símbolos diferentes, em escopos diferentes.
 *   **Bloco solto:** `ativo` fica no escopo do bloco `{ ... }` (nível `1`).
 *   **Tipos:** a coluna `Tipo` mostra o estado no **fim** da análise. `total` começou como `numero`, mas recebeu o retorno de `soma(...)`, que é desconhecido, e por isso terminou como `desconhecido`. Parâmetros e funções são sempre `desconhecido`, e `resultado` também, por ser a soma de dois parâmetros.
+
+---
+
+## 3. Regras Semânticas
+
+As regras abaixo são todas as verificações feitas pela análise semântica. A maioria decorre das decisões de escopo do projeto, cuja justificativa (a diferença entre JavaScript e Python) está em [Escopo e Arquitetura, seção 2.2](escopo-e-arq.md#22-o-que-nao-faz-parte-do-projeto).
+
+Os exemplos foram executados com o compilador; a linha indicada na mensagem é a linha do próprio exemplo. A pasta `tests/invalidos_semanticos/` tem casos de teste para as regras, com exceção da regra 6.
+
+### 3.1 Resumo
+
+| # | Regra | Mensagem |
+|---|---|---|
+| 1 | Uso de nome não declarado | `identificador 'a' nao declarado` |
+| 2 | Redeclaração no mesmo escopo | `'x' ja foi declarado neste escopo (linha N)` |
+| 3 | Sombreamento de nome de escopo externo | `'total' sombreia a declaracao da linha N em escopo externo` |
+| 4 | Atribuição a `const` | `atribuicao a constante 'LIMITE' (declarada na linha N)` |
+| 5 | Função fora do escopo global | `funcao 'interna' declarada fora do escopo global` |
+| 6 | Declaração direto no corpo de `if`/`else`/`while`/`for` | `declaracao de 'x' direto no corpo do if, sem bloco` |
+| 7 | Chamada de função não declarada ou antes da declaração | `funcao 'dobro' nao declarada antes da chamada` |
+| 8 | Chamada de algo que não é função | `'x' nao e uma funcao (declarado na linha N)` |
+| 9 | Número de argumentos diferente do de parâmetros | `funcao 'soma' espera 2 argumento(s), mas recebeu 1` |
+| 10 | Atribuição a variável global dentro de função | `atribuicao a variavel global 'contador' dentro de funcao` |
+| 11 | String com número ou booleano no `+` | `operador '+' entre string e numero (...)` |
+| 12 | String em operação aritmética | `operador '*' nao pode ser usado com string` |
+| 13 | Comparação entre tipos diferentes | `comparacao '>=' entre tipos diferentes (numero e string)` |
+
+### 3.2 Declaração e Uso de Variáveis
+
+#### Regra 1: Uso de nome não declarado
+
+Todo nome usado (em uma expressão, em uma atribuição ou como argumento) precisa ter sido declarado antes, no escopo atual ou em um escopo externo. Isso inclui usar uma variável fora do bloco em que ela foi declarada e usar a própria variável no seu inicializador (`let x = x + 1;`).
+
+```javascript
+{
+    let a = 1;
+}
+console.log(a);
+```
+
+```text
+Erro semantico na linha 4: identificador 'a' nao declarado
+```
+
+#### Regra 2: Redeclaração no mesmo escopo
+
+Um nome não pode ser declarado duas vezes no mesmo escopo, qualquer que seja a forma (`let`, `var`, `const`, função ou parâmetro). Isso vale também para `var x; var x;`, que o JavaScript aceitaria, para parâmetros repetidos (`function f(a, a)`) e para uma variável local com o nome de um parâmetro, já que os dois ficam no mesmo escopo.
+
+```javascript
+let x = 1;
+let x = 2;
+```
+
+```text
+Erro semantico na linha 2: 'x' ja foi declarado neste escopo (linha 1)
+```
+
+#### Regra 3: Sombreamento de nome de escopo externo
+
+Não é permitido declarar, em um escopo interno, um nome que já existe em um escopo externo. Isso vale para blocos, laços e para variáveis locais de função com o nome de uma global.
+
+```javascript
+let total = 0;
+{
+    let total = 1;
+}
+```
+
+```text
+Erro semantico na linha 3: 'total' sombreia a declaracao da linha 1 em escopo externo
+```
+
+**Exceção:** um **parâmetro** pode ter o nome de uma variável global, porque parâmetros são locais à função tanto em JS quanto em Python. O programa abaixo é válido:
+
+```javascript
+let x = 1;
+function f(x) {
+    return x * 2;
+}
+```
+
+#### Regra 4: Atribuição a `const`
+
+Uma variável declarada com `const` não pode receber outro valor.
+
+```javascript
+const LIMITE = 100;
+LIMITE = 200;
+```
+
+```text
+Erro semantico na linha 2: atribuicao a constante 'LIMITE' (declarada na linha 1)
+```
+
+### 3.3 Funções
+
+#### Regra 5: Função fora do escopo global
+
+Funções só podem ser declaradas no escopo global. Uma função dentro de outra função ou dentro de um bloco é um erro.
+
+```javascript
+function externa() {
+    function interna() {
+        return 1;
+    }
+    return 2;
+}
+```
+
+```text
+Erro semantico na linha 2: funcao 'interna' declarada fora do escopo global
+```
+
+#### Regra 6: Declaração direto no corpo de `if`/`else`/`while`/`for`
+
+Uma declaração de variável ou de função não pode ser o corpo inteiro de uma estrutura de controle: ela precisa estar dentro de um bloco `{ }`. A gramática aceita essa forma, e a verificação é feita aqui.
+
+```javascript
+let c = true;
+if (c)
+    let x = 1;
+```
+
+```text
+Erro semantico na linha 3: declaracao de 'x' direto no corpo do if, sem bloco
+```
+
+#### Regra 7: Chamada de função não declarada ou antes da declaração
+
+A função precisa ser declarada antes de ser chamada. Como a função entra na tabela antes da análise do seu corpo, a recursão é permitida.
+
+```javascript
+let r = dobro(2);
+function dobro(x) {
+    return x * 2;
+}
+```
+
+```text
+Erro semantico na linha 1: funcao 'dobro' nao declarada antes da chamada
+```
+
+#### Regra 8: Chamada de algo que não é função
+
+Só é possível chamar nomes declarados como função.
+
+```javascript
+let x = 10;
+x();
+```
+
+```text
+Erro semantico na linha 2: 'x' nao e uma funcao (declarado na linha 1)
+```
+
+#### Regra 9: Número de argumentos diferente do de parâmetros
+
+A chamada precisa ter exatamente tantos argumentos quanto a função tem parâmetros, nem a menos nem a mais.
+
+```javascript
+function soma(a, b) {
+    return a + b;
+}
+let r = soma(1);
+```
+
+```text
+Erro semantico na linha 4: funcao 'soma' espera 2 argumento(s), mas recebeu 1
+```
+
+#### Regra 10: Atribuição a variável global dentro de função
+
+Uma função pode **ler** variáveis globais, mas não **atribuir** a elas. Atribuir a um parâmetro, mesmo que ele tenha o nome de uma global, é permitido.
+
+```javascript
+let contador = 0;
+function incrementa() {
+    contador = contador + 1;
+}
+```
+
+```text
+Erro semantico na linha 3: atribuicao a variavel global 'contador' dentro de funcao
+```
+
+### 3.4 Tipos
+
+A análise infere o tipo de cada expressão (`numero`, `string`, `booleano` ou `desconhecido`) e guarda o resultado no campo `tipo_inferido` do nó da AST. O tipo de uma variável vem do seu inicializador. As regras de tipo só geram erro quando **os dois tipos envolvidos são conhecidos**. Para não gerar erros falsos, ficam como `desconhecido`:
+
+*   parâmetros e o retorno de funções, cujo tipo depende de quem chama;
+*   variáveis reatribuídas com um valor de outro tipo, a partir da reatribuição;
+*   variáveis `let` e `var` externas lidas dentro de uma função, já que a função pode ser chamada depois de uma reatribuição (as `const` mantêm o tipo).
+
+Por exemplo, o programa abaixo é válido: o retorno de `dobro` é desconhecido, e `b` deixa de ter tipo conhecido ao ser reatribuída com uma string.
+
+```javascript
+function dobro(x) {
+    return x * 2;
+}
+let a = dobro(2) + "!";
+let b = 1;
+b = "um";
+let c = b * 2;
+```
+
+#### Regra 11: String com número ou booleano no `+`
+
+O `+` só aceita string com string (concatenação) ou números e booleanos entre si (soma). Misturar string com número ou booleano, em qualquer ordem, é um erro.
+
+```javascript
+let nome = "Ana";
+let idade = 20;
+let texto = nome + idade;
+```
+
+```text
+Erro semantico na linha 3: operador '+' entre string e numero (string so pode ser concatenada com string)
+```
+
+#### Regra 12: String em operação aritmética
+
+Os operadores `-`, `*` e `/` e o menos unário não podem ser usados com strings.
+
+```javascript
+let preco = "10";
+let total = preco * 2;
+let n = -preco;
+```
+
+```text
+Erro semantico na linha 2: operador '*' nao pode ser usado com string
+Erro semantico na linha 3: operador '-' nao pode ser usado com string
+```
+
+#### Regra 13: Comparação entre tipos diferentes
+
+Os operadores `==`, `!=`, `<`, `<=`, `>` e `>=` só podem comparar valores do mesmo tipo.
+
+```javascript
+let idade = 18;
+let maior = idade >= "18";
+```
+
+```text
+Erro semantico na linha 2: comparacao '>=' entre tipos diferentes (numero e string)
+```
