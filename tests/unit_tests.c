@@ -886,6 +886,50 @@ int main(void) {
     total++; falhas += testa_regra("Comparacao com parametro nao gera erro", "function f(p) { return p == 1; }", 0);
     total++; falhas += testa_regra("Comparacao com variavel reatribuida nao gera erro", "let a = 1; a = \"x\"; let b = a == 1;", 0);
 
+    printf("\n--- Regras Semanticas de Funcoes ---\n");
+    total++; falhas += testa_regra("Funcao no escopo global nao gera erro", "function f() { return 1; }", 0);
+    total++; falhas += testa_regra("Funcao aninhada gera erro", "function f() { function g() { return 1; } }", 1);
+    total++; falhas += testa_regra("Funcao dentro de bloco gera erro", "{ function f() { return 1; } }", 1);
+    total++; falhas += testa_regra("Chamada de funcao declarada nao gera erro", "function f(a) { return a; } f(1);", 0);
+    total++; falhas += testa_regra("Chamada de funcao nao declarada gera erro", "f(1);", 1);
+    total++; falhas += testa_regra("Chamada antes da declaracao gera erro", "f(); function f() { return 1; }", 1);
+    total++; falhas += testa_regra("Chamada em expressao e conferida", "let r = g(1) + 1;", 1);
+    total++; falhas += testa_regra("Recursao e permitida", "function fat(n) { return n * fat(n - 1); }", 0);
+    total++; falhas += testa_regra("Funcao chama outra declarada antes", "function a() { return 1; } function b() { return a(); }", 0);
+    total++; falhas += testa_regra("Funcao chama outra declarada depois gera erro", "function b() { return a(); } function a() { return 1; }", 1);
+    total++; falhas += testa_regra("Chamada sem argumentos de funcao sem parametros", "function f() { return 1; } let x = f();", 0);
+    total++; falhas += testa_regra("Argumentos a menos gera erro", "function f(a, b) { return a; } f(1);", 1);
+    total++; falhas += testa_regra("Argumentos a mais gera erro", "function f() { return 1; } f(1, 2);", 1);
+    total++; falhas += testa_regra("Recursao tambem confere os argumentos", "function f(n) { return f(); }", 1);
+    total++; falhas += testa_regra("Chamada aninhada confere cada funcao", "function f(a) { return a; } let r = f(f(1, 2));", 1);
+    total++; falhas += testa_regra("Chamar variavel gera erro", "let x = 1; x();", 1);
+    total++; falhas += testa_regra("Chamar parametro gera erro", "function f(g) { return g(); }", 1);
+    total++; falhas += testa_regra("Atribuicao a global dentro de funcao gera erro", "let g = 1; function f() { g = 2; }", 1);
+    total++; falhas += testa_regra("Atribuicao a global em bloco da funcao gera erro", "let g = 1; function f() { { g = g + 1; } }", 1);
+    total++; falhas += testa_regra("Leitura de global dentro de funcao e permitida", "let g = 1; function f() { return g; }", 0);
+    total++; falhas += testa_regra("Atribuicao a parametro com nome de global e permitida", "let x = 1; function f(x) { x = 2; return x; }", 0);
+    total++; falhas += testa_regra("Atribuicao a variavel local e permitida", "function f() { let a = 1; { a = 2; } return a; }", 0);
+    total++; falhas += testa_regra("Atribuicao a global fora de funcao continua permitida", "let g = 1; g = 2;", 0);
+    total++; falhas += testa_regra("Atribuicao a const global dentro de funcao conta um erro", "const k = 1; function f() { k = 2; }", 1);
+    /* if, while e for ainda nao entram na AST pelo parser (T14): arvores montadas a mao */
+    total++; falhas += testa_arvore("let direto no corpo do if gera erro",
+                                    no_if(no_booleano(1, 1), decl(DECLARADOR_LET, "x", 1), NULL, 1), 1);
+    total++; falhas += testa_arvore("let direto no corpo do else gera erro",
+                                    no_if(no_booleano(1, 1), no_bloco(NULL, 1), decl(DECLARADOR_LET, "y", 2), 1), 1);
+    total++; falhas += testa_arvore("const direto no corpo do while gera erro",
+                                    no_while(no_booleano(1, 1), no_decl_var(DECLARADOR_CONST, strdup("c"), no_numero(1, 1), 1), 1), 1);
+    total++; falhas += testa_arvore("var direto no corpo do for gera erro",
+                                    no_for(NULL, NULL, NULL, decl(DECLARADOR_VAR, "v", 1), 1), 1);
+    total++; falhas += testa_arvore("Funcao direto no corpo do if gera erro",
+                                    no_if(no_booleano(1, 1), no_funcao(strdup("f"), NULL, no_bloco(NULL, 1), 1), NULL, 1), 1);
+    total++; falhas += testa_arvore("Declaracao dentro de bloco no corpo e permitida",
+                                    no_if(no_booleano(1, 1), no_bloco(decl(DECLARADOR_LET, "x", 1), 1),
+                                          no_bloco(decl(DECLARADOR_LET, "y", 2), 2), 1), 0);
+    total++; falhas += testa_arvore("let na inicializacao do for e permitido",
+                                    no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(NULL, 1), 1), 0);
+    total++; falhas += testa_arvore("Comando simples no corpo sem bloco e permitido",
+                                    no_while(no_booleano(1, 1), no_vazio(1), 1), 0);
+
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
     printf("Sumario dos Testes em Memoria:\n");
