@@ -235,6 +235,11 @@ static void visita_declaracao(No *no) {
 }
 
 static void visita_funcao(No *no) {
+    /* Sem funcoes aninhadas (decisao de escopo): funcao so pode ser declarada no escopo global */
+    if (escopo_nivel() != 0) {
+        erro_semantico(no->linha, "funcao '%s' declarada fora do escopo global", no->valor.texto);
+    }
+
     /* A funcao entra antes do corpo, o que permite recursao */
     Simbolo *funcao = declara(no->valor.texto, SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, no->linha);
 

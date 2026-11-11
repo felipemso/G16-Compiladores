@@ -823,7 +823,7 @@ int main(void) {
     total++; falhas += testa_regra("Parametro pode ter o nome de uma global", "let x = 1; function f(x) { return x; }", 0);
     total++; falhas += testa_regra("Variavel local com nome de global gera erro", "let x = 1; function f() { let x = 2; return x; }", 1);
     total++; falhas += testa_regra("Bloco interno com nome de parametro gera erro", "function f(a) { { let a = 1; } }", 1);
-    total++; falhas += testa_regra("Parametro com nome de parametro externo gera erro", "function f(a) { function g(a) { return a; } }", 1);
+    total++; falhas += testa_regra("Parametro com nome de parametro externo gera erro (alem da funcao aninhada)", "function f(a) { function g(a) { return a; } }", 2);
     total++; falhas += testa_arvore("Dois for seguidos podem repetir o let i", no_lista_adiciona(for_com_i(1), for_com_i(2)), 0);
     total++; falhas += testa_arvore("let no corpo do for com o nome do i gera erro", arvore_for_com_i_no_corpo(), 1);
     total++; falhas += testa_regra("Atribuicao a const gera erro", "const LIMITE = 10; LIMITE = 20;", 1);
