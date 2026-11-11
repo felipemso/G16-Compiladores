@@ -172,6 +172,44 @@ static int usa_texto(TipoNo categoria) {
     }
 }
 
+static void imprime_lista(const No *no, int nivel) {
+    static const char *categorias[] = {
+        "NO_PROGRAMA", "NO_BLOCO", "NO_DECL_VAR", "NO_ATRIBUICAO",
+        "NO_IF", "NO_WHILE", "NO_FOR", "NO_FUNCAO", "NO_PARAMETRO",
+        "NO_RETURN", "NO_CHAMADA", "NO_PRINT", "NO_BINARIO", "NO_UNARIO",
+        "NO_ID", "NO_NUMERO", "NO_STRING", "NO_BOOLEANO", "NO_VAZIO"
+    };
+    static const char *operadores[] = {
+        "", "+", "-", "*", "/", "==", "!=", "<", "<=", ">", ">=",
+        "&&", "||", "-", "!"
+    };
+    static const char *declaradores[] = { "let", "var", "const" };
+
+    for (; no; no = no->proximo) {
+        printf("%*s%s", nivel * 2, "", categorias[no->categoria]);
+        if (no->categoria == NO_DECL_VAR) {
+            printf(" %s %s", declaradores[no->declarador], no->valor.texto);
+        } else if (usa_texto(no->categoria)) {
+            printf(" %s", no->valor.texto);
+        } else if (no->categoria == NO_NUMERO) {
+            printf(" %.15g", no->valor.numero);
+        } else if (no->categoria == NO_BOOLEANO) {
+            printf(" %s", no->valor.booleano ? "true" : "false");
+        } else if (no->categoria == NO_BINARIO || no->categoria == NO_UNARIO) {
+            printf(" %s", operadores[no->operador]);
+        }
+        putchar('\n');
+        for (int i = 0; i < NO_MAX_FILHOS; i++) {
+            imprime_lista(no->filhos[i], nivel + 1);
+        }
+    }
+}
+
+/* Filhos nulos sao omitidos; irmaos permanecem no mesmo nivel. */
+void ast_imprime(const No *no) {
+    imprime_lista(no, 0);
+}
+
 void ast_libera(No *no) {
     while (no) {
         No *proximo = no->proximo;
