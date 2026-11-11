@@ -1,40 +1,40 @@
 NO_PROGRAMA
-  NO_PRINT
-    NO_BINARIO /
-      NO_BINARIO *
-        NO_BINARIO -
-          NO_BINARIO +
-            NO_NUMERO 1
-            NO_NUMERO 2
-          NO_NUMERO 3
-        NO_NUMERO 4
-      NO_NUMERO 2
-    NO_UNARIO -
-      NO_NUMERO 1
-    NO_UNARIO !
-      NO_BOOLEANO false
-  NO_PRINT
-    NO_BINARIO ==
-      NO_NUMERO 1
-      NO_NUMERO 2
-    NO_BINARIO !=
-      NO_NUMERO 1
-      NO_NUMERO 2
-    NO_BINARIO <
-      NO_NUMERO 1
-      NO_NUMERO 2
-    NO_BINARIO <=
-      NO_NUMERO 1
-      NO_NUMERO 2
-    NO_BINARIO >
-      NO_NUMERO 1
-      NO_NUMERO 2
-    NO_BINARIO >=
-      NO_NUMERO 1
-      NO_NUMERO 2
-  NO_PRINT
-    NO_BINARIO ||
-      NO_BINARIO &&
-        NO_BOOLEANO true
-        NO_BOOLEANO false
-      NO_BOOLEANO true
+├── NO_PRINT
+│   ├── NO_BINARIO /
+│   │   ├── NO_BINARIO *
+│   │   │   ├── NO_BINARIO -
+│   │   │   │   ├── NO_BINARIO +
+│   │   │   │   │   ├── NO_NUMERO 1
+│   │   │   │   │   └── NO_NUMERO 2
+│   │   │   │   └── NO_NUMERO 3
+│   │   │   └── NO_NUMERO 4
+│   │   └── NO_NUMERO 2
+│   ├── NO_UNARIO -
+│   │   └── NO_NUMERO 1
+│   └── NO_UNARIO !
+│       └── NO_BOOLEANO false
+├── NO_PRINT
+│   ├── NO_BINARIO ==
+│   │   ├── NO_NUMERO 1
+│   │   └── NO_NUMERO 2
+│   ├── NO_BINARIO !=
+│   │   ├── NO_NUMERO 1
+│   │   └── NO_NUMERO 2
+│   ├── NO_BINARIO <
+│   │   ├── NO_NUMERO 1
+│   │   └── NO_NUMERO 2
+│   ├── NO_BINARIO <=
+│   │   ├── NO_NUMERO 1
+│   │   └── NO_NUMERO 2
+│   ├── NO_BINARIO >
+│   │   ├── NO_NUMERO 1
+│   │   └── NO_NUMERO 2
+│   └── NO_BINARIO >=
+│       ├── NO_NUMERO 1
+│       └── NO_NUMERO 2
+└── NO_PRINT
+    └── NO_BINARIO ||
+        ├── NO_BINARIO &&
+        │   ├── NO_BOOLEANO true
+        │   └── NO_BOOLEANO false
+        └── NO_BOOLEANO true

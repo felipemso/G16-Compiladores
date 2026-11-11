@@ -129,7 +129,10 @@ Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos_semanticos") -Titulo "Exe
 Write-Host "`n--- Executando Casos de Teste de AST ---" -ForegroundColor Yellow
 $AstDir = Join-Path $ScriptDir "ast"
 $AstErros = [System.IO.Path]::GetTempFileName()
+$AstCodificacaoOriginal = [Console]::OutputEncoding
 try {
+    # Os conectores da arvore sao UTF-8, inclusive no Windows PowerShell 5.1.
+    [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
     foreach ($arquivo in (Get-ChildItem -Path $AstDir -Filter "*.js" | Sort-Object Name)) {
         $Total++
         $esperado = [System.IO.Path]::ChangeExtension($arquivo.FullName, ".esperado")
@@ -164,6 +167,7 @@ try {
         }
     }
 } finally {
+    [Console]::OutputEncoding = $AstCodificacaoOriginal
     Remove-Item $AstErros
 }
 
