@@ -290,14 +290,36 @@ static void visita_funcao(No *no) {
     escopo_sai();
 }
 
+/* Decisao de escopo: declaracao direto no corpo de if/else/while/for precisa de bloco.
+ * Basta olhar o primeiro no: "if (c) let a, b;" e um comando so. */
+static void verifica_corpo(const No *corpo, const char *comando) {
+    if (corpo && (corpo->categoria == NO_DECL_VAR || corpo->categoria == NO_FUNCAO)) {
+        erro_semantico(corpo->linha, "declaracao de '%s' direto no corpo do %s, sem bloco", corpo->valor.texto, comando);
+    }
+}
+
 static void visita(No *no) {
     switch (no->categoria) {
         case NO_BLOCO:
-        case NO_FOR:
-            /* No for, o let da inicializacao fica neste escopo, por fora do bloco do corpo */
             escopo_entra();
             visita_filhos(no);
             escopo_sai();
+            break;
+        case NO_FOR:
+            verifica_corpo(no->filhos[3], "for");
+            /* O let da inicializacao fica neste escopo, por fora do bloco do corpo */
+            escopo_entra();
+            visita_filhos(no);
+            escopo_sai();
+            break;
+        case NO_IF:
+            verifica_corpo(no->filhos[1], "if");
+            verifica_corpo(no->filhos[2], "else");
+            visita_filhos(no);
+            break;
+        case NO_WHILE:
+            verifica_corpo(no->filhos[1], "while");
+            visita_filhos(no);
             break;
         case NO_FUNCAO:
             visita_funcao(no);
