@@ -22,10 +22,13 @@ static void reporta_falha(const char *fase, int erros) {
 
 int main(int argc, char *argv[]) {
     int mostrar_tabela = 0;
+    int mostrar_ast = 0;
     const char *arquivo = NULL;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--tabela") == 0) {
             mostrar_tabela = 1;
+        } else if (strcmp(argv[i], "--ast") == 0) {
+            mostrar_ast = 1;
         } else {
             arquivo = argv[i];
         }
@@ -54,6 +57,9 @@ int main(int argc, char *argv[]) {
     if (res != 0) {
         reporta_falha("lexica/sintatica", yynerrs);
     } else {
+        if (mostrar_ast) {
+            ast_imprime(raiz_ast);
+        }
         /* A semantica so roda sobre uma AST completa, sem erros de sintaxe */
         analisa(raiz_ast);
         if (mostrar_tabela) {
