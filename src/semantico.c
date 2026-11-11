@@ -181,14 +181,19 @@ static TipoDado tipo_unario(No *no) {
 /* A funcao chamada precisa ja estar na tabela: chamar antes da declaracao e erro (decisao de escopo).
  * A recursao funciona porque a funcao entra na tabela antes do corpo. */
 static void visita_chamada(No *no) {
+    int num_argumentos = 0;
     for (No *argumento = no->filhos[0]; argumento; argumento = argumento->proximo) {
         expressao(argumento);
+        num_argumentos++;
     }
     Simbolo *funcao = tabela_busca(no->valor.texto);
     if (!funcao) {
         erro_semantico(no->linha, "funcao '%s' nao declarada antes da chamada", no->valor.texto);
     } else if (funcao->categoria != SIMBOLO_FUNCAO) {
         erro_semantico(no->linha, "'%s' nao e uma funcao (declarado na linha %d)", no->valor.texto, funcao->linha);
+    } else if (num_argumentos != funcao->num_parametros) {
+        erro_semantico(no->linha, "funcao '%s' espera %d argumento(s), mas recebeu %d",
+                       no->valor.texto, funcao->num_parametros, num_argumentos);
     }
 }
 
