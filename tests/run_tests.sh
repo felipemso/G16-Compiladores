@@ -112,7 +112,37 @@ run_suite "$SCRIPT_DIR/invalidos" "Executando Casos de Teste Invalidos (Falha Es
 echo ""
 run_suite "$SCRIPT_DIR/invalidos_semanticos" "Executando Casos de Teste Invalidos Semanticos (Falha Esperada)" 0 "semantica" "Erro semantico"
 
-# 5. Sumario Final
+# 5. Saida da AST e execucao silenciosa sem --ast
+echo ""
+echo "--- Executando Casos de Teste de AST ---"
+AST_TMP=$(mktemp -d) || exit 1
+trap 'rm -rf "$AST_TMP"' EXIT
+for arquivo in "$SCRIPT_DIR/ast"/*.js; do
+    [ -e "$arquivo" ] || continue
+    TOTAL=$((TOTAL + 1))
+    esperado="${arquivo%.js}.esperado"
+    if "$MINIJS" --ast "$arquivo" > "$AST_TMP/saida" 2> "$AST_TMP/erros" \
+        && [ ! -s "$AST_TMP/erros" ] \
+        && diff -u --strip-trailing-cr "$esperado" "$AST_TMP/saida"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo "  [PASSOU] $(basename "$arquivo") (--ast)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo "  [FALHOU] $(basename "$arquivo") (--ast)"
+        cat "$AST_TMP/erros"
+    fi
+    TOTAL=$((TOTAL + 1))
+    if "$MINIJS" "$arquivo" > "$AST_TMP/saida" 2> "$AST_TMP/erros" \
+        && [ ! -s "$AST_TMP/saida" ] && [ ! -s "$AST_TMP/erros" ]; then
+        PASSARAM=$((PASSARAM + 1))
+        echo "  [PASSOU] $(basename "$arquivo") (sem --ast)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo "  [FALHOU] $(basename "$arquivo") (sem --ast)"
+    fi
+done
+
+# 6. Sumario Final
 echo ""
 echo -e "\033[0;36m============================================================\033[0m"
 echo -e "\033[0;36m                   SUMARIO DOS TESTES                      \033[0m"

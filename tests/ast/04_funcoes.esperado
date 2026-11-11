@@ -1,0 +1,30 @@
+NO_PROGRAMA
+├── NO_FUNCAO soma
+│   ├── NO_PARAMETRO a
+│   ├── NO_PARAMETRO b
+│   └── NO_BLOCO
+│       └── NO_RETURN
+│           └── NO_BINARIO +
+│               ├── NO_ID a
+│               └── NO_ID b
+├── NO_FUNCAO vazia
+│   └── NO_BLOCO
+│       └── NO_RETURN
+├── NO_CHAMADA soma
+│   ├── NO_NUMERO 1
+│   └── NO_NUMERO 2
+├── NO_DECL_VAR let resultado
+│   └── NO_BINARIO *
+│       ├── NO_CHAMADA soma
+│       │   ├── NO_CHAMADA soma
+│       │   │   ├── NO_NUMERO 3
+│       │   │   └── NO_NUMERO 4
+│       │   └── NO_NUMERO 5
+│       └── NO_NUMERO 2
+├── NO_PRINT
+├── NO_PRINT
+│   ├── NO_ID resultado
+│   ├── NO_STRING 'ok'
+│   ├── NO_BOOLEANO true
+│   └── NO_NUMERO 2.5
+└── NO_CHAMADA vazia

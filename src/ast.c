@@ -172,6 +172,86 @@ static int usa_texto(TipoNo categoria) {
     }
 }
 
+static void imprime_valor(const No *no) {
+    static const char *categorias[] = {
+        "NO_PROGRAMA", "NO_BLOCO", "NO_DECL_VAR", "NO_ATRIBUICAO",
+        "NO_IF", "NO_WHILE", "NO_FOR", "NO_FUNCAO", "NO_PARAMETRO",
+        "NO_RETURN", "NO_CHAMADA", "NO_PRINT", "NO_BINARIO", "NO_UNARIO",
+        "NO_ID", "NO_NUMERO", "NO_STRING", "NO_BOOLEANO", "NO_VAZIO"
+    };
+    static const char *operadores[] = {
+        "", "+", "-", "*", "/", "==", "!=", "<", "<=", ">", ">=",
+        "&&", "||", "-", "!"
+    };
+    static const char *declaradores[] = { "let", "var", "const" };
+
+    printf("%s", categorias[no->categoria]);
+    if (no->categoria == NO_DECL_VAR) {
+        printf(" %s %s", declaradores[no->declarador], no->valor.texto);
+    } else if (usa_texto(no->categoria)) {
+        printf(" %s", no->valor.texto);
+    } else if (no->categoria == NO_NUMERO) {
+        printf(" %.15g", no->valor.numero);
+    } else if (no->categoria == NO_BOOLEANO) {
+        printf(" %s", no->valor.booleano ? "true" : "false");
+    } else if (no->categoria == NO_BINARIO || no->categoria == NO_UNARIO) {
+        printf(" %s", operadores[no->operador]);
+    }
+    putchar('\n');
+}
+
+/* Cada ancestral informa se ainda ha um irmao abaixo de seu ramo. */
+typedef struct Prefixo {
+    const struct Prefixo *anterior;
+    int continua;
+} Prefixo;
+
+static void imprime_prefixo(const Prefixo *prefixo) {
+    if (!prefixo) return;
+    imprime_prefixo(prefixo->anterior);
+    printf("%s", prefixo->continua ? "│   " : "    ");
+}
+
+static const char *papel_filho(TipoNo categoria, int indice) {
+    static const char *filhos_if[] = { "condicao", "entao", "senao" };
+    static const char *filhos_while[] = { "condicao", "corpo" };
+    static const char *filhos_for[] = { "inicializacao", "condicao", "incremento", "corpo" };
+    if (categoria == NO_IF && indice < 3) return filhos_if[indice];
+    if (categoria == NO_WHILE && indice < 2) return filhos_while[indice];
+    if (categoria == NO_FOR) return filhos_for[indice];
+    return NULL;
+}
+
+static void imprime_arvore(const No *no, const Prefixo *prefixo,
+                           int ultimo, const char *papel, int raiz) {
+    if (!raiz) {
+        imprime_prefixo(prefixo);
+        printf("%s", ultimo ? "└── " : "├── ");
+        if (papel) printf("%s: ", papel);
+    }
+    imprime_valor(no);
+
+    int ultimo_filho = -1;
+    for (int i = 0; i < NO_MAX_FILHOS; i++) {
+        if (no->filhos[i]) ultimo_filho = i;
+    }
+    Prefixo proximo_prefixo = { prefixo, !ultimo };
+    for (int i = 0; i <= ultimo_filho; i++) {
+        for (const No *filho = no->filhos[i]; filho; filho = filho->proximo) {
+            imprime_arvore(filho, raiz ? NULL : &proximo_prefixo,
+                           i == ultimo_filho && !filho->proximo,
+                           papel_filho(no->categoria, i), 0);
+        }
+    }
+}
+
+/* Filhos nulos sao omitidos; irmaos compartilham as conexoes do mesmo nivel. */
+void ast_imprime(const No *no) {
+    for (; no; no = no->proximo) {
+        imprime_arvore(no, NULL, !no->proximo, NULL, 1);
+    }
+}
+
 void ast_libera(No *no) {
     while (no) {
         No *proximo = no->proximo;

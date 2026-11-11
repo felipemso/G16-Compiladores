@@ -125,7 +125,53 @@ Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos") -Titulo "Executando Cas
 Write-Host ""
 Invoke-TestSuite -Dir (Join-Path $ScriptDir "invalidos_semanticos") -Titulo "Executando Casos de Teste Invalidos Semanticos (Falha Esperada)" -ExpectSuccess $false -Fase "semantica" -Marcador "Erro semantico"
 
-# 5. Sumario Final
+# 5. Saida da AST e execucao silenciosa sem --ast
+Write-Host "`n--- Executando Casos de Teste de AST ---" -ForegroundColor Yellow
+$AstDir = Join-Path $ScriptDir "ast"
+$AstErros = [System.IO.Path]::GetTempFileName()
+$AstCodificacaoOriginal = [Console]::OutputEncoding
+try {
+    # Os conectores da arvore sao UTF-8, inclusive no Windows PowerShell 5.1.
+    [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+    foreach ($arquivo in (Get-ChildItem -Path $AstDir -Filter "*.js" | Sort-Object Name)) {
+        $Total++
+        $esperado = [System.IO.Path]::ChangeExtension($arquivo.FullName, ".esperado")
+        $output = @(& $Minijs --ast $arquivo.FullName 2> $AstErros)
+        $code = $LASTEXITCODE
+        # Normaliza apenas CRLF: espacos, ordem e linhas extras continuam significativos.
+        $texto = if ($output.Count -gt 0) { ($output -join "`n") + "`n" } else { "" }
+        if ((Test-Path $esperado) -and $code -eq 0 -and (Get-Item $AstErros).Length -eq 0) {
+            $referencia = [System.IO.File]::ReadAllText($esperado).Replace("`r`n", "`n")
+            $passou = $texto -ceq $referencia
+        } else {
+            $passou = $false
+        }
+        if ($passou) {
+            $Passaram++
+            Write-Host "  [PASSOU] $($arquivo.Name) (--ast)" -ForegroundColor Green
+        } else {
+            $Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (--ast)" -ForegroundColor Red
+            Get-Content $AstErros
+        }
+
+        $Total++
+        $output = @(& $Minijs $arquivo.FullName 2> $AstErros)
+        $code = $LASTEXITCODE
+        if ($code -eq 0 -and $output.Count -eq 0 -and (Get-Item $AstErros).Length -eq 0) {
+            $Passaram++
+            Write-Host "  [PASSOU] $($arquivo.Name) (sem --ast)" -ForegroundColor Green
+        } else {
+            $Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (sem --ast)" -ForegroundColor Red
+        }
+    }
+} finally {
+    [Console]::OutputEncoding = $AstCodificacaoOriginal
+    Remove-Item $AstErros
+}
+
+# 6. Sumario Final
 Write-Host "`n============================================================" -ForegroundColor Cyan
 Write-Host "                   SUMARIO DOS TESTES                      " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan

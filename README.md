@@ -58,6 +58,13 @@ Analisando um arquivo:
 ./minijs caminho/para/arquivo.js
 ```
 
+Para imprimir a AST:
+```bash
+./minijs --ast caminho/para/arquivo.js
+```
+
+Sem `--ast`, arquivos validos nao produzem saida. Erros sao enviados para stderr.
+
 ---
 
 ## Como Rodar os Testes
@@ -76,10 +83,20 @@ let total = (10 + 20) * 3;
 console.log(total);
 ```
 
-**Saída:**
+**Saída com `--ast`:**
 ```text
-AST: Declaracao de variavel 'total' reconhecida.
-AST: Comando de impressao reconhecido.
-
-Compilacao bem-sucedida! Nao ha erros de sintaxe.
+NO_PROGRAMA
+├── NO_DECL_VAR let total
+│   └── NO_BINARIO *
+│       ├── NO_BINARIO +
+│       │   ├── NO_NUMERO 10
+│       │   └── NO_NUMERO 20
+│       └── NO_NUMERO 3
+└── NO_PRINT
+    └── NO_ID total
 ```
+
+A impressao usa conexoes `├──`, `└──` e `│`, identifica os papeis dos filhos
+de `if`, `while` e `for`, omite filhos nulos e preserva a ordem
+dos filhos e das listas. Os pares `tests/ast/*.js` e `*.esperado` verificam esse
+formato nos runners Bash e PowerShell, alem da execucao silenciosa sem a flag.
