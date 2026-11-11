@@ -871,6 +871,12 @@ int main(void) {
     total++; falhas += testa_regra("String + string nao gera erro", "let x = \"a\" + \"b\";", 0);
     total++; falhas += testa_regra("String + desconhecido nao gera erro", "function f(p) { return p + \"a\"; }", 0);
     total++; falhas += testa_regra("Variavel reatribuida nao gera erro com +", "let a = 1; a = \"x\"; let b = a + 1;", 0);
+    total++; falhas += testa_regra("String - numero gera erro", "let x = \"a\" - 1;", 1);
+    total++; falhas += testa_regra("Numero * string gera erro", "let x = 2 * \"a\";", 1);
+    total++; falhas += testa_regra("Variavel string / numero gera erro", "let s = \"a\"; let x = s / 2;", 1);
+    total++; falhas += testa_regra("Menos unario em string gera erro", "let x = -\"a\";", 1);
+    total++; falhas += testa_regra("Aritmetica com booleano nao gera erro", "let x = true - 1;", 0);
+    total++; falhas += testa_regra("Aritmetica com parametro nao gera erro", "function f(p) { return p * 2; }", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

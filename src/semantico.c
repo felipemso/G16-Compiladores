@@ -79,6 +79,27 @@ static const char *nome_tipo(TipoDado tipo) {
     return "desconhecido";
 }
 
+static const char *nome_operador(Operador operador) {
+    switch (operador) {
+        case OP_SOMA: return "+";
+        case OP_SUBTRACAO:
+        case OP_NEGATIVO: return "-";
+        case OP_MULTIPLICACAO: return "*";
+        case OP_DIVISAO: return "/";
+        case OP_IGUAL: return "==";
+        case OP_DIFERENTE: return "!=";
+        case OP_MENOR: return "<";
+        case OP_MENOR_IGUAL: return "<=";
+        case OP_MAIOR: return ">";
+        case OP_MAIOR_IGUAL: return ">=";
+        case OP_E: return "&&";
+        case OP_OU: return "||";
+        case OP_NAO: return "!";
+        case OP_NENHUM: break;
+    }
+    return "?";
+}
+
 /* Tipo de uma variavel no ponto em que e lida.
  * Dentro de uma funcao, let/var de fora contam como desconhecido: a funcao pode ser chamada
  * depois de uma reatribuicao, e o tipo antigo geraria erro falso. const nunca muda de tipo. */
@@ -121,6 +142,9 @@ static TipoDado tipo_binario(No *no) {
         case OP_SUBTRACAO:
         case OP_MULTIPLICACAO:
         case OP_DIVISAO:
+            if (esquerda == TIPO_STRING || direita == TIPO_STRING) {
+                erro_semantico(no->linha, "operador '%s' nao pode ser usado com string", nome_operador(no->operador));
+            }
             /* O resultado aritmetico e sempre numero (NaN tambem e numero em JS) */
             return TIPO_NUMERO;
         case OP_IGUAL:
@@ -140,9 +164,12 @@ static TipoDado tipo_binario(No *no) {
 }
 
 static TipoDado tipo_unario(No *no) {
-    expressao(no->filhos[0]);
+    TipoDado operando = expressao(no->filhos[0]);
     if (no->operador == OP_NAO) {
         return TIPO_BOOLEANO;
+    }
+    if (operando == TIPO_STRING) {
+        erro_semantico(no->linha, "operador '%s' nao pode ser usado com string", nome_operador(no->operador));
     }
     return TIPO_NUMERO;
 }
