@@ -178,6 +178,25 @@ static TipoDado tipo_unario(No *no) {
     return TIPO_NUMERO;
 }
 
+/* A funcao chamada precisa ja estar na tabela: chamar antes da declaracao e erro (decisao de escopo).
+ * A recursao funciona porque a funcao entra na tabela antes do corpo. */
+static void visita_chamada(No *no) {
+    int num_argumentos = 0;
+    for (No *argumento = no->filhos[0]; argumento; argumento = argumento->proximo) {
+        expressao(argumento);
+        num_argumentos++;
+    }
+    Simbolo *funcao = tabela_busca(no->valor.texto);
+    if (!funcao) {
+        erro_semantico(no->linha, "funcao '%s' nao declarada antes da chamada", no->valor.texto);
+    } else if (funcao->categoria != SIMBOLO_FUNCAO) {
+        erro_semantico(no->linha, "'%s' nao e uma funcao (declarado na linha %d)", no->valor.texto, funcao->linha);
+    } else if (num_argumentos != funcao->num_parametros) {
+        erro_semantico(no->linha, "funcao '%s' espera %d argumento(s), mas recebeu %d",
+                       no->valor.texto, funcao->num_parametros, num_argumentos);
+    }
+}
+
 /* Visita uma expressao, guarda o tipo inferido no proprio no e devolve esse tipo */
 static TipoDado expressao(No *no) {
     TipoDado tipo = TIPO_DESCONHECIDO;
@@ -202,8 +221,11 @@ static TipoDado expressao(No *no) {
         case NO_UNARIO:
             tipo = tipo_unario(no);
             break;
+        case NO_CHAMADA:
+            /* O retorno de funcao conta como desconhecido */
+            visita_chamada(no);
+            break;
         default:
-            /* NO_CHAMADA: o retorno de funcao conta como desconhecido; os argumentos sao visitados */
             visita_filhos(no);
             break;
     }
@@ -221,6 +243,9 @@ static void visita_atribuicao(No *no) {
     }
     if (alvo->categoria == SIMBOLO_CONST) {
         erro_semantico(no->linha, "atribuicao a constante '%s' (declarada na linha %d)", no->valor.texto, alvo->linha);
+    } else if (nivel_funcao > 0 && alvo->nivel_escopo < nivel_funcao) {
+        /* Decisao de escopo: funcao nao altera global. Parametro com nome de global e local e pode ser alterado */
+        erro_semantico(no->linha, "atribuicao a variavel global '%s' dentro de funcao", no->valor.texto);
     } else if (alvo->tipo_inferido != tipo) {
         /* Reatribuida com outro tipo: daqui em diante o tipo deixa de ser conhecido */
         alvo->tipo_inferido = TIPO_DESCONHECIDO;
@@ -235,6 +260,11 @@ static void visita_declaracao(No *no) {
 }
 
 static void visita_funcao(No *no) {
+    /* Sem funcoes aninhadas (decisao de escopo): funcao so pode ser declarada no escopo global */
+    if (escopo_nivel() != 0) {
+        erro_semantico(no->linha, "funcao '%s' declarada fora do escopo global", no->valor.texto);
+    }
+
     /* A funcao entra antes do corpo, o que permite recursao */
     Simbolo *funcao = declara(no->valor.texto, SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, no->linha);
 
@@ -260,14 +290,36 @@ static void visita_funcao(No *no) {
     escopo_sai();
 }
 
+/* Decisao de escopo: declaracao direto no corpo de if/else/while/for precisa de bloco.
+ * Basta olhar o primeiro no: "if (c) let a, b;" e um comando so. */
+static void verifica_corpo(const No *corpo, const char *comando) {
+    if (corpo && (corpo->categoria == NO_DECL_VAR || corpo->categoria == NO_FUNCAO)) {
+        erro_semantico(corpo->linha, "declaracao de '%s' direto no corpo do %s, sem bloco", corpo->valor.texto, comando);
+    }
+}
+
 static void visita(No *no) {
     switch (no->categoria) {
         case NO_BLOCO:
-        case NO_FOR:
-            /* No for, o let da inicializacao fica neste escopo, por fora do bloco do corpo */
             escopo_entra();
             visita_filhos(no);
             escopo_sai();
+            break;
+        case NO_FOR:
+            verifica_corpo(no->filhos[3], "for");
+            /* O let da inicializacao fica neste escopo, por fora do bloco do corpo */
+            escopo_entra();
+            visita_filhos(no);
+            escopo_sai();
+            break;
+        case NO_IF:
+            verifica_corpo(no->filhos[1], "if");
+            verifica_corpo(no->filhos[2], "else");
+            visita_filhos(no);
+            break;
+        case NO_WHILE:
+            verifica_corpo(no->filhos[1], "while");
+            visita_filhos(no);
             break;
         case NO_FUNCAO:
             visita_funcao(no);
@@ -285,7 +337,6 @@ static void visita(No *no) {
         case NO_BINARIO:
         case NO_UNARIO:
         case NO_CHAMADA:
-            /* NO_CHAMADA: o nome da funcao e checado pela T20; aqui so os argumentos */
             expressao(no);
             break;
         default:

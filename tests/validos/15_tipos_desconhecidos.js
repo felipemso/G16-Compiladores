@@ -9,9 +9,8 @@ let v = 1;
 v = "um";
 let w = v * 2;
 
-// Dentro da funcao, contador (let de fora) e desconhecido; depois da atribuicao ele continua desconhecido
+// Dentro da funcao, contador (let de fora) e desconhecido: concatenar com string nao gera erro
 let contador = 0;
-function incrementa() {
-    contador = contador + 1;
+function descreve() {
+    return "valor: " + contador;
 }
-let mensagem = "valor: " + contador;
