@@ -579,6 +579,72 @@ static No *arvore_for_com_i_no_corpo(void) {
     return no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(decl(DECLARADOR_LET, "i", 2), 1), 1);
 }
 
+/* Passa o codigo pelo parser e pela semantica; quem chama confere o resultado e chama limpa_analise */
+static bool analisa_codigo(const char *codigo) {
+    int resultado = parse_string(codigo);
+    bool sintaxe_ok = resultado == 0 && yynerrs == 0;
+    if (sintaxe_ok) {
+        analisa(raiz_ast);
+    }
+    return sintaxe_ok;
+}
+
+static void limpa_analise(void) {
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    tabela_libera();
+    erros_semanticos = 0;
+}
+
+/* Confere o tipo guardado na tabela para a variavel 'nome' no nivel de escopo dado */
+static int testa_tipo_variavel(const char *descricao, const char *codigo, const char *nome, int nivel,
+                               TipoDado esperado) {
+    bool ok = analisa_codigo(codigo);
+    const Simbolo *simbolo = simbolo_em(nome, nivel);
+    ok = ok && simbolo && simbolo->tipo_inferido == esperado && erros_semanticos == 0 && escopo_nivel() == 0;
+    int falhas = verifica(descricao, ok);
+    limpa_analise();
+    return falhas;
+}
+
+/* Comando de numero 'indice' (a partir de 0) no nivel global do programa */
+static No *comando(int indice) {
+    No *no = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    for (int i = 0; no && i < indice; i++) {
+        no = no->proximo;
+    }
+    return no;
+}
+
+/* Confere o tipo anotado na expressao do comando (filhos[0]) e nos seus operandos, quando existem */
+static int testa_anotacao(const char *descricao, const char *codigo, int indice,
+                          TipoDado raiz, TipoDado esquerda, TipoDado direita) {
+    bool ok = analisa_codigo(codigo) && erros_semanticos == 0;
+    No *cmd = comando(indice);
+    No *expr = cmd ? cmd->filhos[0] : NULL;
+    ok = ok && expr && expr->tipo_inferido == raiz;
+    if (ok && expr->filhos[0]) {
+        ok = expr->filhos[0]->tipo_inferido == esquerda;
+    }
+    if (ok && expr->filhos[1]) {
+        ok = expr->filhos[1]->tipo_inferido == direita;
+    }
+    int falhas = verifica(descricao, ok);
+    limpa_analise();
+    return falhas;
+}
+
+static int testa_anotacao_comandos(void) {
+    bool ok = analisa_codigo("let x = true;\nx = \"a\";\n") && erros_semanticos == 0;
+    No *declaracao = comando(0);
+    No *atribuicao = comando(1);
+    ok = ok && declaracao && declaracao->tipo_inferido == TIPO_BOOLEANO
+        && atribuicao && atribuicao->tipo_inferido == TIPO_STRING;
+    int falhas = verifica("Declaracao e atribuicao guardam o tipo do valor", ok);
+    limpa_analise();
+    return falhas;
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -764,6 +830,61 @@ int main(void) {
     total++; falhas += testa_regra("Atribuicao a const dentro de bloco gera erro", "const c = 1; { c = c + 1; }", 1);
     total++; falhas += testa_regra("const pode ser lido normalmente", "const c = 1; let d = c * 2;", 0);
     total++; falhas += testa_regra("Atribuicao a let e var continua permitida", "let a = 1; var b = 2; a = b; b = a;", 0);
+
+    printf("\n--- Verificacao de Tipos ---\n");
+    total++; falhas += testa_tipo_variavel("Literal numerico da tipo numero", "let n = 1;", "n", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Literal string da tipo string", "let s = \"texto\";", "s", 0, TIPO_STRING);
+    total++; falhas += testa_tipo_variavel("Literal booleano da tipo booleano", "let b = true;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Variavel sem inicializacao e desconhecida", "let x;", "x", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Variavel copia o tipo de outra variavel", "let a = 1; let b = a;", "b", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Reatribuicao com o mesmo tipo mantem o tipo", "let a = 1; a = 2;", "a", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Reatribuicao com outro tipo vira desconhecido", "let a = 1; a = \"x\";", "a", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Depois de desconhecido nao volta a ser conhecido", "let a = 1; a = \"x\"; a = 2;", "a", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Parametro e desconhecido", "function f(p) { let c = p; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Retorno de funcao e desconhecido", "function f() { return 1; } let r = f();", "r", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("let externo lido dentro de funcao e desconhecido", "let g = 1; function f() { let c = g; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("const externo lido dentro de funcao mantem o tipo", "const k = 1; function f() { let c = k; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Variavel da propria funcao mantem o tipo", "function f() { let a = 1; let c = a; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Soma de numeros e numero", "let x = 1 + 2;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Operacoes aritmeticas dao numero", "let x = 1 - 2 * 3 / 4;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Concatenacao de strings e string", "let s = \"a\" + \"b\";", "s", 0, TIPO_STRING);
+    total++; falhas += testa_tipo_variavel("Soma com booleano e numero", "let x = true + 1;", "x", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Soma com desconhecido e desconhecida", "function f(p) { let c = p + 1; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Aritmetica com desconhecido ainda e numero", "function f(p) { let c = p * 2; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Comparacao da booleano", "let b = 1 < 2;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Negacao logica da booleano", "let b = !1;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Menos unario da numero", "let n = -1;", "n", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("&& entre booleanos e booleano", "let b = true && false;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("|| entre tipos diferentes e desconhecido", "let x = 1 || \"a\";", "x", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_anotacao("Expressao e operandos sao anotados", "let x = (1 + 2) < 4;", 0, TIPO_BOOLEANO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Identificadores sao anotados com o tipo da variavel", "let s = \"a\"; let t = s + s;", 1, TIPO_STRING, TIPO_STRING, TIPO_STRING);
+    total++; falhas += testa_anotacao("Argumento de console.log e anotado", "console.log(1 + 2);", 0, TIPO_NUMERO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Argumento de chamada e anotado", "function f(a) { return a; } f(\"a\" + \"b\");", 1, TIPO_STRING, TIPO_STRING, TIPO_STRING);
+    total++; falhas += testa_anotacao("Expressao de atribuicao e anotada", "let n = 1; n = n * 2;", 1, TIPO_NUMERO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Chamada e anotada como desconhecida", "function f(a) { return a; } let r = f(1) + 1;", 1, TIPO_DESCONHECIDO, TIPO_DESCONHECIDO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao_comandos();
+    total++; falhas += testa_regra("String + numero gera erro", "let x = \"a\" + 1;", 1);
+    total++; falhas += testa_regra("Numero + string gera erro", "let x = 1 + \"a\";", 1);
+    total++; falhas += testa_regra("Booleano + string gera erro", "let x = true + \"a\";", 1);
+    total++; falhas += testa_regra("Variavel string + numero gera erro", "let s = \"a\"; let x = s + 2;", 1);
+    total++; falhas += testa_regra("Erro de + nao se repete na expressao externa", "let x = (\"a\" + 1) + 2;", 1);
+    total++; falhas += testa_regra("String + string nao gera erro", "let x = \"a\" + \"b\";", 0);
+    total++; falhas += testa_regra("String + desconhecido nao gera erro", "function f(p) { return p + \"a\"; }", 0);
+    total++; falhas += testa_regra("Variavel reatribuida nao gera erro com +", "let a = 1; a = \"x\"; let b = a + 1;", 0);
+    total++; falhas += testa_regra("String - numero gera erro", "let x = \"a\" - 1;", 1);
+    total++; falhas += testa_regra("Numero * string gera erro", "let x = 2 * \"a\";", 1);
+    total++; falhas += testa_regra("Variavel string / numero gera erro", "let s = \"a\"; let x = s / 2;", 1);
+    total++; falhas += testa_regra("Menos unario em string gera erro", "let x = -\"a\";", 1);
+    total++; falhas += testa_regra("Aritmetica com booleano nao gera erro", "let x = true - 1;", 0);
+    total++; falhas += testa_regra("Aritmetica com parametro nao gera erro", "function f(p) { return p * 2; }", 0);
+    total++; falhas += testa_regra("Comparacao entre numero e string gera erro", "let b = 1 == \"1\";", 1);
+    total++; falhas += testa_regra("Comparacao entre booleano e numero gera erro", "let b = true < 1;", 1);
+    total++; falhas += testa_regra("Comparacao de resultado booleano com numero gera erro", "let b = (1 < 2) == 1;", 1);
+    total++; falhas += testa_regra("Comparacao entre strings nao gera erro", "let b = \"a\" != \"b\";", 0);
+    total++; falhas += testa_regra("Comparacao entre numeros nao gera erro", "let b = 1 >= 2;", 0);
+    total++; falhas += testa_regra("Comparacao entre booleanos nao gera erro", "let b = (1 < 2) == true;", 0);
+    total++; falhas += testa_regra("Comparacao com parametro nao gera erro", "function f(p) { return p == 1; }", 0);
+    total++; falhas += testa_regra("Comparacao com variavel reatribuida nao gera erro", "let a = 1; a = \"x\"; let b = a == 1;", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
