@@ -863,6 +863,14 @@ int main(void) {
     total++; falhas += testa_anotacao("Expressao de atribuicao e anotada", "let n = 1; n = n * 2;", 1, TIPO_NUMERO, TIPO_NUMERO, TIPO_NUMERO);
     total++; falhas += testa_anotacao("Chamada e anotada como desconhecida", "function f(a) { return a; } let r = f(1) + 1;", 1, TIPO_DESCONHECIDO, TIPO_DESCONHECIDO, TIPO_NUMERO);
     total++; falhas += testa_anotacao_comandos();
+    total++; falhas += testa_regra("String + numero gera erro", "let x = \"a\" + 1;", 1);
+    total++; falhas += testa_regra("Numero + string gera erro", "let x = 1 + \"a\";", 1);
+    total++; falhas += testa_regra("Booleano + string gera erro", "let x = true + \"a\";", 1);
+    total++; falhas += testa_regra("Variavel string + numero gera erro", "let s = \"a\"; let x = s + 2;", 1);
+    total++; falhas += testa_regra("Erro de + nao se repete na expressao externa", "let x = (\"a\" + 1) + 2;", 1);
+    total++; falhas += testa_regra("String + string nao gera erro", "let x = \"a\" + \"b\";", 0);
+    total++; falhas += testa_regra("String + desconhecido nao gera erro", "function f(p) { return p + \"a\"; }", 0);
+    total++; falhas += testa_regra("Variavel reatribuida nao gera erro com +", "let a = 1; a = \"x\"; let b = a + 1;", 0);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

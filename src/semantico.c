@@ -69,6 +69,16 @@ static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, TipoDado t
     return tabela_insere(nome, categoria, tipo, linha);
 }
 
+static const char *nome_tipo(TipoDado tipo) {
+    switch (tipo) {
+        case TIPO_NUMERO: return "numero";
+        case TIPO_STRING: return "string";
+        case TIPO_BOOLEANO: return "booleano";
+        case TIPO_DESCONHECIDO: break;
+    }
+    return "desconhecido";
+}
+
 /* Tipo de uma variavel no ponto em que e lida.
  * Dentro de uma funcao, let/var de fora contam como desconhecido: a funcao pode ser chamada
  * depois de uma reatribuicao, e o tipo antigo geraria erro falso. const nunca muda de tipo. */
@@ -83,9 +93,16 @@ static bool conhecido(TipoDado tipo) {
     return tipo != TIPO_DESCONHECIDO;
 }
 
-/* + : soma entre numeros/booleanos ou concatenacao entre strings */
-static TipoDado tipo_soma(TipoDado esquerda, TipoDado direita) {
+/* + : soma entre numeros/booleanos ou concatenacao entre strings.
+ * Misturar string com numero ou booleano e erro (decisao de escopo). */
+static TipoDado tipo_soma(No *no, TipoDado esquerda, TipoDado direita) {
     if (esquerda == TIPO_STRING || direita == TIPO_STRING) {
+        TipoDado outro = esquerda == TIPO_STRING ? direita : esquerda;
+        if (outro == TIPO_NUMERO || outro == TIPO_BOOLEANO) {
+            erro_semantico(no->linha, "operador '+' entre %s e %s (string so pode ser concatenada com string)",
+                           nome_tipo(esquerda), nome_tipo(direita));
+            return TIPO_DESCONHECIDO;
+        }
         /* Em JS, string + qualquer coisa e string */
         return TIPO_STRING;
     }
@@ -100,7 +117,7 @@ static TipoDado tipo_binario(No *no) {
     TipoDado direita = expressao(no->filhos[1]);
     switch (no->operador) {
         case OP_SOMA:
-            return tipo_soma(esquerda, direita);
+            return tipo_soma(no, esquerda, direita);
         case OP_SUBTRACAO:
         case OP_MULTIPLICACAO:
         case OP_DIVISAO:
