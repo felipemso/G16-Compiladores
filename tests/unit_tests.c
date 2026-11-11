@@ -607,6 +607,44 @@ static int testa_tipo_variavel(const char *descricao, const char *codigo, const 
     return falhas;
 }
 
+/* Comando de numero 'indice' (a partir de 0) no nivel global do programa */
+static No *comando(int indice) {
+    No *no = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    for (int i = 0; no && i < indice; i++) {
+        no = no->proximo;
+    }
+    return no;
+}
+
+/* Confere o tipo anotado na expressao do comando (filhos[0]) e nos seus operandos, quando existem */
+static int testa_anotacao(const char *descricao, const char *codigo, int indice,
+                          TipoDado raiz, TipoDado esquerda, TipoDado direita) {
+    bool ok = analisa_codigo(codigo) && erros_semanticos == 0;
+    No *cmd = comando(indice);
+    No *expr = cmd ? cmd->filhos[0] : NULL;
+    ok = ok && expr && expr->tipo_inferido == raiz;
+    if (ok && expr->filhos[0]) {
+        ok = expr->filhos[0]->tipo_inferido == esquerda;
+    }
+    if (ok && expr->filhos[1]) {
+        ok = expr->filhos[1]->tipo_inferido == direita;
+    }
+    int falhas = verifica(descricao, ok);
+    limpa_analise();
+    return falhas;
+}
+
+static int testa_anotacao_comandos(void) {
+    bool ok = analisa_codigo("let x = true;\nx = \"a\";\n") && erros_semanticos == 0;
+    No *declaracao = comando(0);
+    No *atribuicao = comando(1);
+    ok = ok && declaracao && declaracao->tipo_inferido == TIPO_BOOLEANO
+        && atribuicao && atribuicao->tipo_inferido == TIPO_STRING;
+    int falhas = verifica("Declaracao e atribuicao guardam o tipo do valor", ok);
+    limpa_analise();
+    return falhas;
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -818,6 +856,13 @@ int main(void) {
     total++; falhas += testa_tipo_variavel("Menos unario da numero", "let n = -1;", "n", 0, TIPO_NUMERO);
     total++; falhas += testa_tipo_variavel("&& entre booleanos e booleano", "let b = true && false;", "b", 0, TIPO_BOOLEANO);
     total++; falhas += testa_tipo_variavel("|| entre tipos diferentes e desconhecido", "let x = 1 || \"a\";", "x", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_anotacao("Expressao e operandos sao anotados", "let x = (1 + 2) < 4;", 0, TIPO_BOOLEANO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Identificadores sao anotados com o tipo da variavel", "let s = \"a\"; let t = s + s;", 1, TIPO_STRING, TIPO_STRING, TIPO_STRING);
+    total++; falhas += testa_anotacao("Argumento de console.log e anotado", "console.log(1 + 2);", 0, TIPO_NUMERO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Argumento de chamada e anotado", "function f(a) { return a; } f(\"a\" + \"b\");", 1, TIPO_STRING, TIPO_STRING, TIPO_STRING);
+    total++; falhas += testa_anotacao("Expressao de atribuicao e anotada", "let n = 1; n = n * 2;", 1, TIPO_NUMERO, TIPO_NUMERO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao("Chamada e anotada como desconhecida", "function f(a) { return a; } let r = f(1) + 1;", 1, TIPO_DESCONHECIDO, TIPO_DESCONHECIDO, TIPO_NUMERO);
+    total++; falhas += testa_anotacao_comandos();
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

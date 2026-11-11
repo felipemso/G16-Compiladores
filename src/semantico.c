@@ -130,7 +130,7 @@ static TipoDado tipo_unario(No *no) {
     return TIPO_NUMERO;
 }
 
-/* Visita uma expressao e devolve o tipo inferido */
+/* Visita uma expressao, guarda o tipo inferido no proprio no e devolve esse tipo */
 static TipoDado expressao(No *no) {
     TipoDado tipo = TIPO_DESCONHECIDO;
     switch (no->categoria) {
@@ -159,12 +159,14 @@ static TipoDado expressao(No *no) {
             visita_filhos(no);
             break;
     }
+    no->tipo_inferido = tipo;
     return tipo;
 }
 
 static void visita_atribuicao(No *no) {
     /* O lado direito vem antes, na ordem em que seria avaliado */
     TipoDado tipo = expressao(no->filhos[0]);
+    no->tipo_inferido = tipo;
     Simbolo *alvo = busca_uso(no->valor.texto, no->linha);
     if (!alvo) {
         return;
@@ -180,6 +182,7 @@ static void visita_atribuicao(No *no) {
 static void visita_declaracao(No *no) {
     /* O inicializador vem antes da insercao: em "let x = x;" o x da direita ainda nao existe */
     TipoDado tipo = no->filhos[0] ? expressao(no->filhos[0]) : TIPO_DESCONHECIDO;
+    no->tipo_inferido = tipo;
     declara(no->valor.texto, categoria_do_declarador(no->declarador), tipo, no->linha);
 }
 
