@@ -147,3 +147,140 @@ Os parênteses não geram nó: eles só determinam a forma da árvore. Por isso,
 ### 2.6 Tipo Inferido
 
 A análise semântica percorre a AST e preenche o campo `tipo_inferido` dos nós de expressão (`NO_NUMERO`, `NO_STRING`, `NO_BOOLEANO`, `NO_ID`, `NO_BINARIO`, `NO_UNARIO` e `NO_CHAMADA`), além de `NO_DECL_VAR` e `NO_ATRIBUICAO`, que recebem o tipo do valor atribuído. O retorno de uma chamada de função conta sempre como `TIPO_DESCONHECIDO`.
+
+---
+
+## 3. Exemplo: Código → Árvore Impressa
+
+A opção `--ast` imprime a árvore depois da análise sintática, antes da análise semântica:
+
+```bash
+./minijs --ast programa.js
+```
+
+A árvore só é impressa se o programa não tiver erros léxicos ou sintáticos. Cada linha mostra a categoria do nó seguida do seu valor: o nome, o literal, o operador ou, em `NO_DECL_VAR`, o declarador e o nome. Os filhos de `NO_IF`, `NO_WHILE` e `NO_FOR` aparecem com o seu papel (`condicao:`, `entao:`, `senao:`, `inicializacao:`, `incremento:`, `corpo:`), e os filhos ausentes (`NULL`) são omitidos.
+
+### 3.1 Programa Completo
+
+O programa abaixo usa funções com recursão, declarações com `const` e `let`, `if`/`else`, `for`, `console.log` com mais de um argumento e operadores binários e unários:
+
+```javascript
+function fatorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * fatorial(n - 1);
+}
+
+const limite = 100;
+let resultado = fatorial(5);
+let ativo = true;
+
+if (resultado > limite && !ativo) {
+    console.log("grande", resultado);
+} else {
+    console.log("pequeno");
+}
+
+for (let i = 0; i < 3; i = i + 1) {
+    resultado = resultado - i;
+}
+```
+
+Saída de `./minijs --ast`:
+
+```text
+NO_PROGRAMA
+├── NO_FUNCAO fatorial
+│   ├── NO_PARAMETRO n
+│   └── NO_BLOCO
+│       ├── NO_IF
+│       │   ├── condicao: NO_BINARIO <=
+│       │   │   ├── NO_ID n
+│       │   │   └── NO_NUMERO 1
+│       │   └── entao: NO_BLOCO
+│       │       └── NO_RETURN
+│       │           └── NO_NUMERO 1
+│       └── NO_RETURN
+│           └── NO_BINARIO *
+│               ├── NO_ID n
+│               └── NO_CHAMADA fatorial
+│                   └── NO_BINARIO -
+│                       ├── NO_ID n
+│                       └── NO_NUMERO 1
+├── NO_DECL_VAR const limite
+│   └── NO_NUMERO 100
+├── NO_DECL_VAR let resultado
+│   └── NO_CHAMADA fatorial
+│       └── NO_NUMERO 5
+├── NO_DECL_VAR let ativo
+│   └── NO_BOOLEANO true
+├── NO_IF
+│   ├── condicao: NO_BINARIO &&
+│   │   ├── NO_BINARIO >
+│   │   │   ├── NO_ID resultado
+│   │   │   └── NO_ID limite
+│   │   └── NO_UNARIO !
+│   │       └── NO_ID ativo
+│   ├── entao: NO_BLOCO
+│   │   └── NO_PRINT
+│   │       ├── NO_STRING "grande"
+│   │       └── NO_ID resultado
+│   └── senao: NO_BLOCO
+│       └── NO_PRINT
+│           └── NO_STRING "pequeno"
+└── NO_FOR
+    ├── inicializacao: NO_DECL_VAR let i
+    │   └── NO_NUMERO 0
+    ├── condicao: NO_BINARIO <
+    │   ├── NO_ID i
+    │   └── NO_NUMERO 3
+    ├── incremento: NO_ATRIBUICAO i
+    │   └── NO_BINARIO +
+    │       ├── NO_ID i
+    │       └── NO_NUMERO 1
+    └── corpo: NO_BLOCO
+        └── NO_ATRIBUICAO resultado
+            └── NO_BINARIO -
+                ├── NO_ID resultado
+                └── NO_ID i
+```
+
+Alguns pontos que a árvore mostra:
+
+*   **Listas de irmãos:** os comandos do programa (`NO_FUNCAO`, as três `NO_DECL_VAR`, `NO_IF` e `NO_FOR`) aparecem como filhos de `NO_PROGRAMA`, mas na estrutura são uma lista encadeada pelo campo `proximo`. O mesmo vale para os argumentos do primeiro `NO_PRINT`.
+*   **Filho opcional ausente:** o `if` dentro de `fatorial` não tem `else`, então só aparecem `condicao` e `entao`.
+*   **Chamada dentro de expressão:** `fatorial(n - 1)` é um `NO_CHAMADA` como operando do `*`, e `fatorial(5)` é o inicializador de `resultado`.
+*   **Precedência:** em `resultado > limite && !ativo`, o `&&` fica na raiz da condição, porque tem a menor precedência, e o `!` se aplica apenas a `ativo`.
+*   **Strings com aspas:** o valor de `NO_STRING` mantém as aspas do código-fonte.
+
+### 3.2 Precedência e Parênteses
+
+Os parênteses não aparecem na árvore, mas mudam a sua forma:
+
+```javascript
+let a = 1 + 2 * 3;
+let b = (1 + 2) * 3;
+```
+
+```text
+NO_PROGRAMA
+├── NO_DECL_VAR let a
+│   └── NO_BINARIO +
+│       ├── NO_NUMERO 1
+│       └── NO_BINARIO *
+│           ├── NO_NUMERO 2
+│           └── NO_NUMERO 3
+└── NO_DECL_VAR let b
+    └── NO_BINARIO *
+        ├── NO_BINARIO +
+        │   ├── NO_NUMERO 1
+        │   └── NO_NUMERO 2
+        └── NO_NUMERO 3
+```
+
+Em `a`, a multiplicação é calculada primeiro e fica mais funda na árvore; em `b`, os parênteses fazem a soma ficar embaixo. Quem percorre a árvore (a análise semântica e, depois, o gerador de Python) não precisa conhecer as regras de precedência: a ordem de avaliação já está na estrutura.
+
+### 3.3 Testes da AST
+
+A pasta `tests/ast/` tem pares de arquivos `.js` e `.esperado`. Os scripts `run_tests.sh` e `run_tests.ps1` executam `./minijs --ast` em cada `.js` e comparam a saída com o `.esperado` correspondente.
