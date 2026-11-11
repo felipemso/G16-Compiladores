@@ -1,0 +1,1625 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../gramatica/">
+      
+      
+        <link rel="next" href="../semantica/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>AST - Compiladores (G16)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#arvore-sintatica-abstrata-ast" class="md-skip">
+          Ir para o conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+<header class="custom-header md-header" data-md-component="header">
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Título navbar -->
+      <a href="./" class="brand">
+        <span class="brand-name">Compiladores</span>
+        <span class="brand-tag">(G16)</span>
+      </a>
+
+      <!-- Chaves navbar -->
+      <ul class="nav-links">
+        
+          <li>
+            
+              <a href="../.."
+                 >
+                Home
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../sobre/"
+                 >
+                Sobre
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../escopo-e-arq/"
+                 class="current">
+                Documentação
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../equipe/"
+                 >
+                Equipe
+              </a>
+            
+          </li>
+        
+      </ul>
+
+      <!-- Search — reuses Material's native search component -->
+      <div class="nav-search-wrap">
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando a pesquisa
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Compiladores (G16)
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sobre/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sobre
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentação
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentação
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../escopo-e-arq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escopo e Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gramatica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gramática
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-estrutura-do-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Estrutura do Nó
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Estrutura do Nó">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-filhos-e-listas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Filhos e Listas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-campo-valor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Campo valor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-enumeracoes-auxiliares" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Enumerações Auxiliares
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tipos-de-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tipos de Nó
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tipos de Nó">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-estrutura-do-programa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Estrutura do Programa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-declaracoes-e-atribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Declarações e Atribuição
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-controle-de-fluxo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Controle de Fluxo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-funcoes-e-saida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Funções e Saída
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-tipo-inferido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Tipo Inferido
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-exemplo-codigo-arvore-impressa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Exemplo: Código → Árvore Impressa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Exemplo: Código → Árvore Impressa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-programa-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Programa Completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-precedencia-e-parenteses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Precedência e Parênteses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-testes-da-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Testes da AST
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Análise Semântica
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint1/sprint1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint2/sprint2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint3/sprint3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint4/sprint4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../equipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-estrutura-do-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Estrutura do Nó
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Estrutura do Nó">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-filhos-e-listas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Filhos e Listas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-campo-valor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Campo valor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-enumeracoes-auxiliares" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Enumerações Auxiliares
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tipos-de-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tipos de Nó
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tipos de Nó">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-estrutura-do-programa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Estrutura do Programa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-declaracoes-e-atribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Declarações e Atribuição
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-controle-de-fluxo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Controle de Fluxo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-funcoes-e-saida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Funções e Saída
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-tipo-inferido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Tipo Inferido
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-exemplo-codigo-arvore-impressa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Exemplo: Código → Árvore Impressa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Exemplo: Código → Árvore Impressa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-programa-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Programa Completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-precedencia-e-parenteses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Precedência e Parênteses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-testes-da-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Testes da AST
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="arvore-sintatica-abstrata-ast">Árvore Sintática Abstrata (AST)</h1>
+<p>A AST é a representação intermediária do compilador: uma árvore em memória que guarda a estrutura do programa sem os detalhes da sintaxe concreta (parênteses, <code>;</code>, chaves). Ela é construída pelas ações semânticas do Bison durante a própria análise sintática, percorrida pela análise semântica e, na próxima etapa, servirá de base para a geração de Python.</p>
+<p>A definição está em <code>src/ast.h</code> e os construtores, a impressão e a liberação da árvore estão em <code>src/ast.c</code>.</p>
+<hr />
+<h2 id="1-estrutura-do-no">1. Estrutura do Nó</h2>
+<p>Todos os nós da árvore usam a mesma estrutura, <code>struct No</code>:</p>
+<pre><code class="language-c">#define NO_MAX_FILHOS 4
+
+typedef struct No {
+    TipoNo categoria;
+    TipoDado tipo_inferido;
+    int linha;
+    Operador operador;
+    Declarador declarador;
+    union {
+        double numero;
+        char *texto;
+        int booleano;
+    } valor;
+    struct No *filhos[NO_MAX_FILHOS];
+    struct No *proximo;
+} No;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>categoria</code></td>
+<td>O tipo do nó (<code>NO_IF</code>, <code>NO_BINARIO</code>, etc.), conforme a <a href="#2-tipos-de-no">seção 2</a>.</td>
+</tr>
+<tr>
+<td><code>tipo_inferido</code></td>
+<td>O tipo de dado da expressão, preenchido pela análise semântica. Vale <code>TIPO_DESCONHECIDO</code> até lá.</td>
+</tr>
+<tr>
+<td><code>linha</code></td>
+<td>A linha do código-fonte em que a construção começa, usada nas mensagens de erro semântico.</td>
+</tr>
+<tr>
+<td><code>operador</code></td>
+<td>O operador de um nó <code>NO_BINARIO</code> ou <code>NO_UNARIO</code>. Nos demais nós vale <code>OP_NENHUM</code>.</td>
+</tr>
+<tr>
+<td><code>declarador</code></td>
+<td>Em <code>NO_DECL_VAR</code>, indica se a variável foi declarada com <code>let</code>, <code>var</code> ou <code>const</code>.</td>
+</tr>
+<tr>
+<td><code>valor</code></td>
+<td>O dado do nó, quando existe: número, texto (nomes e strings) ou booleano.</td>
+</tr>
+<tr>
+<td><code>filhos</code></td>
+<td>Até 4 filhos, cada um em uma posição com papel fixo (por exemplo, no <code>if</code>: condição, então, senão).</td>
+</tr>
+<tr>
+<td><code>proximo</code></td>
+<td>O próximo irmão, para formar listas (comandos, parâmetros, argumentos).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="11-filhos-e-listas">1.1 Filhos e Listas</h3>
+<p>A árvore combina duas formas de ligação:</p>
+<ul>
+<li><strong>Filhos em posições fixas (<code>filhos[0..3]</code>):</strong> cada tipo de nó define o papel de cada posição. Um filho opcional ausente fica como <code>NULL</code>, como o <code>else</code> de um <code>if</code> sem <code>else</code> ou as partes vazias de um <code>for</code>.</li>
+<li><strong>Listas de irmãos (<code>proximo</code>):</strong> sequências de tamanho variável são listas encadeadas. O filho aponta para o primeiro elemento, e os demais seguem pelo <code>proximo</code>. É assim que são representados os comandos de um programa ou bloco, os parâmetros de uma função e os argumentos de uma chamada ou de um <code>console.log</code>.</li>
+</ul>
+<p>As listas são montadas por <code>no_lista_adiciona</code>, que ignora elementos <code>NULL</code>. Assim, as construções que não geram nó, como um comando descartado pela recuperação de erros, simplesmente não aparecem na lista.</p>
+<p>Uma declaração com várias variáveis (<code>let a = 1, b = 2;</code>) gera <strong>um nó <code>NO_DECL_VAR</code> por variável</strong>, encadeados como comandos irmãos.</p>
+<h3 id="12-campo-valor">1.2 Campo <code>valor</code></h3>
+<table>
+<thead>
+<tr>
+<th>Campo da <code>union</code></th>
+<th>Usado por</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>texto</code></td>
+<td><code>NO_DECL_VAR</code>, <code>NO_ATRIBUICAO</code>, <code>NO_FUNCAO</code>, <code>NO_PARAMETRO</code>, <code>NO_CHAMADA</code> e <code>NO_ID</code> (o nome); <code>NO_STRING</code> (o texto, com as aspas)</td>
+</tr>
+<tr>
+<td><code>numero</code></td>
+<td><code>NO_NUMERO</code> (sempre <code>double</code>, inteiro ou decimal)</td>
+</tr>
+<tr>
+<td><code>booleano</code></td>
+<td><code>NO_BOOLEANO</code> (<code>1</code> para <code>true</code>, <code>0</code> para <code>false</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>O texto é alocado pelo léxico (<code>strdup</code>) e passa a pertencer ao nó: ele é liberado junto com a árvore, por <code>ast_libera</code>, que percorre os filhos e as listas recursivamente.</p>
+<h3 id="13-enumeracoes-auxiliares">1.3 Enumerações Auxiliares</h3>
+<p><strong><code>TipoDado</code></strong>, o tipo inferido pela análise semântica:</p>
+<table>
+<thead>
+<tr>
+<th>Valor</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TIPO_DESCONHECIDO</code></td>
+<td>Tipo que não dá para saber em tempo de compilação (parâmetros, retorno de funções, variáveis reatribuídas com outro tipo)</td>
+</tr>
+<tr>
+<td><code>TIPO_NUMERO</code></td>
+<td>Número</td>
+</tr>
+<tr>
+<td><code>TIPO_STRING</code></td>
+<td>Texto</td>
+</tr>
+<tr>
+<td><code>TIPO_BOOLEANO</code></td>
+<td><code>true</code> ou <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>Operador</code></strong>, usado por <code>NO_BINARIO</code> e <code>NO_UNARIO</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Valor</th>
+<th>Operador</th>
+<th>Valor</th>
+<th>Operador</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OP_SOMA</code></td>
+<td><code>+</code></td>
+<td><code>OP_MENOR</code></td>
+<td><code>&lt;</code></td>
+</tr>
+<tr>
+<td><code>OP_SUBTRACAO</code></td>
+<td><code>-</code></td>
+<td><code>OP_MENOR_IGUAL</code></td>
+<td><code>&lt;=</code></td>
+</tr>
+<tr>
+<td><code>OP_MULTIPLICACAO</code></td>
+<td><code>*</code></td>
+<td><code>OP_MAIOR</code></td>
+<td><code>&gt;</code></td>
+</tr>
+<tr>
+<td><code>OP_DIVISAO</code></td>
+<td><code>/</code></td>
+<td><code>OP_MAIOR_IGUAL</code></td>
+<td><code>&gt;=</code></td>
+</tr>
+<tr>
+<td><code>OP_IGUAL</code></td>
+<td><code>==</code></td>
+<td><code>OP_E</code></td>
+<td><code>&amp;&amp;</code></td>
+</tr>
+<tr>
+<td><code>OP_DIFERENTE</code></td>
+<td><code>!=</code></td>
+<td><code>OP_OU</code></td>
+<td><code>||</code></td>
+</tr>
+<tr>
+<td><code>OP_NEGATIVO</code></td>
+<td><code>-</code> unário</td>
+<td><code>OP_NAO</code></td>
+<td><code>!</code></td>
+</tr>
+</tbody>
+</table>
+<p>O valor <code>OP_NENHUM</code> indica um nó sem operador.</p>
+<p><strong><code>Declarador</code></strong>: <code>DECLARADOR_LET</code>, <code>DECLARADOR_VAR</code> e <code>DECLARADOR_CONST</code>.</p>
+<hr />
+<h2 id="2-tipos-de-no">2. Tipos de Nó</h2>
+<p>O <code>enum TipoNo</code> define 19 categorias. A tabela mostra a construção do Mini-JS que gera cada uma, os campos que ela usa e o papel de cada filho.</p>
+<h3 id="21-estrutura-do-programa">2.1 Estrutura do Programa</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Gerado por</th>
+<th>Campos</th>
+<th>Filhos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_PROGRAMA</code></td>
+<td>o programa inteiro (raiz da árvore)</td>
+<td>—</td>
+<td><code>[0]</code> lista de comandos</td>
+</tr>
+<tr>
+<td><code>NO_BLOCO</code></td>
+<td><code>{ ... }</code></td>
+<td>—</td>
+<td><code>[0]</code> lista de comandos</td>
+</tr>
+<tr>
+<td><code>NO_VAZIO</code></td>
+<td><code>;</code> sozinho</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-declaracoes-e-atribuicao">2.2 Declarações e Atribuição</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Gerado por</th>
+<th>Campos</th>
+<th>Filhos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_DECL_VAR</code></td>
+<td><code>let x = 1;</code>, <code>var y;</code>, <code>const z = 2;</code> (um nó por variável)</td>
+<td><code>declarador</code>, <code>valor.texto</code> (nome)</td>
+<td><code>[0]</code> inicializador (opcional)</td>
+</tr>
+<tr>
+<td><code>NO_ATRIBUICAO</code></td>
+<td><code>x = 10;</code> e as atribuições na inicialização e no incremento do <code>for</code></td>
+<td><code>valor.texto</code> (nome)</td>
+<td><code>[0]</code> expressão</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-controle-de-fluxo">2.3 Controle de Fluxo</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Gerado por</th>
+<th>Campos</th>
+<th>Filhos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_IF</code></td>
+<td><code>if (c) ...</code> e <code>if (c) ... else ...</code></td>
+<td>—</td>
+<td><code>[0]</code> condição, <code>[1]</code> então, <code>[2]</code> senão (opcional)</td>
+</tr>
+<tr>
+<td><code>NO_WHILE</code></td>
+<td><code>while (c) ...</code></td>
+<td>—</td>
+<td><code>[0]</code> condição, <code>[1]</code> corpo</td>
+</tr>
+<tr>
+<td><code>NO_FOR</code></td>
+<td><code>for (init; cond; incr) ...</code></td>
+<td>—</td>
+<td><code>[0]</code> inicialização, <code>[1]</code> condição, <code>[2]</code> incremento, <code>[3]</code> corpo (os três primeiros são opcionais)</td>
+</tr>
+</tbody>
+</table>
+<p>No <code>for</code>, a inicialização é uma lista de <code>NO_DECL_VAR</code> (<code>let i = 0</code>) ou um <code>NO_ATRIBUICAO</code> (<code>i = 0</code>), e o incremento é um <code>NO_ATRIBUICAO</code> (<code>i = i + 1</code>) ou uma expressão qualquer.</p>
+<h3 id="24-funcoes-e-saida">2.4 Funções e Saída</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Gerado por</th>
+<th>Campos</th>
+<th>Filhos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_FUNCAO</code></td>
+<td><code>function soma(a, b) { ... }</code></td>
+<td><code>valor.texto</code> (nome)</td>
+<td><code>[0]</code> lista de parâmetros (opcional), <code>[1]</code> corpo (<code>NO_BLOCO</code>)</td>
+</tr>
+<tr>
+<td><code>NO_PARAMETRO</code></td>
+<td>cada parâmetro da função</td>
+<td><code>valor.texto</code> (nome)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>NO_RETURN</code></td>
+<td><code>return;</code> e <code>return expressao;</code></td>
+<td>—</td>
+<td><code>[0]</code> expressão (opcional)</td>
+</tr>
+<tr>
+<td><code>NO_CHAMADA</code></td>
+<td><code>soma(1, 2)</code>, como comando ou dentro de uma expressão</td>
+<td><code>valor.texto</code> (nome da função)</td>
+<td><code>[0]</code> lista de argumentos (opcional)</td>
+</tr>
+<tr>
+<td><code>NO_PRINT</code></td>
+<td><code>console.log(...)</code></td>
+<td>—</td>
+<td><code>[0]</code> lista de argumentos (opcional)</td>
+</tr>
+</tbody>
+</table>
+<p>Um <code>return</code> fora de função não gera nó: o parser relata o erro e descarta o comando.</p>
+<h3 id="25-expressoes">2.5 Expressões</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Gerado por</th>
+<th>Campos</th>
+<th>Filhos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_BINARIO</code></td>
+<td><code>a + b</code>, <code>a &lt; b</code>, <code>a &amp;&amp; b</code>, etc.</td>
+<td><code>operador</code></td>
+<td><code>[0]</code> operando esquerdo, <code>[1]</code> operando direito</td>
+</tr>
+<tr>
+<td><code>NO_UNARIO</code></td>
+<td><code>-x</code> e <code>!x</code></td>
+<td><code>operador</code> (<code>OP_NEGATIVO</code> ou <code>OP_NAO</code>)</td>
+<td><code>[0]</code> operando</td>
+</tr>
+<tr>
+<td><code>NO_ID</code></td>
+<td>uso de uma variável</td>
+<td><code>valor.texto</code> (nome)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>NO_NUMERO</code></td>
+<td><code>42</code>, <code>3.14</code></td>
+<td><code>valor.numero</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>NO_STRING</code></td>
+<td><code>"texto"</code>, <code>'texto'</code></td>
+<td><code>valor.texto</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>NO_BOOLEANO</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td><code>valor.booleano</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Os parênteses não geram nó: eles só determinam a forma da árvore. Por isso, <code>(a + b) * c</code> e <code>a + b * c</code> geram árvores diferentes, e a precedência dos operadores fica registrada na própria estrutura.</p>
+<h3 id="26-tipo-inferido">2.6 Tipo Inferido</h3>
+<p>A análise semântica percorre a AST e preenche o campo <code>tipo_inferido</code> dos nós de expressão (<code>NO_NUMERO</code>, <code>NO_STRING</code>, <code>NO_BOOLEANO</code>, <code>NO_ID</code>, <code>NO_BINARIO</code>, <code>NO_UNARIO</code> e <code>NO_CHAMADA</code>), além de <code>NO_DECL_VAR</code> e <code>NO_ATRIBUICAO</code>, que recebem o tipo do valor atribuído. O retorno de uma chamada de função conta sempre como <code>TIPO_DESCONHECIDO</code>.</p>
+<hr />
+<h2 id="3-exemplo-codigo-arvore-impressa">3. Exemplo: Código → Árvore Impressa</h2>
+<p>A opção <code>--ast</code> imprime a árvore depois da análise sintática, antes da análise semântica:</p>
+<pre><code class="language-bash">./minijs --ast programa.js
+</code></pre>
+<p>A árvore só é impressa se o programa não tiver erros léxicos ou sintáticos. Cada linha mostra a categoria do nó seguida do seu valor: o nome, o literal, o operador ou, em <code>NO_DECL_VAR</code>, o declarador e o nome. Os filhos de <code>NO_IF</code>, <code>NO_WHILE</code> e <code>NO_FOR</code> aparecem com o seu papel (<code>condicao:</code>, <code>entao:</code>, <code>senao:</code>, <code>inicializacao:</code>, <code>incremento:</code>, <code>corpo:</code>), e os filhos ausentes (<code>NULL</code>) são omitidos.</p>
+<h3 id="31-programa-completo">3.1 Programa Completo</h3>
+<p>O programa abaixo usa funções com recursão, declarações com <code>const</code> e <code>let</code>, <code>if</code>/<code>else</code>, <code>for</code>, <code>console.log</code> com mais de um argumento e operadores binários e unários:</p>
+<pre><code class="language-javascript">function fatorial(n) {
+    if (n &lt;= 1) {
+        return 1;
+    }
+    return n * fatorial(n - 1);
+}
+
+const limite = 100;
+let resultado = fatorial(5);
+let ativo = true;
+
+if (resultado &gt; limite &amp;&amp; !ativo) {
+    console.log(&quot;grande&quot;, resultado);
+} else {
+    console.log(&quot;pequeno&quot;);
+}
+
+for (let i = 0; i &lt; 3; i = i + 1) {
+    resultado = resultado - i;
+}
+</code></pre>
+<p>Saída de <code>./minijs --ast</code>:</p>
+<pre><code class="language-text">NO_PROGRAMA
+├── NO_FUNCAO fatorial
+│   ├── NO_PARAMETRO n
+│   └── NO_BLOCO
+│       ├── NO_IF
+│       │   ├── condicao: NO_BINARIO &lt;=
+│       │   │   ├── NO_ID n
+│       │   │   └── NO_NUMERO 1
+│       │   └── entao: NO_BLOCO
+│       │       └── NO_RETURN
+│       │           └── NO_NUMERO 1
+│       └── NO_RETURN
+│           └── NO_BINARIO *
+│               ├── NO_ID n
+│               └── NO_CHAMADA fatorial
+│                   └── NO_BINARIO -
+│                       ├── NO_ID n
+│                       └── NO_NUMERO 1
+├── NO_DECL_VAR const limite
+│   └── NO_NUMERO 100
+├── NO_DECL_VAR let resultado
+│   └── NO_CHAMADA fatorial
+│       └── NO_NUMERO 5
+├── NO_DECL_VAR let ativo
+│   └── NO_BOOLEANO true
+├── NO_IF
+│   ├── condicao: NO_BINARIO &amp;&amp;
+│   │   ├── NO_BINARIO &gt;
+│   │   │   ├── NO_ID resultado
+│   │   │   └── NO_ID limite
+│   │   └── NO_UNARIO !
+│   │       └── NO_ID ativo
+│   ├── entao: NO_BLOCO
+│   │   └── NO_PRINT
+│   │       ├── NO_STRING &quot;grande&quot;
+│   │       └── NO_ID resultado
+│   └── senao: NO_BLOCO
+│       └── NO_PRINT
+│           └── NO_STRING &quot;pequeno&quot;
+└── NO_FOR
+    ├── inicializacao: NO_DECL_VAR let i
+    │   └── NO_NUMERO 0
+    ├── condicao: NO_BINARIO &lt;
+    │   ├── NO_ID i
+    │   └── NO_NUMERO 3
+    ├── incremento: NO_ATRIBUICAO i
+    │   └── NO_BINARIO +
+    │       ├── NO_ID i
+    │       └── NO_NUMERO 1
+    └── corpo: NO_BLOCO
+        └── NO_ATRIBUICAO resultado
+            └── NO_BINARIO -
+                ├── NO_ID resultado
+                └── NO_ID i
+</code></pre>
+<p>Alguns pontos que a árvore mostra:</p>
+<ul>
+<li><strong>Listas de irmãos:</strong> os comandos do programa (<code>NO_FUNCAO</code>, as três <code>NO_DECL_VAR</code>, <code>NO_IF</code> e <code>NO_FOR</code>) aparecem como filhos de <code>NO_PROGRAMA</code>, mas na estrutura são uma lista encadeada pelo campo <code>proximo</code>. O mesmo vale para os argumentos do primeiro <code>NO_PRINT</code>.</li>
+<li><strong>Filho opcional ausente:</strong> o <code>if</code> dentro de <code>fatorial</code> não tem <code>else</code>, então só aparecem <code>condicao</code> e <code>entao</code>.</li>
+<li><strong>Chamada dentro de expressão:</strong> <code>fatorial(n - 1)</code> é um <code>NO_CHAMADA</code> como operando do <code>*</code>, e <code>fatorial(5)</code> é o inicializador de <code>resultado</code>.</li>
+<li><strong>Precedência:</strong> em <code>resultado &gt; limite &amp;&amp; !ativo</code>, o <code>&amp;&amp;</code> fica na raiz da condição, porque tem a menor precedência, e o <code>!</code> se aplica apenas a <code>ativo</code>.</li>
+<li><strong>Strings com aspas:</strong> o valor de <code>NO_STRING</code> mantém as aspas do código-fonte.</li>
+</ul>
+<h3 id="32-precedencia-e-parenteses">3.2 Precedência e Parênteses</h3>
+<p>Os parênteses não aparecem na árvore, mas mudam a sua forma:</p>
+<pre><code class="language-javascript">let a = 1 + 2 * 3;
+let b = (1 + 2) * 3;
+</code></pre>
+<pre><code class="language-text">NO_PROGRAMA
+├── NO_DECL_VAR let a
+│   └── NO_BINARIO +
+│       ├── NO_NUMERO 1
+│       └── NO_BINARIO *
+│           ├── NO_NUMERO 2
+│           └── NO_NUMERO 3
+└── NO_DECL_VAR let b
+    └── NO_BINARIO *
+        ├── NO_BINARIO +
+        │   ├── NO_NUMERO 1
+        │   └── NO_NUMERO 2
+        └── NO_NUMERO 3
+</code></pre>
+<p>Em <code>a</code>, a multiplicação é calculada primeiro e fica mais funda na árvore; em <code>b</code>, os parênteses fazem a soma ficar embaixo. Quem percorre a árvore (a análise semântica e, depois, o gerador de Python) não precisa conhecer as regras de precedência: a ordem de avaliação já está na estrutura.</p>
+<h3 id="33-testes-da-ast">3.3 Testes da AST</h3>
+<p>A pasta <code>tests/ast/</code> tem pares de arquivos <code>.js</code> e <code>.esperado</code>. Os scripts <code>run_tests.sh</code> e <code>run_tests.ps1</code> executam <code>./minijs --ast</code> em cada <code>.js</code> e comparam a saída com o <code>.esperado</code> correspondente.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Grupo 16, Compiladores(T01)
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

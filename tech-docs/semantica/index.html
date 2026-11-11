@@ -1,0 +1,1872 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../ast/">
+      
+      
+        <link rel="next" href="../../sprints/sprint1/sprint1/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Análise Semântica - Compiladores (G16)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#analise-semantica" class="md-skip">
+          Ir para o conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+<header class="custom-header md-header" data-md-component="header">
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Título navbar -->
+      <a href="./" class="brand">
+        <span class="brand-name">Compiladores</span>
+        <span class="brand-tag">(G16)</span>
+      </a>
+
+      <!-- Chaves navbar -->
+      <ul class="nav-links">
+        
+          <li>
+            
+              <a href="../.."
+                 >
+                Home
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../sobre/"
+                 >
+                Sobre
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../escopo-e-arq/"
+                 class="current">
+                Documentação
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../equipe/"
+                 >
+                Equipe
+              </a>
+            
+          </li>
+        
+      </ul>
+
+      <!-- Search — reuses Material's native search component -->
+      <div class="nav-search-wrap">
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando a pesquisa
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Compiladores (G16)
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sobre/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sobre
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentação
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentação
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../escopo-e-arq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escopo e Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gramatica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gramática
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ast/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Análise Semântica
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Análise Semântica
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-tabela-de-simbolos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tabela de Símbolos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Tabela de Símbolos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-estrutura-do-simbolo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Estrutura do Símbolo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-categorias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Categorias
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-operacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Operações
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-organizacao-em-memoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Organização em Memória
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-escopos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Escopos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Escopos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-niveis-de-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Níveis de Escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-declaracao-e-uso-de-nomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Declaração e Uso de Nomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-exemplo-com-tabela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Exemplo com --tabela
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-regras-semanticas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Regras Semânticas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Regras Semânticas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-resumo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Resumo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-declaracao-e-uso-de-variaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Declaração e Uso de Variáveis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Declaração e Uso de Variáveis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-1-uso-de-nome-nao-declarado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 1: Uso de nome não declarado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-2-redeclaracao-no-mesmo-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 2: Redeclaração no mesmo escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-3-sombreamento-de-nome-de-escopo-externo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 3: Sombreamento de nome de escopo externo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-4-atribuicao-a-const" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 4: Atribuição a const
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-funcoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Funções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Funções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-5-funcao-fora-do-escopo-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 5: Função fora do escopo global
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-6-declaracao-direto-no-corpo-de-ifelsewhilefor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 6: Declaração direto no corpo de if/else/while/for
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-7-chamada-de-funcao-nao-declarada-ou-antes-da-declaracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 7: Chamada de função não declarada ou antes da declaração
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-8-chamada-de-algo-que-nao-e-funcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 8: Chamada de algo que não é função
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-9-numero-de-argumentos-diferente-do-de-parametros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 9: Número de argumentos diferente do de parâmetros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-10-atribuicao-a-variavel-global-dentro-de-funcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 10: Atribuição a variável global dentro de função
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-tipos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Tipos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Tipos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-11-string-com-numero-ou-booleano-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 11: String com número ou booleano no +
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-12-string-em-operacao-aritmetica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 12: String em operação aritmética
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-13-comparacao-entre-tipos-diferentes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 13: Comparação entre tipos diferentes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint1/sprint1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint2/sprint2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint3/sprint3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint4/sprint4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../equipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-tabela-de-simbolos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tabela de Símbolos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Tabela de Símbolos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-estrutura-do-simbolo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Estrutura do Símbolo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-categorias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Categorias
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-operacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Operações
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-organizacao-em-memoria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Organização em Memória
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-escopos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Escopos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Escopos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-niveis-de-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Níveis de Escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-declaracao-e-uso-de-nomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Declaração e Uso de Nomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-exemplo-com-tabela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Exemplo com --tabela
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-regras-semanticas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Regras Semânticas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Regras Semânticas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-resumo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Resumo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-declaracao-e-uso-de-variaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Declaração e Uso de Variáveis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Declaração e Uso de Variáveis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-1-uso-de-nome-nao-declarado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 1: Uso de nome não declarado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-2-redeclaracao-no-mesmo-escopo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 2: Redeclaração no mesmo escopo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-3-sombreamento-de-nome-de-escopo-externo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 3: Sombreamento de nome de escopo externo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-4-atribuicao-a-const" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 4: Atribuição a const
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-funcoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Funções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Funções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-5-funcao-fora-do-escopo-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 5: Função fora do escopo global
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-6-declaracao-direto-no-corpo-de-ifelsewhilefor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 6: Declaração direto no corpo de if/else/while/for
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-7-chamada-de-funcao-nao-declarada-ou-antes-da-declaracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 7: Chamada de função não declarada ou antes da declaração
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-8-chamada-de-algo-que-nao-e-funcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 8: Chamada de algo que não é função
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-9-numero-de-argumentos-diferente-do-de-parametros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 9: Número de argumentos diferente do de parâmetros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-10-atribuicao-a-variavel-global-dentro-de-funcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 10: Atribuição a variável global dentro de função
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-tipos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Tipos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Tipos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regra-11-string-com-numero-ou-booleano-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 11: String com número ou booleano no +
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-12-string-em-operacao-aritmetica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 12: String em operação aritmética
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regra-13-comparacao-entre-tipos-diferentes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regra 13: Comparação entre tipos diferentes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="analise-semantica">Análise Semântica</h1>
+<p>A análise semântica verifica o que a gramática não consegue expressar: se cada nome usado foi declarado, se as declarações respeitam as regras de escopo, se as chamadas de função batem com as declarações e se os tipos das operações são compatíveis.</p>
+<p>Ela é feita em <strong>uma única passada sobre a AST</strong> (<code>src/semantico.c</code>), apoiada na tabela de símbolos (<code>src/tabela.c</code>), e só é executada quando as análises léxica e sintática terminam sem erros. A passada não para no primeiro erro: cada erro é relatado no formato <code>Erro semantico na linha N: ...</code> e contado, e ao final, se houver algum, a compilação falha com a mensagem <code>Compilacao falhou na fase semantica (N erro(s))</code>.</p>
+<hr />
+<h2 id="1-tabela-de-simbolos">1. Tabela de Símbolos</h2>
+<p>A tabela de símbolos guarda as informações de cada nome declarado no programa: variáveis, funções e parâmetros.</p>
+<h3 id="11-estrutura-do-simbolo">1.1 Estrutura do Símbolo</h3>
+<pre><code class="language-c">typedef struct Simbolo {
+    char *nome;
+    CategoriaSimbolo categoria;
+    TipoDado tipo_inferido;
+    int linha;
+    int num_parametros;
+    int nivel_escopo;
+    struct Simbolo *proximo_no_escopo;
+    struct Simbolo *proximo_na_tabela;
+} Simbolo;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nome</code></td>
+<td>O nome declarado (uma cópia, que pertence à tabela).</td>
+</tr>
+<tr>
+<td><code>categoria</code></td>
+<td>O que o nome representa: <code>let</code>, <code>var</code>, <code>const</code>, função ou parâmetro.</td>
+</tr>
+<tr>
+<td><code>tipo_inferido</code></td>
+<td>O tipo conhecido do valor (<code>numero</code>, <code>string</code>, <code>booleano</code> ou <code>desconhecido</code>), atualizado durante a análise.</td>
+</tr>
+<tr>
+<td><code>linha</code></td>
+<td>A linha da declaração, usada nas mensagens de erro (por exemplo, "declarado na linha 3").</td>
+</tr>
+<tr>
+<td><code>num_parametros</code></td>
+<td>Para funções, a quantidade de parâmetros, usada para conferir as chamadas.</td>
+</tr>
+<tr>
+<td><code>nivel_escopo</code></td>
+<td>A profundidade do escopo em que o nome foi declarado (<code>0</code> = global).</td>
+</tr>
+<tr>
+<td><code>proximo_no_escopo</code></td>
+<td>O próximo símbolo do mesmo escopo, usado nas buscas.</td>
+</tr>
+<tr>
+<td><code>proximo_na_tabela</code></td>
+<td>O próximo símbolo em ordem de declaração, usado na impressão e na liberação.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-categorias">1.2 Categorias</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Origem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIMBOLO_LET</code></td>
+<td><code>let x;</code></td>
+</tr>
+<tr>
+<td><code>SIMBOLO_VAR</code></td>
+<td><code>var x;</code> (com as mesmas regras de <code>let</code>, conforme a decisão de escopo)</td>
+</tr>
+<tr>
+<td><code>SIMBOLO_CONST</code></td>
+<td><code>const x = 1;</code></td>
+</tr>
+<tr>
+<td><code>SIMBOLO_FUNCAO</code></td>
+<td><code>function f(...) { ... }</code></td>
+</tr>
+<tr>
+<td><code>SIMBOLO_PARAMETRO</code></td>
+<td>cada parâmetro de uma função</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-operacoes">1.3 Operações</h3>
+<table>
+<thead>
+<tr>
+<th>Função</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>escopo_entra()</code></td>
+<td>Abre um escopo novo, um nível abaixo do atual.</td>
+</tr>
+<tr>
+<td><code>escopo_sai()</code></td>
+<td>Fecha o escopo atual e volta ao anterior. O escopo global nunca é fechado.</td>
+</tr>
+<tr>
+<td><code>escopo_nivel()</code></td>
+<td>Devolve o nível do escopo atual (<code>0</code> = global).</td>
+</tr>
+<tr>
+<td><code>tabela_insere(nome, categoria, tipo, linha)</code></td>
+<td>Insere um símbolo no escopo atual. Devolve <code>NULL</code> se o nome já existe nesse escopo.</td>
+</tr>
+<tr>
+<td><code>tabela_busca_local(nome)</code></td>
+<td>Procura o nome <strong>apenas no escopo atual</strong>.</td>
+</tr>
+<tr>
+<td><code>tabela_busca(nome)</code></td>
+<td>Procura o nome do escopo atual até o global, devolvendo a declaração mais próxima.</td>
+</tr>
+<tr>
+<td><code>tabela_imprime()</code></td>
+<td>Imprime todos os símbolos, em ordem de declaração (opção <code>--tabela</code>).</td>
+</tr>
+<tr>
+<td><code>tabela_libera()</code></td>
+<td>Libera todos os escopos e símbolos.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-organizacao-em-memoria">1.4 Organização em Memória</h3>
+<p>Os escopos formam uma <strong>pilha</strong>: cada escopo aponta para o anterior, até chegar ao global. Cada escopo tem a sua própria lista de símbolos, encadeada por <code>proximo_no_escopo</code>, e as buscas percorrem essas listas.</p>
+<p>Quando um escopo é fechado, ele sai da pilha e os seus nomes deixam de ser encontrados pelas buscas, mas os símbolos <strong>não são apagados</strong>: eles continuam numa segunda lista, global e em ordem de declaração, encadeada por <code>proximo_na_tabela</code>. É por isso que a opção <code>--tabela</code>, executada no fim da análise, consegue mostrar também os símbolos de funções e blocos que já foram fechados.</p>
+<hr />
+<h2 id="2-escopos">2. Escopos</h2>
+<h3 id="21-niveis-de-escopo">2.1 Níveis de Escopo</h3>
+<p>O escopo global tem nível <code>0</code>, e cada escopo aberto dentro de outro tem o nível do anterior mais um. A análise abre um escopo novo em três situações:</p>
+<table>
+<thead>
+<tr>
+<th>Construção</th>
+<th>Escopo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Função</strong></td>
+<td>Abre um escopo com os parâmetros e o corpo. O bloco do corpo <strong>não</strong> abre um segundo escopo: parâmetros e variáveis locais ficam no mesmo nível.</td>
+</tr>
+<tr>
+<td><strong>Bloco <code>{ ... }</code></strong></td>
+<td>Abre um escopo para as declarações do bloco, incluindo os blocos usados como corpo de <code>if</code>, <code>else</code> e <code>while</code>.</td>
+</tr>
+<tr>
+<td><strong><code>for</code></strong></td>
+<td>Abre um escopo para a inicialização (<code>let i = 0</code>). O bloco do corpo abre outro escopo, um nível abaixo. Assim, o <code>i</code> só existe dentro do laço, e dois <code>for (let i ...)</code> seguidos não entram em conflito.</td>
+</tr>
+</tbody>
+</table>
+<p>O <code>if</code> e o <code>while</code> não abrem escopo por si só: apenas os blocos do corpo deles. Como a declaração direto no corpo dessas estruturas é proibida (veja as regras), toda declaração interna fica dentro de um bloco.</p>
+<p>Por decisão de escopo, <strong><code>var</code> é tratado como <code>let</code></strong>: a variável é registrada com a categoria <code>var</code>, mas tem escopo de bloco e segue as mesmas regras. Não há o escopo de função nem o <em>hoisting</em> do <code>var</code> do JavaScript.</p>
+<h3 id="22-declaracao-e-uso-de-nomes">2.2 Declaração e Uso de Nomes</h3>
+<ul>
+<li><strong>Declaração:</strong> antes de inserir um nome, a análise procura o mesmo nome no escopo atual (<code>tabela_busca_local</code>), para detectar redeclaração, e nos escopos externos (<code>tabela_busca</code>), para detectar sombreamento. Se a declaração for inválida, o nome não é inserido e a declaração anterior continua valendo.</li>
+<li><strong>Uso:</strong> cada uso de um nome (leitura de variável, atribuição ou chamada de função) é resolvido por <code>tabela_busca</code>, do escopo atual até o global. Se o nome não for encontrado, o uso é um erro.</li>
+<li><strong>Ordem:</strong> a tabela é preenchida na ordem em que a AST é percorrida, que é a ordem do código. Por isso, um nome só pode ser usado depois da sua declaração. Em <code>let x = x;</code>, o inicializador é analisado antes da inserção, então o <code>x</code> da direita ainda não existe.</li>
+<li><strong>Recursão:</strong> a função é inserida na tabela antes da análise do seu corpo, o que permite que ela chame a si mesma.</li>
+</ul>
+<h3 id="23-exemplo-com-tabela">2.3 Exemplo com <code>--tabela</code></h3>
+<p>A opção <code>--tabela</code> imprime a tabela de símbolos ao final da análise:</p>
+<pre><code class="language-bash">./minijs --tabela programa.js
+</code></pre>
+<pre><code class="language-javascript">let total = 0;
+var nome = &quot;Mini-JS&quot;;
+
+function soma(a, b) {
+    let resultado = a + b;
+    return resultado;
+}
+
+for (let i = 0; i &lt; 3; i = i + 1) {
+    let dobro = i * 2;
+    total = total + dobro;
+}
+
+for (let i = 0; i &lt; 2; i = i + 1) {
+    total = soma(total, i);
+}
+
+{
+    const ativo = true;
+    console.log(nome, ativo);
+}
+</code></pre>
+<pre><code class="language-text">Nivel  Nome                 Categoria  Tipo          Linha  Parametros
+0      total                let        desconhecido  1      -
+0      nome                 var        string        2      -
+0      soma                 funcao     desconhecido  4      2
+1      a                    parametro  desconhecido  4      -
+1      b                    parametro  desconhecido  4      -
+1      resultado            let        desconhecido  5      -
+1      i                    let        numero        9      -
+2      dobro                let        numero        10     -
+1      i                    let        numero        14     -
+1      ativo                const      booleano      19     -
+</code></pre>
+<p>O que a tabela mostra:</p>
+<ul>
+<li><strong>Função:</strong> <code>soma</code> fica no escopo global e registra <code>2</code> parâmetros; <code>a</code>, <code>b</code> e <code>resultado</code> ficam no mesmo nível (<code>1</code>), porque o corpo da função não abre um segundo escopo.</li>
+<li><strong><code>for</code>:</strong> o <code>i</code> de cada laço fica no escopo do <code>for</code> (nível <code>1</code>), e <code>dobro</code> fica no bloco do corpo (nível <code>2</code>). Os dois <code>i</code> são símbolos diferentes, em escopos diferentes.</li>
+<li><strong>Bloco solto:</strong> <code>ativo</code> fica no escopo do bloco <code>{ ... }</code> (nível <code>1</code>).</li>
+<li><strong>Tipos:</strong> a coluna <code>Tipo</code> mostra o estado no <strong>fim</strong> da análise. <code>total</code> começou como <code>numero</code>, mas recebeu o retorno de <code>soma(...)</code>, que é desconhecido, e por isso terminou como <code>desconhecido</code>. Parâmetros e funções são sempre <code>desconhecido</code>, e <code>resultado</code> também, por ser a soma de dois parâmetros.</li>
+</ul>
+<hr />
+<h2 id="3-regras-semanticas">3. Regras Semânticas</h2>
+<p>As regras abaixo são todas as verificações feitas pela análise semântica. A maioria decorre das decisões de escopo do projeto, cuja justificativa (a diferença entre JavaScript e Python) está em <a href="../escopo-e-arq/#22-o-que-nao-faz-parte-do-projeto">Escopo e Arquitetura, seção 2.2</a>.</p>
+<p>Os exemplos foram executados com o compilador; a linha indicada na mensagem é a linha do próprio exemplo. A pasta <code>tests/invalidos_semanticos/</code> tem casos de teste para as regras, com exceção da regra 6.</p>
+<h3 id="31-resumo">3.1 Resumo</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Regra</th>
+<th>Mensagem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Uso de nome não declarado</td>
+<td><code>identificador 'a' nao declarado</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Redeclaração no mesmo escopo</td>
+<td><code>'x' ja foi declarado neste escopo (linha N)</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sombreamento de nome de escopo externo</td>
+<td><code>'total' sombreia a declaracao da linha N em escopo externo</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Atribuição a <code>const</code></td>
+<td><code>atribuicao a constante 'LIMITE' (declarada na linha N)</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Função fora do escopo global</td>
+<td><code>funcao 'interna' declarada fora do escopo global</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Declaração direto no corpo de <code>if</code>/<code>else</code>/<code>while</code>/<code>for</code></td>
+<td><code>declaracao de 'x' direto no corpo do if, sem bloco</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Chamada de função não declarada ou antes da declaração</td>
+<td><code>funcao 'dobro' nao declarada antes da chamada</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Chamada de algo que não é função</td>
+<td><code>'x' nao e uma funcao (declarado na linha N)</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Número de argumentos diferente do de parâmetros</td>
+<td><code>funcao 'soma' espera 2 argumento(s), mas recebeu 1</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Atribuição a variável global dentro de função</td>
+<td><code>atribuicao a variavel global 'contador' dentro de funcao</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td>String com número ou booleano no <code>+</code></td>
+<td><code>operador '+' entre string e numero (...)</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>String em operação aritmética</td>
+<td><code>operador '*' nao pode ser usado com string</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Comparação entre tipos diferentes</td>
+<td><code>comparacao '&gt;=' entre tipos diferentes (numero e string)</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-declaracao-e-uso-de-variaveis">3.2 Declaração e Uso de Variáveis</h3>
+<h4 id="regra-1-uso-de-nome-nao-declarado">Regra 1: Uso de nome não declarado</h4>
+<p>Todo nome usado (em uma expressão, em uma atribuição ou como argumento) precisa ter sido declarado antes, no escopo atual ou em um escopo externo. Isso inclui usar uma variável fora do bloco em que ela foi declarada e usar a própria variável no seu inicializador (<code>let x = x + 1;</code>).</p>
+<pre><code class="language-javascript">{
+    let a = 1;
+}
+console.log(a);
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 4: identificador 'a' nao declarado
+</code></pre>
+<h4 id="regra-2-redeclaracao-no-mesmo-escopo">Regra 2: Redeclaração no mesmo escopo</h4>
+<p>Um nome não pode ser declarado duas vezes no mesmo escopo, qualquer que seja a forma (<code>let</code>, <code>var</code>, <code>const</code>, função ou parâmetro). Isso vale também para <code>var x; var x;</code>, que o JavaScript aceitaria, para parâmetros repetidos (<code>function f(a, a)</code>) e para uma variável local com o nome de um parâmetro, já que os dois ficam no mesmo escopo.</p>
+<pre><code class="language-javascript">let x = 1;
+let x = 2;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: 'x' ja foi declarado neste escopo (linha 1)
+</code></pre>
+<h4 id="regra-3-sombreamento-de-nome-de-escopo-externo">Regra 3: Sombreamento de nome de escopo externo</h4>
+<p>Não é permitido declarar, em um escopo interno, um nome que já existe em um escopo externo. Isso vale para blocos, laços e para variáveis locais de função com o nome de uma global.</p>
+<pre><code class="language-javascript">let total = 0;
+{
+    let total = 1;
+}
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 3: 'total' sombreia a declaracao da linha 1 em escopo externo
+</code></pre>
+<p><strong>Exceção:</strong> um <strong>parâmetro</strong> pode ter o nome de uma variável global, porque parâmetros são locais à função tanto em JS quanto em Python. O programa abaixo é válido:</p>
+<pre><code class="language-javascript">let x = 1;
+function f(x) {
+    return x * 2;
+}
+</code></pre>
+<h4 id="regra-4-atribuicao-a-const">Regra 4: Atribuição a <code>const</code></h4>
+<p>Uma variável declarada com <code>const</code> não pode receber outro valor.</p>
+<pre><code class="language-javascript">const LIMITE = 100;
+LIMITE = 200;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: atribuicao a constante 'LIMITE' (declarada na linha 1)
+</code></pre>
+<h3 id="33-funcoes">3.3 Funções</h3>
+<h4 id="regra-5-funcao-fora-do-escopo-global">Regra 5: Função fora do escopo global</h4>
+<p>Funções só podem ser declaradas no escopo global. Uma função dentro de outra função ou dentro de um bloco é um erro.</p>
+<pre><code class="language-javascript">function externa() {
+    function interna() {
+        return 1;
+    }
+    return 2;
+}
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: funcao 'interna' declarada fora do escopo global
+</code></pre>
+<h4 id="regra-6-declaracao-direto-no-corpo-de-ifelsewhilefor">Regra 6: Declaração direto no corpo de <code>if</code>/<code>else</code>/<code>while</code>/<code>for</code></h4>
+<p>Uma declaração de variável ou de função não pode ser o corpo inteiro de uma estrutura de controle: ela precisa estar dentro de um bloco <code>{ }</code>. A gramática aceita essa forma, e a verificação é feita aqui.</p>
+<pre><code class="language-javascript">let c = true;
+if (c)
+    let x = 1;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 3: declaracao de 'x' direto no corpo do if, sem bloco
+</code></pre>
+<h4 id="regra-7-chamada-de-funcao-nao-declarada-ou-antes-da-declaracao">Regra 7: Chamada de função não declarada ou antes da declaração</h4>
+<p>A função precisa ser declarada antes de ser chamada. Como a função entra na tabela antes da análise do seu corpo, a recursão é permitida.</p>
+<pre><code class="language-javascript">let r = dobro(2);
+function dobro(x) {
+    return x * 2;
+}
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 1: funcao 'dobro' nao declarada antes da chamada
+</code></pre>
+<h4 id="regra-8-chamada-de-algo-que-nao-e-funcao">Regra 8: Chamada de algo que não é função</h4>
+<p>Só é possível chamar nomes declarados como função.</p>
+<pre><code class="language-javascript">let x = 10;
+x();
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: 'x' nao e uma funcao (declarado na linha 1)
+</code></pre>
+<h4 id="regra-9-numero-de-argumentos-diferente-do-de-parametros">Regra 9: Número de argumentos diferente do de parâmetros</h4>
+<p>A chamada precisa ter exatamente tantos argumentos quanto a função tem parâmetros, nem a menos nem a mais.</p>
+<pre><code class="language-javascript">function soma(a, b) {
+    return a + b;
+}
+let r = soma(1);
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 4: funcao 'soma' espera 2 argumento(s), mas recebeu 1
+</code></pre>
+<h4 id="regra-10-atribuicao-a-variavel-global-dentro-de-funcao">Regra 10: Atribuição a variável global dentro de função</h4>
+<p>Uma função pode <strong>ler</strong> variáveis globais, mas não <strong>atribuir</strong> a elas. Atribuir a um parâmetro, mesmo que ele tenha o nome de uma global, é permitido.</p>
+<pre><code class="language-javascript">let contador = 0;
+function incrementa() {
+    contador = contador + 1;
+}
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 3: atribuicao a variavel global 'contador' dentro de funcao
+</code></pre>
+<h3 id="34-tipos">3.4 Tipos</h3>
+<p>A análise infere o tipo de cada expressão (<code>numero</code>, <code>string</code>, <code>booleano</code> ou <code>desconhecido</code>) e guarda o resultado no campo <code>tipo_inferido</code> do nó da AST. O tipo de uma variável vem do seu inicializador. As regras de tipo só geram erro quando <strong>os dois tipos envolvidos são conhecidos</strong>. Para não gerar erros falsos, ficam como <code>desconhecido</code>:</p>
+<ul>
+<li>parâmetros e o retorno de funções, cujo tipo depende de quem chama;</li>
+<li>variáveis reatribuídas com um valor de outro tipo, a partir da reatribuição;</li>
+<li>variáveis <code>let</code> e <code>var</code> externas lidas dentro de uma função, já que a função pode ser chamada depois de uma reatribuição (as <code>const</code> mantêm o tipo).</li>
+</ul>
+<p>Por exemplo, o programa abaixo é válido: o retorno de <code>dobro</code> é desconhecido, e <code>b</code> deixa de ter tipo conhecido ao ser reatribuída com uma string.</p>
+<pre><code class="language-javascript">function dobro(x) {
+    return x * 2;
+}
+let a = dobro(2) + &quot;!&quot;;
+let b = 1;
+b = &quot;um&quot;;
+let c = b * 2;
+</code></pre>
+<h4 id="regra-11-string-com-numero-ou-booleano-no">Regra 11: String com número ou booleano no <code>+</code></h4>
+<p>O <code>+</code> só aceita string com string (concatenação) ou números e booleanos entre si (soma). Misturar string com número ou booleano, em qualquer ordem, é um erro.</p>
+<pre><code class="language-javascript">let nome = &quot;Ana&quot;;
+let idade = 20;
+let texto = nome + idade;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 3: operador '+' entre string e numero (string so pode ser concatenada com string)
+</code></pre>
+<h4 id="regra-12-string-em-operacao-aritmetica">Regra 12: String em operação aritmética</h4>
+<p>Os operadores <code>-</code>, <code>*</code> e <code>/</code> e o menos unário não podem ser usados com strings.</p>
+<pre><code class="language-javascript">let preco = &quot;10&quot;;
+let total = preco * 2;
+let n = -preco;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: operador '*' nao pode ser usado com string
+Erro semantico na linha 3: operador '-' nao pode ser usado com string
+</code></pre>
+<h4 id="regra-13-comparacao-entre-tipos-diferentes">Regra 13: Comparação entre tipos diferentes</h4>
+<p>Os operadores <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> e <code>&gt;=</code> só podem comparar valores do mesmo tipo.</p>
+<pre><code class="language-javascript">let idade = 18;
+let maior = idade &gt;= &quot;18&quot;;
+</code></pre>
+<pre><code class="language-text">Erro semantico na linha 2: comparacao '&gt;=' entre tipos diferentes (numero e string)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Grupo 16, Compiladores(T01)
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
