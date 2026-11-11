@@ -16,7 +16,7 @@ Projeto de Compilador proposto pelo professor Sérgio Freitas na disciplina de C
 
 ## Estrutura do Repositório e Branches
 
-* `dev`: Código-fonte em C (analisadores léxico e sintático, testes e automação).
+* `dev`: Código-fonte em C (analisadores léxico, sintático e semântico, AST, tabela de símbolos, testes e automação).
 * `docs`: Documentação completa do projeto em MkDocs.
 * `main`: Branch principal com versões estáveis.
 * `comp`: Guia organizacional da disciplina.
@@ -25,21 +25,30 @@ Projeto de Compilador proposto pelo professor Sérgio Freitas na disciplina de C
 ### Organização de Arquivos (`dev`)
 
 ```text
-cdev/
+G16-Compiladores/
 ├── lexer/
-│   └── lexer.l
+│   └── lexer.l                # Analisador léxico (Flex)
 ├── parser/
-│   └── parser.y
+│   └── parser.y               # Analisador sintático (Bison) e construção da AST
 ├── src/
-│   └── main.c
+│   ├── main.c                 # Ponto de entrada: executa as fases e trata as opções
+│   ├── ast.c / ast.h          # Nós da AST: construtores, impressão e liberação
+│   ├── tabela.c / tabela.h    # Tabela de símbolos e pilha de escopos
+│   └── semantico.c / semantico.h  # Análise semântica sobre a AST
 ├── tests/
-│   ├── run_tests.ps1
-│   ├── unit_tests.c
-│   ├── validos/
-│   └── invalidos/
+│   ├── validos/               # Programas que devem compilar sem erros
+│   ├── invalidos/             # Programas com erro léxico ou sintático
+│   ├── invalidos_semanticos/  # Programas com erro semântico
+│   ├── ast/                   # Pares .js / .esperado para conferir a saída de --ast
+│   ├── unit_tests.c           # Testes unitários do parser, da AST, da tabela e da semântica
+│   ├── run_tests.sh           # Executor dos testes no Linux (Bash)
+│   └── run_tests.ps1          # Executor dos testes no Windows (PowerShell)
+├── teste.js                   # Programa de exemplo
 ├── Makefile
 └── README.md
 ```
+
+Os arquivos gerados na compilação (`lex.yy.c`, `parser.tab.c`, `parser.tab.h` e os executáveis `minijs` e `test_unit`) ficam na raiz do projeto e não são versionados.
 
 ---
 
@@ -53,38 +62,191 @@ make
 
 ## Como Executar
 
-Analisando um arquivo:
 ```bash
-./minijs caminho/para/arquivo.js
+./minijs [--ast] [--tabela] caminho/para/arquivo.js
 ```
 
-Avaliando código diretamente:
-```bash
-./minijs -e "let x = (10 + 20) * 3; console.log(x);"
-```
+No Windows, o executável é `minijs.exe`.
+
+| Comando | O que faz |
+|---|---|
+| `./minijs arquivo.js` | Executa as análises léxica, sintática e semântica. Se o programa for válido, não imprime nada. |
+| `./minijs --ast arquivo.js` | Também imprime a Árvore Sintática Abstrata (AST), depois da análise sintática. |
+| `./minijs --tabela arquivo.js` | Também imprime a tabela de símbolos, ao final da análise semântica. |
+| `./minijs --ast --tabela arquivo.js` | Imprime a AST e depois a tabela de símbolos. |
+
+* As opções podem vir antes ou depois do nome do arquivo.
+* Sem um arquivo, o `minijs` lê o programa da entrada padrão (por exemplo, `echo "let a = 1;" | ./minijs --tabela`).
+* A AST e a tabela são impressas na saída padrão (`stdout`). As mensagens de erro vão para a saída de erro (`stderr`).
+* A AST é impressa sempre que não há erro léxico ou sintático, e a tabela sempre que a análise semântica é executada, mesmo que ela encontre erros. Isso ajuda a entender a causa de um erro semântico.
+* Se houver um erro léxico ou sintático, a análise semântica não é executada, e nem a AST nem a tabela são impressas.
+
+### Código de Saída
+
+| Código | Situação |
+|---|---|
+| `0` | Compilação sem erros |
+| `1` | Erro léxico, sintático ou semântico, ou arquivo que não pôde ser aberto |
+
+Quando há erros no programa, a última mensagem informa a fase e a quantidade de erros, por exemplo: `Compilacao falhou na fase semantica (1 erro(s))`. Erros léxicos e sintáticos são relatados juntos, como fase `lexica/sintatica`.
 
 ---
 
 ## Como Rodar os Testes
 
+Os testes usam as mesmas ferramentas da compilação: `gcc`, `make`, `flex` e `bison`, disponíveis no `PATH`. O comando é o mesmo nos dois sistemas:
+
 ```bash
 make test
 ```
 
+O `make test` compila o `minijs` e o executável de testes unitários (`test_unit`) e depois chama o script de testes adequado ao sistema operacional.
+
+### Linux
+
+No Ubuntu/Debian, as ferramentas podem ser instaladas com:
+
+```bash
+sudo apt install gcc make flex bison
+```
+
+No Linux, o `make test` executa o script Bash `tests/run_tests.sh`. Depois de compilar com `make` e `make test_unit`, o script também pode ser executado diretamente:
+
+```bash
+bash tests/run_tests.sh
+```
+
+### Windows
+
+No Windows, o `make test` executa o script PowerShell `tests/run_tests.ps1`, que procura os executáveis `minijs.exe` e `test_unit.exe`. É preciso ter `gcc`, `make`, `flex` e `bison` instalados e no `PATH` (por exemplo, via MSYS2 ou MinGW). Depois de compilar, o script também pode ser executado diretamente:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tests/run_tests.ps1
+```
+
+### O que é Testado
+
+Os dois scripts executam as mesmas etapas:
+
+| Etapa | O que verifica |
+|---|---|
+| Testes unitários (`tests/unit_tests.c`) | Parser, construção da AST, tabela de símbolos e regras semânticas, analisando trechos de código diretamente em memória |
+| `tests/validos/` | Programas que devem compilar sem erros (código de saída `0`) |
+| `tests/invalidos/` | Programas com erro léxico ou sintático, que devem falhar |
+| `tests/invalidos_semanticos/` | Programas com erro semântico, que devem falhar com a mensagem `Erro semantico` (assim, um erro de sintaxe acidental no teste não passa despercebido) |
+| `tests/ast/` | Compara a saída de `./minijs --ast` com o arquivo `.esperado` correspondente e confere que, sem a opção, nada é impresso |
+
+Ao final, o script mostra o total de testes que passaram e falharam e retorna código de saída diferente de zero se algum teste falhar.
+
+Para adicionar um caso de teste, basta criar um arquivo `.js` na pasta correspondente; para a AST, crie também o `.esperado` com a saída esperada. Para remover os arquivos gerados na compilação, use `make clean`.
+
 ---
 
-## Saída Esperada
+## Exemplos de Saída
 
-**Entrada (`teste.js`):**
+### Sucesso
+
+**Entrada (`exemplo.js`):**
 ```javascript
+function dobro(n) {
+    return n * 2;
+}
+
 let total = (10 + 20) * 3;
-console.log(total);
+console.log("total:", dobro(total));
 ```
 
-**Saída:**
+Sem opções, um programa válido não produz saída, e o código de saída é `0`:
+
+```bash
+./minijs exemplo.js
+```
+
+Com `--ast --tabela`, o compilador imprime a AST e, em seguida, a tabela de símbolos:
+
+```bash
+./minijs --ast --tabela exemplo.js
+```
+
 ```text
-AST: Declaracao de variavel 'total' reconhecida.
-AST: Comando de impressao reconhecido.
-
-Compilacao bem-sucedida! Nao ha erros de sintaxe.
+NO_PROGRAMA
+├── NO_FUNCAO dobro
+│   ├── NO_PARAMETRO n
+│   └── NO_BLOCO
+│       └── NO_RETURN
+│           └── NO_BINARIO *
+│               ├── NO_ID n
+│               └── NO_NUMERO 2
+├── NO_DECL_VAR let total
+│   └── NO_BINARIO *
+│       ├── NO_BINARIO +
+│       │   ├── NO_NUMERO 10
+│       │   └── NO_NUMERO 20
+│       └── NO_NUMERO 3
+└── NO_PRINT
+    ├── NO_STRING "total:"
+    └── NO_CHAMADA dobro
+        └── NO_ID total
+Nivel  Nome                 Categoria  Tipo          Linha  Parametros
+0      dobro                funcao     desconhecido  1      1
+1      n                    parametro  desconhecido  1      -
+0      total                let        numero        5      -
 ```
+
+A AST usa as conexões `├──`, `└──` e `│`, mostra o papel dos filhos de `if`, `while` e `for` (`condicao:`, `entao:`, `senao:`, `corpo:` etc.) e omite os filhos ausentes. Na tabela, cada símbolo aparece com o nível do escopo (`0` = global), a categoria, o tipo inferido, a linha da declaração e, para funções, a quantidade de parâmetros.
+
+### Erro Sintático
+
+**Entrada:**
+```javascript
+let a = 10;
+let b = a +;
+console.log(a)
+let c = 3;
+```
+
+```text
+Erro sintatico na linha 2: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Erro sintatico na linha 4: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (2 erro(s))
+```
+
+O parser se recupera de cada erro descartando a entrada até o próximo `;` e continua a análise, por isso os dois erros são relatados na mesma execução. A falta de `;` na linha 3 é relatada na linha 4, onde o parser encontra o `let` inesperado.
+
+Erros léxicos aparecem da mesma forma e também interrompem a compilação. Por exemplo, para `let preco = 10 @ 2;`:
+
+```text
+Erro lexico: Caractere invalido '@' na linha 1
+Erro sintatico na linha 1: syntax error
+[RECUPERACAO] Erro sintatico descartado ate ';'
+Compilacao falhou na fase lexica/sintatica (1 erro(s))
+```
+
+### Erro Semântico
+
+**Entrada:**
+```javascript
+const LIMITE = 100;
+let nome = "Ana";
+
+function soma(a, b) {
+    return a + b;
+}
+
+LIMITE = 200;
+let texto = nome + 1;
+let r = soma(1);
+console.log(idade);
+```
+
+```text
+Erro semantico na linha 8: atribuicao a constante 'LIMITE' (declarada na linha 1)
+Erro semantico na linha 9: operador '+' entre string e numero (string so pode ser concatenada com string)
+Erro semantico na linha 10: funcao 'soma' espera 2 argumento(s), mas recebeu 1
+Erro semantico na linha 11: identificador 'idade' nao declarado
+Compilacao falhou na fase semantica (4 erro(s))
+```
+
+A análise semântica só é executada quando não há erros léxicos ou sintáticos. Ela também não para no primeiro erro: todos os erros do programa são relatados. A lista completa de regras semânticas está na [documentação do projeto](https://felipemso.github.io/G16-Compiladores/).

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 %}
 
 /* Evita a necessidade de linkar com a biblioteca do Flex (-lfl) no GCC */
@@ -21,31 +23,27 @@
 "else"                  { return ELSE; }
 "while"                 { return WHILE; }
 "for"                   { return FOR; }
-"do"                    { return DO; }
-"switch"                { return SWITCH; }
-"case"                  { return CASE; }
-"break"                 { return BREAK; }
-"continue"              { return CONTINUE; }
 "return"                { return RETURN; }
-"try"                   { return TRY; }
-"catch"                 { return CATCH; }
-"throw"                 { return THROW; }
-"class"                 { return CLASS; }
-"extends"               { return EXTENDS; }
-"import"                { return IMPORT; }
-"from"                  { return FROM; }
-"export"                { return EXPORT; }
-"new"                   { return NEW; }
-"in"                    { return IN; }
-"of"                    { return OF; }
-"delete"                { return DELETE; }
 "console.log"           { return PRINT; }
 
  /* 2. Valores Literais */
 "true"                          { yylval.booleano = 1; return BOOLEAN_VAL; }
 "false"                         { yylval.booleano = 0; return BOOLEAN_VAL; }
 [0-9]+(\.[0-9]+)?               { yylval.valor_num = atof(yytext); return NUM; }
-\"[^\"]*\"|\'[^\']*\'           { yylval.texto = strdup(yytext); return STRING_VAL; } 
+\"[^\"\r\n]*\"|\'[^\'\r\n]*\' { yylval.texto = strdup(yytext); return STRING_VAL; }
+
+ /* Detecta a quebra sem consumi-la, preservando a linha inicial da string. */
+(\"[^\"\r\n]*|\'[^\'\r\n]*)/[\r\n] {
+    fprintf(stderr, "Erro lexico: string com quebra de linha na linha %d\n", yylineno);
+    return YYUNDEF;
+}
+
+ /* Palavras reservadas fora do escopo: antes da regra de identificadores */
+"do"|"switch"|"case"|"break"|"continue"|"try"|"catch"|"throw"|"class"|"extends"|"import"|"from"|"export"|"new"|"in"|"of"|"delete"|"default"|"finally"|"this"|"typeof"|"instanceof"|"void"|"super"|"with"|"yield"|"await"|"enum"|"debugger" {
+    fprintf(stderr, "palavra reservada '%s' fora do escopo na linha %d\n", yytext, yylineno);
+    /* Token invalido para o Bison registrar o erro, mesmo com recuperacao. */
+    return YYUNDEF;
+}
 
  /* 3. Identificadores */
 [a-zA-Z_][a-zA-Z0-9_]*          { yylval.texto = strdup(yytext); return ID; }
@@ -53,6 +51,7 @@
  /* 4. Operadores Relacionais e Logicos */
 "=="                            { return EQ; }
 "!="                            { return NEQ; }
+"!"                             { return NOT; }
 "<="                            { return LEQ; }
 ">="                            { return GEQ; }
 "<"                             { return LT; }
@@ -81,6 +80,9 @@
 "/*"([^*]|\*+[^*/])*\*+"/"      { /* Ignora comentarios de bloco / multilinha */ }
 
  /* 8. Tratamento de Erro Lexico */
-.                       { printf("Erro lexico: Caractere invalido '%s'\n", yytext); }
+.                       {
+    fprintf(stderr, "Erro lexico: Caractere invalido '%s' na linha %d\n", yytext, yylineno);
+    return YYUNDEF;
+}
 
 %%
