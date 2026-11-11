@@ -12,7 +12,7 @@
         <link rel="prev" href="../../sprint2/sprint2/">
       
       
-        <link rel="next" href="../../../equipe/">
+        <link rel="next" href="../../sprint4/sprint4/">
       
       
         
@@ -594,10 +594,88 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#5-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-conflito-do-dangling-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Conflito do Dangling Else
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-conflito-do-consolelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Conflito do console.log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-merge-de-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Merge de Branches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprint4/sprint4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -726,6 +804,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#5-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-conflito-do-dangling-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Conflito do Dangling Else
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-conflito-do-consolelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Conflito do console.log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-merge-de-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Merge de Branches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -777,6 +905,24 @@
 <li><strong>Integração Léxico-Sintático:</strong> Definir a união de tipos semânticos (<code>%union</code>) para números, literais de texto e identificadores, comunicados através da variável global <code>yylval</code> e do cabeçalho <code>parser.tab.h</code>.</li>
 <li><strong>Recuperação e Sincronização de Erros:</strong> Implementar regras com o token especial <code>error</code> sincronizado no ponto e vírgula (<code>error SEMICOLON</code>), permitindo ao parser reportar erros sem abortar prematuramente a leitura do arquivo.</li>
 <li><strong>Rastreamento de Posição:</strong> Utilizar contadores de linha (<code>yylineno</code>) para exibir mensagens informativas de erro sintático via rotina <code>yyerror()</code>.</li>
+</ul>
+<h2 id="5-problemas-encontrados-e-solucoes">5. Problemas Encontrados e Soluções</h2>
+<p>Registro das dificuldades que surgiram durante a sprint e de como foram resolvidas.</p>
+<h3 id="51-conflito-do-dangling-else">5.1 Conflito do <em>Dangling Else</em></h3>
+<ul>
+<li><strong>Problema:</strong> Como o <code>else</code> é opcional, um <code>else</code> depois de dois <code>if</code> aninhados (<code>if (a) if (b) x; else y;</code>) pode pertencer a qualquer um deles. Para o Bison, isso aparece como um conflito de empilhar/reduzir (<em>shift/reduce</em>) no token <code>ELSE</code>.</li>
+<li><strong>Solução:</strong> Declarar o pseudo-token <code>LOWER_THAN_ELSE</code> com precedência menor que a de <code>ELSE</code> (<code>%nonassoc LOWER_THAN_ELSE</code> e <code>%nonassoc ELSE</code>) e aplicá-lo à regra do <code>if</code> sem <code>else</code> com <code>%prec LOWER_THAN_ELSE</code>. Assim o <code>else</code> fica associado ao <code>if</code> mais próximo, como no JavaScript. A solução entrou junto com as estruturas de controle (T06), e o conflito nunca chegou à branch <code>dev</code>. A explicação completa está na página de Gramática.</li>
+</ul>
+<h3 id="52-conflito-do-consolelog">5.2 Conflito do <code>console.log</code></h3>
+<ul>
+<li><strong>Problema:</strong> Após o merge da tarefa de funções (T07), o Bison passou a relatar um conflito de empilhar/reduzir no token <code>)</code>. Havia duas regras para o mesmo comando: a original, <code>console.log(expressao)</code>, e a nova, <code>console.log(args_opt)</code>, que aceita zero ou mais argumentos. Com um único argumento, as duas regras se aplicam, e o parser não sabia se fechava a impressão pela primeira regra ou se reduzia o argumento a uma lista para a segunda.</li>
+<li><strong>Causa:</strong> A T07 substituiu a regra original pela nova, mas, na resolução do conflito de merge com a <code>dev</code>, as duas versões foram mantidas no <code>parser.y</code>.</li>
+<li><strong>Solução:</strong> Remover a regra antiga, mantendo só <code>console.log(args_opt)</code>. A correção foi feita na branch da T07 em 30/09, mas depois que o Pull Request já tinha sido aceito; por isso ela nunca chegou à <code>dev</code>, e o conflito permaneceu até ser corrigido de vez na Sprint 4, na tarefa de ajuste de escopo (T09). Desde então, o Bison gera o parser sem nenhum conflito.</li>
+</ul>
+<h3 id="53-merge-de-branches">5.3 Merge de Branches</h3>
+<ul>
+<li><strong>Problema:</strong> As tarefas da sprint (estrutura do programa, declarações, controle de fluxo, funções e recuperação de erros) foram desenvolvidas em paralelo, em branches separadas, e quase todas alteravam os mesmos arquivos: o <code>parser/parser.y</code> e o <code>tests/unit_tests.c</code>. Os merges com a <code>dev</code> geraram conflitos nesses dois arquivos, e a resolução manual de um deles foi a origem do conflito do <code>console.log</code>.</li>
+<li><strong>Solução:</strong> Na sprint, os conflitos foram resolvidos trazendo a <code>dev</code> para dentro de cada branch antes do merge final. Para a Sprint 4, a equipe adotou regras para evitar o problema: uma branch por issue, Pull Requests pequenos, <em>rebase</em> na <code>dev</code> antes de abrir o PR (já que o <code>parser.y</code> é compartilhado), revisão por alguém de outra frente e a exigência de que todo commit compile e passe no <code>make test</code>.</li>
 </ul>
 <hr />
 

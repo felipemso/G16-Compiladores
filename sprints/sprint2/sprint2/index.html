@@ -566,6 +566,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#5-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-dependencia-do-lexico-em-relacao-ao-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Dependência do Léxico em Relação ao Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-lexico-incompleto-ao-fim-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Léxico Incompleto ao Fim da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-estrutura-de-pastas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Estrutura de Pastas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -590,6 +640,34 @@
     
   
     Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprint4/sprint4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 4
   
 
     
@@ -726,6 +804,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#5-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-dependencia-do-lexico-em-relacao-ao-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Dependência do Léxico em Relação ao Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-lexico-incompleto-ao-fim-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Léxico Incompleto ao Fim da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-estrutura-de-pastas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Estrutura de Pastas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -776,6 +904,23 @@
 <li><strong>Definição das Produções:</strong> Esboçar as regras de produção da gramática que descreve a sintaxe da linguagem (declarações, expressões, comandos de controle, blocos).</li>
 <li><strong>Identificação de Ambiguidades:</strong> Analisar as produções em busca de possíveis ambiguidades ou conflitos que dificultem a construção do Parser.</li>
 <li><strong>Escolha da Técnica de Parsing:</strong> Definir e documentar a abordagem de análise sintática a ser utilizada (ex: Recursive Descent, LL(1), ou uso de gerador de parser).</li>
+</ul>
+<h2 id="5-problemas-encontrados-e-solucoes">5. Problemas Encontrados e Soluções</h2>
+<p>Registro das dificuldades que surgiram durante a sprint e de como foram resolvidas.</p>
+<h3 id="51-dependencia-do-lexico-em-relacao-ao-parser">5.1 Dependência do Léxico em Relação ao Parser</h3>
+<ul>
+<li><strong>Problema:</strong> O analisador léxico (<code>lexer.l</code>) não compila sozinho: ele inclui o arquivo <code>parser.tab.h</code>, onde estão as definições dos tokens, e esse arquivo só existe depois que o Bison processa o <code>parser.y</code>. Sem o parser, não era possível compilar nem testar o léxico.</li>
+<li><strong>Solução:</strong> Criar um esqueleto do <code>parser.y</code> já nesta sprint, declarando todos os tokens com <code>%token</code>, e um <code>Makefile</code> que executa as etapas na ordem certa (<code>bison</code> → <code>flex</code> → <code>gcc</code>). Assim, o léxico passou a ser compilado junto com um parser mínimo, antes mesmo de a gramática ser escrita.</li>
+</ul>
+<h3 id="52-lexico-incompleto-ao-fim-da-sprint">5.2 Léxico Incompleto ao Fim da Sprint</h3>
+<ul>
+<li><strong>Problema:</strong> A primeira versão do léxico, entregue no fim da sprint (14/09), ainda não reconhecia algumas palavras reservadas do escopo (<code>var</code>, <code>function</code>, <code>return</code>), aceitava apenas números inteiros e não enviava ao parser o valor dos literais e identificadores.</li>
+<li><strong>Solução:</strong> O léxico foi completado no início da Sprint 3, com as palavras reservadas que faltavam e os números decimais. O envio dos valores ao parser foi resolvido pela integração com <code>%union</code> e <code>yylval</code> (tarefa T02 da Sprint 3).</li>
+</ul>
+<h3 id="53-estrutura-de-pastas">5.3 Estrutura de Pastas</h3>
+<ul>
+<li><strong>Problema:</strong> O léxico e o parser foram criados dentro de <code>src/</code> (<code>src/lexer/</code> e <code>src/parser/</code>), mas a organização do projeto mudou, e o <code>Makefile</code> dependia desses caminhos.</li>
+<li><strong>Solução:</strong> No início da Sprint 3, os arquivos foram movidos para as pastas <code>lexer/</code> e <code>parser/</code> na raiz do repositório, e o <code>Makefile</code> foi ajustado aos novos caminhos.</li>
 </ul>
 <hr />
 
