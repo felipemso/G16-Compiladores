@@ -579,6 +579,34 @@ static No *arvore_for_com_i_no_corpo(void) {
     return no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(decl(DECLARADOR_LET, "i", 2), 1), 1);
 }
 
+/* Passa o codigo pelo parser e pela semantica; quem chama confere o resultado e chama limpa_analise */
+static bool analisa_codigo(const char *codigo) {
+    int resultado = parse_string(codigo);
+    bool sintaxe_ok = resultado == 0 && yynerrs == 0;
+    if (sintaxe_ok) {
+        analisa(raiz_ast);
+    }
+    return sintaxe_ok;
+}
+
+static void limpa_analise(void) {
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    tabela_libera();
+    erros_semanticos = 0;
+}
+
+/* Confere o tipo guardado na tabela para a variavel 'nome' no nivel de escopo dado */
+static int testa_tipo_variavel(const char *descricao, const char *codigo, const char *nome, int nivel,
+                               TipoDado esperado) {
+    bool ok = analisa_codigo(codigo);
+    const Simbolo *simbolo = simbolo_em(nome, nivel);
+    ok = ok && simbolo && simbolo->tipo_inferido == esperado && erros_semanticos == 0 && escopo_nivel() == 0;
+    int falhas = verifica(descricao, ok);
+    limpa_analise();
+    return falhas;
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -764,6 +792,21 @@ int main(void) {
     total++; falhas += testa_regra("Atribuicao a const dentro de bloco gera erro", "const c = 1; { c = c + 1; }", 1);
     total++; falhas += testa_regra("const pode ser lido normalmente", "const c = 1; let d = c * 2;", 0);
     total++; falhas += testa_regra("Atribuicao a let e var continua permitida", "let a = 1; var b = 2; a = b; b = a;", 0);
+
+    printf("\n--- Verificacao de Tipos ---\n");
+    total++; falhas += testa_tipo_variavel("Literal numerico da tipo numero", "let n = 1;", "n", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Literal string da tipo string", "let s = \"texto\";", "s", 0, TIPO_STRING);
+    total++; falhas += testa_tipo_variavel("Literal booleano da tipo booleano", "let b = true;", "b", 0, TIPO_BOOLEANO);
+    total++; falhas += testa_tipo_variavel("Variavel sem inicializacao e desconhecida", "let x;", "x", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Variavel copia o tipo de outra variavel", "let a = 1; let b = a;", "b", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Reatribuicao com o mesmo tipo mantem o tipo", "let a = 1; a = 2;", "a", 0, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Reatribuicao com outro tipo vira desconhecido", "let a = 1; a = \"x\";", "a", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Depois de desconhecido nao volta a ser conhecido", "let a = 1; a = \"x\"; a = 2;", "a", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Parametro e desconhecido", "function f(p) { let c = p; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("Retorno de funcao e desconhecido", "function f() { return 1; } let r = f();", "r", 0, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("let externo lido dentro de funcao e desconhecido", "let g = 1; function f() { let c = g; }", "c", 1, TIPO_DESCONHECIDO);
+    total++; falhas += testa_tipo_variavel("const externo lido dentro de funcao mantem o tipo", "const k = 1; function f() { let c = k; }", "c", 1, TIPO_NUMERO);
+    total++; falhas += testa_tipo_variavel("Variavel da propria funcao mantem o tipo", "function f() { let a = 1; let c = a; }", "c", 1, TIPO_NUMERO);
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

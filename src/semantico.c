@@ -16,6 +16,10 @@ void erro_semantico(int linha, const char *formato, ...) {
 }
 
 static void visita(No *no);
+static TipoDado expressao(No *no);
+
+/* Nivel do escopo da funcao sendo analisada (0 fora de funcoes) */
+static int nivel_funcao = 0;
 
 static void visita_lista(No *lista) {
     for (No *no = lista; no; no = no->proximo) {
@@ -49,7 +53,7 @@ static Simbolo *busca_uso(const char *nome, int linha) {
 
 /* Ponto unico de entrada de nomes na tabela: variaveis, funcoes e parametros.
  * Retorna NULL quando a declaracao e invalida; o nome nao entra e o primeiro continua valendo. */
-static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, int linha) {
+static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, TipoDado tipo, int linha) {
     Simbolo *anterior = tabela_busca_local(nome);
     if (anterior) {
         erro_semantico(linha, "'%s' ja foi declarado neste escopo (linha %d)", nome, anterior->linha);
@@ -61,32 +65,77 @@ static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, int linha)
         erro_semantico(linha, "'%s' sombreia a declaracao da linha %d em escopo externo", nome, externo->linha);
         return NULL;
     }
-    return tabela_insere(nome, categoria, TIPO_DESCONHECIDO, linha);
+    return tabela_insere(nome, categoria, tipo, linha);
+}
+
+/* Tipo de uma variavel no ponto em que e lida.
+ * Dentro de uma funcao, let/var de fora contam como desconhecido: a funcao pode ser chamada
+ * depois de uma reatribuicao, e o tipo antigo geraria erro falso. const nunca muda de tipo. */
+static TipoDado tipo_do_simbolo(const Simbolo *simbolo) {
+    if (nivel_funcao > 0 && simbolo->nivel_escopo < nivel_funcao && simbolo->categoria != SIMBOLO_CONST) {
+        return TIPO_DESCONHECIDO;
+    }
+    return simbolo->tipo_inferido;
+}
+
+/* Visita uma expressao e devolve o tipo inferido */
+static TipoDado expressao(No *no) {
+    TipoDado tipo = TIPO_DESCONHECIDO;
+    switch (no->categoria) {
+        case NO_NUMERO:
+            tipo = TIPO_NUMERO;
+            break;
+        case NO_STRING:
+            tipo = TIPO_STRING;
+            break;
+        case NO_BOOLEANO:
+            tipo = TIPO_BOOLEANO;
+            break;
+        case NO_ID: {
+            Simbolo *simbolo = busca_uso(no->valor.texto, no->linha);
+            tipo = simbolo ? tipo_do_simbolo(simbolo) : TIPO_DESCONHECIDO;
+            break;
+        }
+        default:
+            /* Operacoes e chamadas ficam como desconhecido; os operandos e argumentos sao visitados */
+            visita_filhos(no);
+            break;
+    }
+    return tipo;
 }
 
 static void visita_atribuicao(No *no) {
     /* O lado direito vem antes, na ordem em que seria avaliado */
-    visita_filhos(no);
+    TipoDado tipo = expressao(no->filhos[0]);
     Simbolo *alvo = busca_uso(no->valor.texto, no->linha);
-    if (alvo && alvo->categoria == SIMBOLO_CONST) {
+    if (!alvo) {
+        return;
+    }
+    if (alvo->categoria == SIMBOLO_CONST) {
         erro_semantico(no->linha, "atribuicao a constante '%s' (declarada na linha %d)", no->valor.texto, alvo->linha);
+    } else if (alvo->tipo_inferido != tipo) {
+        /* Reatribuida com outro tipo: daqui em diante o tipo deixa de ser conhecido */
+        alvo->tipo_inferido = TIPO_DESCONHECIDO;
     }
 }
 
 static void visita_declaracao(No *no) {
     /* O inicializador vem antes da insercao: em "let x = x;" o x da direita ainda nao existe */
-    visita_filhos(no);
-    declara(no->valor.texto, categoria_do_declarador(no->declarador), no->linha);
+    TipoDado tipo = no->filhos[0] ? expressao(no->filhos[0]) : TIPO_DESCONHECIDO;
+    declara(no->valor.texto, categoria_do_declarador(no->declarador), tipo, no->linha);
 }
 
 static void visita_funcao(No *no) {
     /* A funcao entra antes do corpo, o que permite recursao */
-    Simbolo *funcao = declara(no->valor.texto, SIMBOLO_FUNCAO, no->linha);
+    Simbolo *funcao = declara(no->valor.texto, SIMBOLO_FUNCAO, TIPO_DESCONHECIDO, no->linha);
 
     escopo_entra();
+    int nivel_anterior = nivel_funcao;
+    nivel_funcao = escopo_nivel();
     int num_parametros = 0;
     for (No *parametro = no->filhos[0]; parametro; parametro = parametro->proximo) {
-        declara(parametro->valor.texto, SIMBOLO_PARAMETRO, parametro->linha);
+        /* Parametros contam como desconhecido: o tipo depende de quem chama */
+        declara(parametro->valor.texto, SIMBOLO_PARAMETRO, TIPO_DESCONHECIDO, parametro->linha);
         num_parametros++;
     }
     if (funcao) {
@@ -98,6 +147,7 @@ static void visita_funcao(No *no) {
     if (corpo) {
         visita_lista(corpo->filhos[0]);
     }
+    nivel_funcao = nivel_anterior;
     escopo_sai();
 }
 
@@ -120,10 +170,16 @@ static void visita(No *no) {
             visita_atribuicao(no);
             break;
         case NO_ID:
-            busca_uso(no->valor.texto, no->linha);
+        case NO_NUMERO:
+        case NO_STRING:
+        case NO_BOOLEANO:
+        case NO_BINARIO:
+        case NO_UNARIO:
+        case NO_CHAMADA:
+            /* NO_CHAMADA: o nome da funcao e checado pela T20; aqui so os argumentos */
+            expressao(no);
             break;
         default:
-            /* NO_CHAMADA: o nome da funcao e checado pela T20; aqui so os argumentos */
             visita_filhos(no);
             break;
     }
@@ -131,5 +187,6 @@ static void visita(No *no) {
 
 void analisa(No *raiz) {
     erros_semanticos = 0;
+    nivel_funcao = 0;
     visita_lista(raiz);
 }
