@@ -16,7 +16,7 @@ Projeto de Compilador proposto pelo professor Sérgio Freitas na disciplina de C
 
 ## Estrutura do Repositório e Branches
 
-* `dev`: Código-fonte em C (analisadores léxico e sintático, testes e automação).
+* `dev`: Código-fonte em C (analisadores léxico, sintático e semântico, AST, tabela de símbolos, testes e automação).
 * `docs`: Documentação completa do projeto em MkDocs.
 * `main`: Branch principal com versões estáveis.
 * `comp`: Guia organizacional da disciplina.
@@ -25,21 +25,30 @@ Projeto de Compilador proposto pelo professor Sérgio Freitas na disciplina de C
 ### Organização de Arquivos (`dev`)
 
 ```text
-cdev/
+G16-Compiladores/
 ├── lexer/
-│   └── lexer.l
+│   └── lexer.l                # Analisador léxico (Flex)
 ├── parser/
-│   └── parser.y
+│   └── parser.y               # Analisador sintático (Bison) e construção da AST
 ├── src/
-│   └── main.c
+│   ├── main.c                 # Ponto de entrada: executa as fases e trata as opções
+│   ├── ast.c / ast.h          # Nós da AST: construtores, impressão e liberação
+│   ├── tabela.c / tabela.h    # Tabela de símbolos e pilha de escopos
+│   └── semantico.c / semantico.h  # Análise semântica sobre a AST
 ├── tests/
-│   ├── run_tests.ps1
-│   ├── unit_tests.c
-│   ├── validos/
-│   └── invalidos/
+│   ├── validos/               # Programas que devem compilar sem erros
+│   ├── invalidos/             # Programas com erro léxico ou sintático
+│   ├── invalidos_semanticos/  # Programas com erro semântico
+│   ├── ast/                   # Pares .js / .esperado para conferir a saída de --ast
+│   ├── unit_tests.c           # Testes unitários do parser, da AST, da tabela e da semântica
+│   ├── run_tests.sh           # Executor dos testes no Linux (Bash)
+│   └── run_tests.ps1          # Executor dos testes no Windows (PowerShell)
+├── teste.js                   # Programa de exemplo
 ├── Makefile
 └── README.md
 ```
+
+Os arquivos gerados na compilação (`lex.yy.c`, `parser.tab.c`, `parser.tab.h` e os executáveis `minijs` e `test_unit`) ficam na raiz do projeto e não são versionados.
 
 ---
 
