@@ -158,6 +158,46 @@ static int testa_ast_parser(const char *descricao, const char *codigo, const Tip
     return falhas;
 }
 
+/* Confere a estrutura produzida pelo parser, antes da analise semantica. */
+static bool categoria(const No *no, TipoNo tipo) {
+    return no && no->categoria == tipo;
+}
+
+static int testa_ast_if(void) {
+    int resultado = parse_string(
+        "if (a) if (b) x = 1; else x = 2;\n"
+        "if (true) {} else { x = 3; }\n"
+        "let fim;\n");
+    No *externo = raiz_ast ? raiz_ast->filhos[0] : NULL;
+    No *interno = externo ? externo->filhos[1] : NULL;
+    No *com_else = externo ? externo->proximo : NULL;
+
+    bool ok = resultado == 0 && yynerrs == 0
+        && categoria(externo, NO_IF) && externo->linha == 1
+        && categoria(externo->filhos[0], NO_ID)
+        && strcmp(externo->filhos[0]->valor.texto, "a") == 0
+        && externo->filhos[2] == NULL && externo->filhos[3] == NULL
+        && categoria(interno, NO_IF)
+        && categoria(interno->filhos[0], NO_ID)
+        && strcmp(interno->filhos[0]->valor.texto, "b") == 0
+        && categoria(interno->filhos[1], NO_ATRIBUICAO)
+        && categoria(interno->filhos[2], NO_ATRIBUICAO)
+        && interno->filhos[1]->filhos[0]->valor.numero == 1
+        && interno->filhos[2]->filhos[0]->valor.numero == 2
+        && categoria(com_else, NO_IF) && com_else->linha == 2
+        && categoria(com_else->filhos[0], NO_BOOLEANO)
+        && categoria(com_else->filhos[1], NO_BLOCO)
+        && com_else->filhos[1]->filhos[0] == NULL
+        && categoria(com_else->filhos[2], NO_BLOCO)
+        && categoria(com_else->filhos[2]->filhos[0], NO_ATRIBUICAO)
+        && categoria(com_else->proximo, NO_DECL_VAR)
+        && com_else->proximo->proximo == NULL;
+    int falhas = verifica("If/else preserva condicoes, corpos, linhas e else mais proximo", ok);
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return falhas;
+}
+
 static int testa_ast_linhas(void) {
     const char *codigo =
         "let a =\n"
@@ -566,8 +606,7 @@ static int testa_regra(const char *descricao, const char *codigo, int erros_espe
     return falhas;
 }
 
-/* Analisa uma arvore montada a mao e confere a quantidade de erros.
- * Usado so para o for, que o parser ainda nao coloca na AST (T14) */
+/* Analisa uma arvore montada a mao e confere a quantidade de erros. */
 static int testa_arvore(const char *descricao, No *comandos, int erros_esperados) {
     No *raiz = no_programa(comandos, 1);
     analisa(raiz);
@@ -757,8 +796,9 @@ int main(void) {
 
     printf("\n--- AST: Integracao com o Parser ---\n");
     const TipoNo seq_comandos[] = { NO_DECL_VAR, NO_DECL_VAR, NO_ATRIBUICAO, NO_VAZIO, NO_BLOCO };
-    const TipoNo seq_uma_decl[] = { NO_DECL_VAR };
+    const TipoNo seq_controle[] = { NO_IF, NO_DECL_VAR };
     const TipoNo seq_duas_decl[] = { NO_DECL_VAR, NO_DECL_VAR };
+    total++; falhas += testa_ast_if();
     total++; falhas += testa_ast_linhas();
     total++; falhas += testa_ast_declaracoes();
     total++; falhas += testa_ast_funcao();
@@ -767,7 +807,7 @@ int main(void) {
     total++; falhas += testa_ast_print();
     total++; falhas += testa_ast_parser("Programa vazio tem raiz sem comandos", "", NULL, 0, false);
     total++; falhas += testa_ast_parser("Lista preserva declaracoes, atribuicoes e comando vazio", "let a, b; a = 1; ; {}", seq_comandos, 5, false);
-    total++; falhas += testa_ast_parser("Comandos sem AST sao ignorados", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_uma_decl, 1, false);
+    total++; falhas += testa_ast_parser("Controles de fluxo permanecem na lista de comandos", "if (true) ; else ; while (false) {} for (;;) ; let x;", seq_controle, 2, false);
     total++; falhas += testa_ast_parser("Recuperacao ignora comando invalido e preserva o seguinte", "let a; x = ; let b;", seq_duas_decl, 2, true);
     total++; falhas += testa_ast_parser("Recuperacao por chave ignora NULL", "let a; x = } let b;", seq_duas_decl, 2, true);
 
@@ -830,6 +870,8 @@ int main(void) {
     total++; falhas += testa_regra("Atribuicao a const dentro de bloco gera erro", "const c = 1; { c = c + 1; }", 1);
     total++; falhas += testa_regra("const pode ser lido normalmente", "const c = 1; let d = c * 2;", 0);
     total++; falhas += testa_regra("Atribuicao a let e var continua permitida", "let a = 1; var b = 2; a = b; b = a;", 0);
+
+    total++; falhas += testa_regra("If e else visitam os dois corpos", "if (true) { x = 1; } else { y = 2; }", 2);
 
     printf("\n--- Verificacao de Tipos ---\n");
     total++; falhas += testa_tipo_variavel("Literal numerico da tipo numero", "let n = 1;", "n", 0, TIPO_NUMERO);
@@ -911,7 +953,7 @@ int main(void) {
     total++; falhas += testa_regra("Atribuicao a variavel local e permitida", "function f() { let a = 1; { a = 2; } return a; }", 0);
     total++; falhas += testa_regra("Atribuicao a global fora de funcao continua permitida", "let g = 1; g = 2;", 0);
     total++; falhas += testa_regra("Atribuicao a const global dentro de funcao conta um erro", "const k = 1; function f() { k = 2; }", 1);
-    /* if, while e for ainda nao entram na AST pelo parser (T14): arvores montadas a mao */
+    /* Testes diretos da semantica, independentes do parser. */
     total++; falhas += testa_arvore("let direto no corpo do if gera erro",
                                     no_if(no_booleano(1, 1), decl(DECLARADOR_LET, "x", 1), NULL, 1), 1);
     total++; falhas += testa_arvore("let direto no corpo do else gera erro",

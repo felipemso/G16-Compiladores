@@ -212,15 +212,10 @@ lista_args:
 
 comando_if:
     IF LPAREN expressao RPAREN comando %prec LOWER_THAN_ELSE {
-        ast_libera($3);
-        ast_libera($5);
-        $$ = NULL;
+        $$ = no_if($3, $5, NULL, @1.first_line);
     }
   | IF LPAREN expressao RPAREN comando ELSE comando {
-        ast_libera($3);
-        ast_libera($5);
-        ast_libera($7);
-        $$ = NULL;
+        $$ = no_if($3, $5, $7, @1.first_line);
     }
   ;
 
