@@ -5,6 +5,7 @@
 #include "ast.h"
 #include "tabela.h"
 #include "semantico.h"
+#include "gerador.h"
 
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
@@ -768,6 +769,40 @@ static int testa_anotacao_comandos(void) {
     return falhas;
 }
 
+static bool gera_texto(const No *raiz, char *texto, size_t tamanho) {
+    const char *caminho = "teste_gerador.tmp";
+    FILE *arquivo = fopen(caminho, "w+");
+    if (!arquivo) {
+        return false;
+    }
+    gera_python(raiz, arquivo);
+    rewind(arquivo);
+    size_t lidos = fread(texto, 1, tamanho - 1, arquivo);
+    texto[lidos] = '\0';
+    fclose(arquivo);
+    remove(caminho);
+    return true;
+}
+
+static int testa_geracao(const char *descricao, const char *codigo, const char *esperado) {
+    int resultado = parse_string(codigo);
+    char texto[4096];
+    bool gerado = gera_texto(raiz_ast, texto, sizeof(texto));
+    bool ok = resultado == 0 && yynerrs == 0 && gerado && strcmp(texto, esperado) == 0;
+    if (!ok && gerado) {
+        printf("    obtido: [%s]\n", texto);
+    }
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return verifica(descricao, ok);
+}
+
+static int testa_geracao_raiz_nula(void) {
+    char texto[16];
+    bool ok = gera_texto(NULL, texto, sizeof(texto)) && texto[0] == '\0';
+    return verifica("Raiz nula nao gera nada", ok);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -1063,6 +1098,11 @@ int main(void) {
                                     no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(NULL, 1), 1), 0);
     total++; falhas += testa_arvore("Comando simples no corpo sem bloco e permitido",
                                     no_while(no_booleano(1, 1), no_vazio(1), 1), 0);
+
+    printf("\n--- Geracao de Python ---\n");
+    total++; falhas += testa_geracao("Programa vazio gera Python vazio", "", "");
+    total++; falhas += testa_geracao("Comando vazio e blocos nao geram linhas", "; { } { ; { } }", "");
+    total++; falhas += testa_geracao_raiz_nula();
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
