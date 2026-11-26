@@ -58,6 +58,39 @@ static void gera_expressao(Gerador *g, const No *no) {
     }
 }
 
+static const No *unico_if(const No *no) {
+    if (no && no->categoria == NO_BLOCO && no->filhos[0] && !no->filhos[0]->proximo) {
+        no = no->filhos[0];
+    }
+    return (no && no->categoria == NO_IF) ? no : NULL;
+}
+
+static void gera_if(Gerador *g, const No *no) {
+    const char *palavra = "if";
+    while (no) {
+        inicia_linha(g);
+        fprintf(g->saida, "%s ", palavra);
+        gera_expressao(g, no->filhos[0]);
+        fputs(":", g->saida);
+        termina_linha(g);
+        gera_corpo(g, no->filhos[1]);
+
+        const No *proximo_if = unico_if(no->filhos[2]);
+        if (proximo_if) {
+            palavra = "elif";
+            no = proximo_if;
+        } else {
+            if (no->filhos[2]) {
+                inicia_linha(g);
+                fputs("else:", g->saida);
+                termina_linha(g);
+                gera_corpo(g, no->filhos[2]);
+            }
+            break;
+        }
+    }
+}
+
 static void gera_comando(Gerador *g, const No *no) {
     if (!no) {
         return;
@@ -83,6 +116,9 @@ static void gera_comando(Gerador *g, const No *no) {
             fprintf(g->saida, "%s = ", no->valor.texto);
             gera_expressao(g, no->filhos[0]);
             termina_linha(g);
+            break;
+        case NO_IF:
+            gera_if(g, no);
             break;
         default:
             break;

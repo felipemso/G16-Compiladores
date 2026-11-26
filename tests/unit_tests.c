@@ -1113,6 +1113,21 @@ int main(void) {
     total++; falhas += testa_geracao("Bloco solto mantem nivel de indentacao e comando vazio nao gera linha",
                                      "let a = 1; ; { let b = 2; ; { a = b; } } { let c = 3; }",
                                      "a = 1\nb = 2\na = b\nc = 3\n");
+    total++; falhas += testa_geracao("If com bloco e com corpo vazio gera indentacao e pass",
+                                     "let x = 0; if (true) { x = 1; } if (false) {} if (true) ;",
+                                     "x = 0\nif True:\n    x = 1\nif False:\n    pass\nif True:\n    pass\n");
+    total++; falhas += testa_geracao("If e else aninhados mantem indentacao e geram pass em else vazio",
+                                     "let x = 0, a = true, b = false; if (a) { if (b) x = 1; else x = 2; } else ;",
+                                     "x = 0\na = True\nb = False\nif a:\n    if b:\n        x = 1\n    else:\n        x = 2\nelse:\n    pass\n");
+    total++; falhas += testa_geracao("Else if encadeado vira elif",
+                                     "let x = 0, a = false, b = true; if (a) x = 1; else if (b) x = 2; else x = 3;",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\nelse:\n    x = 3\n");
+    total++; falhas += testa_geracao("Else com bloco contendo so outro if vira elif",
+                                     "let x = 0, a = false, b = true; if (a) { x = 1; } else { if (b) { x = 2; } else { x = 3; } }",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\nelse:\n    x = 3\n");
+    total++; falhas += testa_geracao("Else com outros comandos alem do if mantem else indentado",
+                                     "let x = 0, a = false, b = true; if (a) { x = 1; } else { if (b) { x = 2; } x = 3; }",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelse:\n    if b:\n        x = 2\n    x = 3\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
