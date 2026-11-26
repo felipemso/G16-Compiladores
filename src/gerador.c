@@ -66,6 +66,8 @@ static void gera_comando(Gerador *g, const No *no) {
         case NO_BLOCO:
             gera_lista(g, no->filhos[0]);
             break;
+        case NO_VAZIO:
+            break;
         case NO_DECL_VAR:
             inicia_linha(g);
             fprintf(g->saida, "%s = ", no->valor.texto);

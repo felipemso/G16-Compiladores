@@ -1110,6 +1110,9 @@ int main(void) {
     total++; falhas += testa_geracao("Atribuicao gera linha x = e",
                                      "let x = 3.14, y; y = x; x = 2;",
                                      "x = 3.14\ny = None\ny = x\nx = 2\n");
+    total++; falhas += testa_geracao("Bloco solto mantem nivel de indentacao e comando vazio nao gera linha",
+                                     "let a = 1; ; { let b = 2; ; { a = b; } } { let c = 3; }",
+                                     "a = 1\nb = 2\na = b\nc = 3\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
