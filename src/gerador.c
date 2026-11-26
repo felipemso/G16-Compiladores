@@ -38,6 +38,26 @@ static void gera_corpo(Gerador *g, const No *corpo) {
     g->nivel--;
 }
 
+static void gera_expressao(Gerador *g, const No *no) {
+    if (!no) {
+        return;
+    }
+    switch (no->categoria) {
+        case NO_ID:
+        case NO_STRING:
+            fputs(no->valor.texto, g->saida);
+            break;
+        case NO_NUMERO:
+            fprintf(g->saida, "%.15g", no->valor.numero);
+            break;
+        case NO_BOOLEANO:
+            fputs(no->valor.booleano ? "True" : "False", g->saida);
+            break;
+        default:
+            break;
+    }
+}
+
 static void gera_comando(Gerador *g, const No *no) {
     if (!no) {
         return;
@@ -45,6 +65,22 @@ static void gera_comando(Gerador *g, const No *no) {
     switch (no->categoria) {
         case NO_BLOCO:
             gera_lista(g, no->filhos[0]);
+            break;
+        case NO_DECL_VAR:
+            inicia_linha(g);
+            fprintf(g->saida, "%s = ", no->valor.texto);
+            if (no->filhos[0]) {
+                gera_expressao(g, no->filhos[0]);
+            } else {
+                fputs("None", g->saida);
+            }
+            termina_linha(g);
+            break;
+        case NO_ATRIBUICAO:
+            inicia_linha(g);
+            fprintf(g->saida, "%s = ", no->valor.texto);
+            gera_expressao(g, no->filhos[0]);
+            termina_linha(g);
             break;
         default:
             break;

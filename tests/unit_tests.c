@@ -1103,6 +1103,13 @@ int main(void) {
     total++; falhas += testa_geracao("Programa vazio gera Python vazio", "", "");
     total++; falhas += testa_geracao("Comando vazio e blocos nao geram linhas", "; { } { ; { } }", "");
     total++; falhas += testa_geracao_raiz_nula();
+    total++; falhas += testa_geracao("Declaracao let com e sem valor inicial", "let x = 10; let y;", "x = 10\ny = None\n");
+    total++; falhas += testa_geracao("Declaracao multipla com var e const gera uma linha por variavel",
+                                     "var a = \"oi\", b = 'fim', c; const t = true, f = false;",
+                                     "a = \"oi\"\nb = 'fim'\nc = None\nt = True\nf = False\n");
+    total++; falhas += testa_geracao("Atribuicao gera linha x = e",
+                                     "let x = 3.14, y; y = x; x = 2;",
+                                     "x = 3.14\ny = None\ny = x\nx = 2\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
