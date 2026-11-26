@@ -102,6 +102,7 @@ static void gera_comando(Gerador *g, const No *no) {
         case NO_VAZIO:
             break;
         case NO_DECL_VAR:
+        case NO_ATRIBUICAO:
             inicia_linha(g);
             fprintf(g->saida, "%s = ", no->valor.texto);
             if (no->filhos[0]) {
@@ -109,12 +110,6 @@ static void gera_comando(Gerador *g, const No *no) {
             } else {
                 fputs("None", g->saida);
             }
-            termina_linha(g);
-            break;
-        case NO_ATRIBUICAO:
-            inicia_linha(g);
-            fprintf(g->saida, "%s = ", no->valor.texto);
-            gera_expressao(g, no->filhos[0]);
             termina_linha(g);
             break;
         case NO_IF:
