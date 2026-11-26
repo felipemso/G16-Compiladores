@@ -1,0 +1,10 @@
+a = 1
+b = 2
+vazio = None
+texto = "ola"
+simples = 'ok'
+PI = 3.14
+ATIVO = True
+interno = 5
+vazio = interno
+a = b
