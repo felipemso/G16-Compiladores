@@ -1,0 +1,20 @@
+inteiro = 10
+real = 3.14
+sem_decimal = 10
+texto = "ola" + ' mundo'
+ligado = True
+desligado = False
+soma = inteiro + real * 2
+divisao = inteiro / 4 - 1
+negativo = -inteiro
+maior = inteiro > real
+igual = inteiro == 10
+diferente = texto != "ola"
+ambos = ligado and desligado
+algum = ligado or desligado
+nenhum = not ligado
+faixa = inteiro >= 0 and inteiro <= 100
+if inteiro > 5 and not desligado:
+    soma = soma - 1
+elif texto == "":
+    soma = 0

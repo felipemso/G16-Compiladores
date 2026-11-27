@@ -38,6 +38,64 @@ static void gera_corpo(Gerador *g, const No *corpo) {
     g->nivel--;
 }
 
+static const char *operador_python(Operador operador) {
+    switch (operador) {
+        case OP_SOMA: return "+";
+        case OP_SUBTRACAO: return "-";
+        case OP_MULTIPLICACAO: return "*";
+        case OP_DIVISAO: return "/";
+        case OP_IGUAL: return "==";
+        case OP_DIFERENTE: return "!=";
+        case OP_MENOR: return "<";
+        case OP_MENOR_IGUAL: return "<=";
+        case OP_MAIOR: return ">";
+        case OP_MAIOR_IGUAL: return ">=";
+        case OP_E: return "and";
+        case OP_OU: return "or";
+        case OP_NEGATIVO: return "-";
+        case OP_NAO: return "not ";
+        default: return "";
+    }
+}
+
+static int precedencia(const No *no) {
+    if (no->categoria == NO_UNARIO) {
+        return no->operador == OP_NAO ? 3 : 7;
+    }
+    if (no->categoria != NO_BINARIO) {
+        return 8;
+    }
+    switch (no->operador) {
+        case OP_OU: return 1;
+        case OP_E: return 2;
+        case OP_SOMA:
+        case OP_SUBTRACAO: return 5;
+        case OP_MULTIPLICACAO:
+        case OP_DIVISAO: return 6;
+        default: return 4;
+    }
+}
+
+static int eh_comparacao(const No *no) {
+    return no->categoria == NO_BINARIO && precedencia(no) == 4;
+}
+
+static void gera_expressao(Gerador *g, const No *no);
+
+static void gera_operando(Gerador *g, const No *pai, const No *filho, int direita) {
+    int p_pai = precedencia(pai);
+    int p_filho = precedencia(filho);
+    int parenteses = p_filho < p_pai || (direita && p_filho == p_pai) ||
+                     (eh_comparacao(pai) && eh_comparacao(filho));
+    if (parenteses) {
+        fputc('(', g->saida);
+    }
+    gera_expressao(g, filho);
+    if (parenteses) {
+        fputc(')', g->saida);
+    }
+}
+
 static void gera_expressao(Gerador *g, const No *no) {
     if (!no) {
         return;
@@ -52,6 +110,15 @@ static void gera_expressao(Gerador *g, const No *no) {
             break;
         case NO_BOOLEANO:
             fputs(no->valor.booleano ? "True" : "False", g->saida);
+            break;
+        case NO_BINARIO:
+            gera_operando(g, no, no->filhos[0], 0);
+            fprintf(g->saida, " %s ", operador_python(no->operador));
+            gera_operando(g, no, no->filhos[1], 1);
+            break;
+        case NO_UNARIO:
+            fputs(operador_python(no->operador), g->saida);
+            gera_operando(g, no, no->filhos[0], 0);
             break;
         default:
             break;

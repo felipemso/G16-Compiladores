@@ -1134,6 +1134,36 @@ int main(void) {
     total++; falhas += testa_geracao("Corpo sem chaves com lista de nos gera todos os itens",
                                      "if (true) let a = 1, b = 2;",
                                      "if True:\n    a = 1\n    b = 2\n");
+    total++; falhas += testa_geracao("Operadores aritmeticos mantem simbolos",
+                                     "x = a + b - c * d / e; y = 10 / 4 + 3.14;",
+                                     "x = a + b - c * d / e\ny = 10 / 4 + 3.14\n");
+    total++; falhas += testa_geracao("Operadores relacionais mantem simbolos",
+                                     "x = a < b; x = a <= b; x = a > b; x = a >= b; x = a == b; x = a != b;",
+                                     "x = a < b\nx = a <= b\nx = a > b\nx = a >= b\nx = a == b\nx = a != b\n");
+    total++; falhas += testa_geracao("Operadores logicos viram and e or",
+                                     "x = a && b || c;",
+                                     "x = a and b or c\n");
+    total++; falhas += testa_geracao("Menos unario e negacao viram - e not",
+                                     "x = -a; x = !b; x = -a * b; x = a && !b;",
+                                     "x = -a\nx = not b\nx = -a * b\nx = a and not b\n");
+    total++; falhas += testa_geracao("Condicao do if com expressao",
+                                     "if (x > 0) { x = x - 1; }",
+                                     "if x > 0:\n    x = x - 1\n");
+    total++; falhas += testa_geracao("Negacao antes de comparacao ganha parenteses",
+                                     "x = !a == b;",
+                                     "x = (not a) == b\n");
+    total++; falhas += testa_geracao("Comparacao dentro de comparacao ganha parenteses",
+                                     "x = a < b == c; y = a == b == c; z = a == (b < c);",
+                                     "x = (a < b) == c\ny = (a == b) == c\nz = a == (b < c)\n");
+    total++; falhas += testa_geracao("Parenteses so quando a precedencia exige",
+                                     "x = (1 + 2) * 3; y = 1 + 2 * 3; z = a / (b * c);",
+                                     "x = (1 + 2) * 3\ny = 1 + 2 * 3\nz = a / (b * c)\n");
+    total++; falhas += testa_geracao("Associatividade a esquerda mantem parenteses a direita",
+                                     "x = a - (b - c); y = a - b - c;",
+                                     "x = a - (b - c)\ny = a - b - c\n");
+    total++; falhas += testa_geracao("Operandos de not, menos unario e logicos com parenteses",
+                                     "x = !(a && b); x = -(a + b); x = (a || b) && c; x = a == !b; x = a > b && b > c;",
+                                     "x = not (a and b)\nx = -(a + b)\nx = (a or b) and c\nx = a == (not b)\nx = a > b and b > c\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

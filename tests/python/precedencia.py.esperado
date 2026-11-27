@@ -1,0 +1,15 @@
+a = 1
+b = 2
+c = 3
+p = True
+q = False
+negacao = (not p) == q
+encadeada = (a < b) == p
+comparacoes = (a == b) == q
+agrupada = (a + b) * c
+sem_parenteses = a + b * c
+direita = a - (b - c)
+esquerda = a - b - c
+divisao = a / (b * c)
+logica = (p or q) and not (p and q)
+menos = -(a + b) * c
