@@ -1084,6 +1084,10 @@ int main(void) {
     total++; falhas += testa_regra("Menos unario em string gera erro", "let x = -\"a\";", 1);
     total++; falhas += testa_regra("Aritmetica com booleano nao gera erro", "let x = true - 1;", 0);
     total++; falhas += testa_regra("Aritmetica com parametro nao gera erro", "function f(p) { return p * 2; }", 0);
+    total++; falhas += testa_regra("Erro de - nao gera erro de comparacao em cascata", "let x = (\"a\" - 1) < \"b\";", 1);
+    total++; falhas += testa_regra("Erro de * nao gera erro de + em cascata", "let s = \"a\" * 2; let t = s + \"x\";", 1);
+    total++; falhas += testa_regra("Erro de menos unario nao gera erro em cascata", "let b = -\"a\" == \"b\";", 1);
+    total++; falhas += testa_regra("String na conta de fora continua gerando erro", "let x = (\"a\" / 2) * \"b\";", 2);
     total++; falhas += testa_regra("Comparacao entre numero e string gera erro", "let b = 1 == \"1\";", 1);
     total++; falhas += testa_regra("Comparacao entre booleano e numero gera erro", "let b = true < 1;", 1);
     total++; falhas += testa_regra("Comparacao de resultado booleano com numero gera erro", "let b = (1 < 2) == 1;", 1);
