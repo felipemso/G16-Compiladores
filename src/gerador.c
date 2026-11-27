@@ -81,6 +81,7 @@ static int eh_comparacao(const No *no) {
 }
 
 static void gera_expressao(Gerador *g, const No *no);
+static void gera_separados(Gerador *g, const No *lista);
 
 static void gera_operando(Gerador *g, const No *pai, const No *filho, int direita) {
     int p_pai = precedencia(pai);
@@ -120,6 +121,11 @@ static void gera_expressao(Gerador *g, const No *no) {
         case NO_UNARIO:
             fputs(operador_python(no->operador), g->saida);
             gera_operando(g, no, no->filhos[0], 0);
+            break;
+        case NO_CHAMADA:
+            fprintf(g->saida, "%s(", no->valor.texto);
+            gera_separados(g, no->filhos[0]);
+            fputc(')', g->saida);
             break;
         default:
             break;
@@ -225,6 +231,11 @@ static void gera_comando(Gerador *g, const No *no) {
                 fputc(' ', g->saida);
                 gera_expressao(g, no->filhos[0]);
             }
+            termina_linha(g);
+            break;
+        case NO_CHAMADA:
+            inicia_linha(g);
+            gera_expressao(g, no);
             termina_linha(g);
             break;
         default:

@@ -1173,6 +1173,15 @@ int main(void) {
     total++; falhas += testa_geracao("Corpo da funcao com if e declaracao mantem indentacao",
                                      "function sinal(n) { let s = 1; if (n < 0) { return -s; } return s; }",
                                      "def sinal(n):\n    s = 1\n    if n < 0:\n        return -s\n    return s\n");
+    total++; falhas += testa_geracao("Chamada como comando com e sem argumentos",
+                                     "f(); g(1, x, 'a');",
+                                     "f()\ng(1, x, 'a')\n");
+    total++; falhas += testa_geracao("Chamada dentro de expressao e como argumento",
+                                     "x = f(a + 1, g(b)) * 2; y = -f(); z = !g(a) && h(a < b, (c || d));",
+                                     "x = f(a + 1, g(b)) * 2\ny = -f()\nz = not g(a) and h(a < b, c or d)\n");
+    total++; falhas += testa_geracao("Chamada recursiva no return",
+                                     "function fat(n) { if (n <= 1) { return 1; } return n * fat(n - 1); }",
+                                     "def fat(n):\n    if n <= 1:\n        return 1\n    return n * fat(n - 1)\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
