@@ -42,15 +42,19 @@ static void gera_lista(Gerador *g, const No *lista) {
     }
 }
 
-static void gera_corpo(Gerador *g, const No *corpo) {
-    int antes = g->linhas;
-    g->nivel++;
-    gera_lista(g, corpo);
-    if (g->linhas == antes) {
+static void gera_pass_se_vazio(Gerador *g, int linhas_antes) {
+    if (g->linhas == linhas_antes) {
         inicia_linha(g);
         fputs("pass", g->saida);
         termina_linha(g);
     }
+}
+
+static void gera_corpo(Gerador *g, const No *corpo) {
+    int antes = g->linhas;
+    g->nivel++;
+    gera_lista(g, corpo);
+    gera_pass_se_vazio(g, antes);
     g->nivel--;
 }
 
@@ -208,6 +212,38 @@ static void gera_if(Gerador *g, const No *no) {
     }
 }
 
+static void gera_incremento(Gerador *g, const No *incr) {
+    if (!incr) {
+        return;
+    }
+    if (incr->categoria == NO_ATRIBUICAO) {
+        gera_comando(g, incr);
+        return;
+    }
+    inicia_linha(g);
+    gera_expressao(g, incr);
+    termina_linha(g);
+}
+
+static void gera_while(Gerador *g, const No *cond, const No *corpo, const No *incr) {
+    inicia_linha(g);
+    fputs("while ", g->saida);
+    if (cond) {
+        gera_expressao(g, cond);
+    } else {
+        fputs("True", g->saida);
+    }
+    fputs(":", g->saida);
+    termina_linha(g);
+
+    int antes = g->linhas;
+    g->nivel++;
+    gera_lista(g, corpo);
+    gera_incremento(g, incr);
+    gera_pass_se_vazio(g, antes);
+    g->nivel--;
+}
+
 static void gera_comando(Gerador *g, const No *no) {
     if (!no) {
         return;
@@ -233,12 +269,11 @@ static void gera_comando(Gerador *g, const No *no) {
             gera_if(g, no);
             break;
         case NO_WHILE:
-            inicia_linha(g);
-            fputs("while ", g->saida);
-            gera_expressao(g, no->filhos[0]);
-            fputs(":", g->saida);
-            termina_linha(g);
-            gera_corpo(g, no->filhos[1]);
+            gera_while(g, no->filhos[0], no->filhos[1], NULL);
+            break;
+        case NO_FOR:
+            gera_lista(g, no->filhos[0]);
+            gera_while(g, no->filhos[1], no->filhos[3], no->filhos[2]);
             break;
         case NO_FUNCAO:
             inicia_linha(g);

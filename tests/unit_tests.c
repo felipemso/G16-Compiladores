@@ -1258,6 +1258,24 @@ int main(void) {
     total++; falhas += testa_geracao("While aninhado e dentro de funcao mantem indentacao",
                                      "function f(n) { while (n > 0) { while (n > 1) n = n - 1; n = n - 1; } }",
                                      "def f(n):\n    while n > 0:\n        while n > 1:\n            n = n - 1\n        n = n - 1\n");
+    total++; falhas += testa_geracao("For completo vira init seguido de while com incremento no fim",
+                                     "let s = 0; for (let i = 0; i < 3; i = i + 1) { s = s + i; }",
+                                     "s = 0\ni = 0\nwhile i < 3:\n    s = s + i\n    i = i + 1\n");
+    total++; falhas += testa_geracao("For aceita declaracao multipla e atribuicao na inicializacao",
+                                     "let k = 0; for (let a = 0, b = 2; a < b; a = a + 1) k = k + 1; for (k = 1; k < 3; k = k + 1) k = k;",
+                                     "k = 0\na = 0\nb = 2\nwhile a < b:\n    k = k + 1\n    a = a + 1\nk = 1\nwhile k < 3:\n    k = k\n    k = k + 1\n");
+    total++; falhas += testa_geracao("For com partes vazias omite init/incr e usa while True sem condicao",
+                                     "for (; i < 3; i = i + 1) { s = s + i; } for (let j = 0; j < 2;) { j = j + 1; } for (let k = 0;; k = k + 1) { f(k); } for (;;) ;",
+                                     "while i < 3:\n    s = s + i\n    i = i + 1\nj = 0\nwhile j < 2:\n    j = j + 1\nk = 0\nwhile True:\n    f(k)\n    k = k + 1\nwhile True:\n    pass\n");
+    total++; falhas += testa_geracao("For com corpo vazio gera so incremento ou pass quando nao ha incremento",
+                                     "for (let i = 0; i < 3; i = i + 1) {} for (let j = 0; j < 3; j = j + 1) ; for (; c;) {} for (; c;) { ; {} }",
+                                     "i = 0\nwhile i < 3:\n    i = i + 1\nj = 0\nwhile j < 3:\n    j = j + 1\nwhile c:\n    pass\nwhile c:\n    pass\n");
+    total++; falhas += testa_geracao("For dentro de for e dentro de funcao mantem indentacao",
+                                     "function soma(n) { let t = 0; for (let i = 0; i < n; i = i + 1) { for (let j = 0; j < n; passo(j)) t = t + 1; } return t; }",
+                                     "def soma(n):\n    t = 0\n    i = 0\n    while i < n:\n        j = 0\n        while j < n:\n            t = t + 1\n            passo(j)\n        i = i + 1\n    return t\n");
+    total++; falhas += testa_geracao("For com incremento expressao gera a expressao no fim do corpo",
+                                     "for (let i = 0; i < 1; i + 1) ;",
+                                     "i = 0\nwhile i < 1:\n    i + 1\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
