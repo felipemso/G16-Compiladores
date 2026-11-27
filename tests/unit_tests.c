@@ -769,6 +769,22 @@ static int testa_anotacao_comandos(void) {
     return falhas;
 }
 
+#define AUXILIAR_PRINT \
+    "def _js_str(valor):\n" \
+    "    if valor is None:\n" \
+    "        return \"undefined\"\n" \
+    "    if isinstance(valor, bool):\n" \
+    "        return \"true\" if valor else \"false\"\n" \
+    "    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:\n" \
+    "        return str(int(valor))\n" \
+    "    return str(valor)\n" \
+    "\n" \
+    "\n" \
+    "def _js_print(*valores):\n" \
+    "    print(\" \".join(_js_str(valor) for valor in valores))\n" \
+    "\n" \
+    "\n"
+
 static bool gera_texto(const No *raiz, char *texto, size_t tamanho) {
     const char *caminho = "teste_gerador.tmp";
     FILE *arquivo = fopen(caminho, "w+");
@@ -1182,6 +1198,15 @@ int main(void) {
     total++; falhas += testa_geracao("Chamada recursiva no return",
                                      "function fat(n) { if (n <= 1) { return 1; } return n * fat(n - 1); }",
                                      "def fat(n):\n    if n <= 1:\n        return 1\n    return n * fat(n - 1)\n");
+    total++; falhas += testa_geracao("console.log vira chamada a funcao auxiliar escrita no inicio",
+                                     "let x = 1; console.log(x, 'a' + 'b', x > 0); console.log();",
+                                     AUXILIAR_PRINT "x = 1\n_js_print(x, 'a' + 'b', x > 0)\n_js_print()\n");
+    total++; falhas += testa_geracao("console.log aninhado em funcao e if tambem gera auxiliar",
+                                     "function f(a) { if (a) { console.log(a); } }",
+                                     AUXILIAR_PRINT "def f(a):\n    if a:\n        _js_print(a)\n");
+    total++; falhas += testa_geracao("Programa sem console.log nao gera auxiliar",
+                                     "function f(a) { return a; } f(1);",
+                                     "def f(a):\n    return a\nf(1)\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

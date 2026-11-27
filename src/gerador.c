@@ -9,6 +9,22 @@ typedef struct {
 
 static void gera_comando(Gerador *g, const No *no);
 
+static const char *AUXILIAR_PRINT =
+    "def _js_str(valor):\n"
+    "    if valor is None:\n"
+    "        return \"undefined\"\n"
+    "    if isinstance(valor, bool):\n"
+    "        return \"true\" if valor else \"false\"\n"
+    "    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:\n"
+    "        return str(int(valor))\n"
+    "    return str(valor)\n"
+    "\n"
+    "\n"
+    "def _js_print(*valores):\n"
+    "    print(\" \".join(_js_str(valor) for valor in valores))\n"
+    "\n"
+    "\n";
+
 static void inicia_linha(Gerador *g) {
     for (int i = 0; i < g->nivel; i++) {
         fputs("    ", g->saida);
@@ -238,14 +254,38 @@ static void gera_comando(Gerador *g, const No *no) {
             gera_expressao(g, no);
             termina_linha(g);
             break;
+        case NO_PRINT:
+            inicia_linha(g);
+            fputs("_js_print(", g->saida);
+            gera_separados(g, no->filhos[0]);
+            fputc(')', g->saida);
+            termina_linha(g);
+            break;
         default:
             break;
     }
 }
 
+static int usa_print(const No *no) {
+    for (; no; no = no->proximo) {
+        if (no->categoria == NO_PRINT) {
+            return 1;
+        }
+        for (int i = 0; i < NO_MAX_FILHOS; i++) {
+            if (usa_print(no->filhos[i])) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void gera_python(const No *raiz, FILE *saida) {
     Gerador g = { saida, 0, 0 };
     if (raiz) {
+        if (usa_print(raiz->filhos[0])) {
+            fputs(AUXILIAR_PRINT, saida);
+        }
         gera_lista(&g, raiz->filhos[0]);
     }
 }
