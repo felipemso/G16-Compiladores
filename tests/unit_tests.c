@@ -1164,6 +1164,15 @@ int main(void) {
     total++; falhas += testa_geracao("Operandos de not, menos unario e logicos com parenteses",
                                      "x = !(a && b); x = -(a + b); x = (a || b) && c; x = a == !b; x = a > b && b > c;",
                                      "x = not (a and b)\nx = -(a + b)\nx = (a or b) and c\nx = a == (not b)\nx = a > b and b > c\n");
+    total++; falhas += testa_geracao("Funcao com parametros gera def e return com valor",
+                                     "function soma(a, b) { return a + b; }",
+                                     "def soma(a, b):\n    return a + b\n");
+    total++; falhas += testa_geracao("Funcao sem parametros com corpo vazio gera pass e return sem valor",
+                                     "function f() {} function g() { ; {} return; }",
+                                     "def f():\n    pass\ndef g():\n    return\n");
+    total++; falhas += testa_geracao("Corpo da funcao com if e declaracao mantem indentacao",
+                                     "function sinal(n) { let s = 1; if (n < 0) { return -s; } return s; }",
+                                     "def sinal(n):\n    s = 1\n    if n < 0:\n        return -s\n    return s\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

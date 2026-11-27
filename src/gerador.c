@@ -102,6 +102,7 @@ static void gera_expressao(Gerador *g, const No *no) {
     }
     switch (no->categoria) {
         case NO_ID:
+        case NO_PARAMETRO:
         case NO_STRING:
             fputs(no->valor.texto, g->saida);
             break;
@@ -122,6 +123,15 @@ static void gera_expressao(Gerador *g, const No *no) {
             break;
         default:
             break;
+    }
+}
+
+static void gera_separados(Gerador *g, const No *lista) {
+    for (const No *no = lista; no; no = no->proximo) {
+        gera_expressao(g, no);
+        if (no->proximo) {
+            fputs(", ", g->saida);
+        }
     }
 }
 
@@ -199,6 +209,23 @@ static void gera_comando(Gerador *g, const No *no) {
             break;
         case NO_IF:
             gera_if(g, no);
+            break;
+        case NO_FUNCAO:
+            inicia_linha(g);
+            fprintf(g->saida, "def %s(", no->valor.texto);
+            gera_separados(g, no->filhos[0]);
+            fputs("):", g->saida);
+            termina_linha(g);
+            gera_corpo(g, no->filhos[1]);
+            break;
+        case NO_RETURN:
+            inicia_linha(g);
+            fputs("return", g->saida);
+            if (no->filhos[0]) {
+                fputc(' ', g->saida);
+                gera_expressao(g, no->filhos[0]);
+            }
+            termina_linha(g);
             break;
         default:
             break;
