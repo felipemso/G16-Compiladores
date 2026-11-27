@@ -1,0 +1,18 @@
+c1 = False
+c2 = False
+c3 = True
+r = 0
+if c1:
+    r = 1
+elif c2:
+    pass
+elif c3:
+    r = 3
+else:
+    r = 4
+if c1:
+    r = 10
+elif c2:
+    r = 20
+elif c3:
+    r = 30

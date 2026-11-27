@@ -29,13 +29,84 @@ static void gera_lista(Gerador *g, const No *lista) {
 static void gera_corpo(Gerador *g, const No *corpo) {
     int antes = g->linhas;
     g->nivel++;
-    gera_comando(g, corpo);
+    gera_lista(g, corpo);
     if (g->linhas == antes) {
         inicia_linha(g);
         fputs("pass", g->saida);
         termina_linha(g);
     }
     g->nivel--;
+}
+
+static void gera_expressao(Gerador *g, const No *no) {
+    if (!no) {
+        return;
+    }
+    switch (no->categoria) {
+        case NO_ID:
+        case NO_STRING:
+            fputs(no->valor.texto, g->saida);
+            break;
+        case NO_NUMERO:
+            fprintf(g->saida, "%.15g", no->valor.numero);
+            break;
+        case NO_BOOLEANO:
+            fputs(no->valor.booleano ? "True" : "False", g->saida);
+            break;
+        default:
+            break;
+    }
+}
+
+/* Percorre blocos soltos e comandos vazios; devolve 0 se houver mais de um comando efetivo. */
+static int coleta_ate_um_comando(const No *no, const No **unico) {
+    for (; no; no = no->proximo) {
+        if (no->categoria == NO_VAZIO) {
+            continue;
+        }
+        if (no->categoria == NO_BLOCO) {
+            if (!coleta_ate_um_comando(no->filhos[0], unico)) {
+                return 0;
+            }
+            continue;
+        }
+        if (*unico) {
+            return 0;
+        }
+        *unico = no;
+    }
+    return 1;
+}
+
+static const No *unico_if(const No *no) {
+    const No *unico = NULL;
+    return (coleta_ate_um_comando(no, &unico) && unico && unico->categoria == NO_IF) ? unico : NULL;
+}
+
+static void gera_if(Gerador *g, const No *no) {
+    const char *palavra = "if";
+    while (no) {
+        inicia_linha(g);
+        fprintf(g->saida, "%s ", palavra);
+        gera_expressao(g, no->filhos[0]);
+        fputs(":", g->saida);
+        termina_linha(g);
+        gera_corpo(g, no->filhos[1]);
+
+        const No *proximo_if = unico_if(no->filhos[2]);
+        if (proximo_if) {
+            palavra = "elif";
+            no = proximo_if;
+        } else {
+            if (no->filhos[2]) {
+                inicia_linha(g);
+                fputs("else:", g->saida);
+                termina_linha(g);
+                gera_corpo(g, no->filhos[2]);
+            }
+            break;
+        }
+    }
 }
 
 static void gera_comando(Gerador *g, const No *no) {
@@ -45,6 +116,22 @@ static void gera_comando(Gerador *g, const No *no) {
     switch (no->categoria) {
         case NO_BLOCO:
             gera_lista(g, no->filhos[0]);
+            break;
+        case NO_VAZIO:
+            break;
+        case NO_DECL_VAR:
+        case NO_ATRIBUICAO:
+            inicia_linha(g);
+            fprintf(g->saida, "%s = ", no->valor.texto);
+            if (no->filhos[0]) {
+                gera_expressao(g, no->filhos[0]);
+            } else {
+                fputs("None", g->saida);
+            }
+            termina_linha(g);
+            break;
+        case NO_IF:
+            gera_if(g, no);
             break;
         default:
             break;
