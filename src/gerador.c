@@ -225,7 +225,7 @@ static void gera_incremento(Gerador *g, const No *incr) {
     termina_linha(g);
 }
 
-static void gera_while(Gerador *g, const No *cond, const No *corpo, const No *incr) {
+static void gera_laco(Gerador *g, const No *cond, const No *corpo, const No *incr) {
     inicia_linha(g);
     fputs("while ", g->saida);
     if (cond) {
@@ -269,11 +269,11 @@ static void gera_comando(Gerador *g, const No *no) {
             gera_if(g, no);
             break;
         case NO_WHILE:
-            gera_while(g, no->filhos[0], no->filhos[1], NULL);
+            gera_laco(g, no->filhos[0], no->filhos[1], NULL);
             break;
         case NO_FOR:
             gera_lista(g, no->filhos[0]);
-            gera_while(g, no->filhos[1], no->filhos[3], no->filhos[2]);
+            gera_laco(g, no->filhos[1], no->filhos[3], no->filhos[2]);
             break;
         case NO_FUNCAO:
             inicia_linha(g);
