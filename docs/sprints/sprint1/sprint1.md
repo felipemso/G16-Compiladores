@@ -4,6 +4,31 @@
 **Objetivo Principal:** Configurar o ambiente de desenvolvimento, definir o escopo da linguagem a ser compilada, produzir a documentação inicial e dar início à implementação do Analisador Léxico.
 **Período:** 19/08/2026 a 02/09/2026
 
+## Resultado Esperado
+Ao final da sprint, a equipe deverá dispor de uma base organizada para desenvolver o compilador de JavaScript para Python: ambiente de desenvolvimento definido, repositório estruturado, documentação inicial e início do reconhecimento léxico. Uma entrada simples como `let x = 10;` deverá orientar os primeiros casos de reconhecimento de palavras-chave, identificadores, números e delimitadores.
+
+## Escopo da Sprint
+*   Configuração do ambiente, organização do repositório e definição do fluxo de trabalho.
+*   Definição inicial das linguagens de entrada e saída e da arquitetura do compilador.
+*   Documentação de instalação, execução, escopo e categorias de tokens.
+*   Estrutura inicial do lexer e primeiros testes de reconhecimento.
+
+## Exclusões e Continuidade
+*   A conclusão do scanner e de sua cobertura de testes fica para a Sprint 2.
+*   A implementação completa do parser, da AST, da análise semântica e da geração de Python pertence às etapas seguintes.
+*   A definição inicial do escopo poderá ser refinada nas próximas sprints; não representa garantia de suporte já implementado.
+
+## Resultados da Sprint
+A sprint teve como foco a ambientação da equipe na disciplina e a preparação do projeto. Foram concluídas a organização dos ambientes de desenvolvimento dos membros, o levantamento de requisitos, a definição de um escopo inicial e a criação dos documentos iniciais e da estrutura de documentação com MkDocs.
+
+O início da implementação e dos testes do analisador léxico, previsto no planejamento abaixo, foi transferido para a Sprint 2. Não houve implementação do lexer nesta sprint.
+
+## Organização e Responsáveis
+As atividades foram realizadas em conjunto pela equipe, sem divisão individual de responsabilidades por frente nesta sprint.
+
+## Problemas Encontrados e Soluções
+A principal dificuldade foi compreender a dinâmica da disciplina, identificar o que deveria ser desenvolvido e conhecer as ferramentas propostas. A equipe iniciou o acompanhamento do guia da disciplina como orientação para organizar o trabalho e compreender as etapas do projeto.
+
 ---
 
 ## 1. Ambientação e Infraestrutura

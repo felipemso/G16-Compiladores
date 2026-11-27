@@ -2,7 +2,7 @@
 
 ## Visão Geral da Sprint
 **Objetivo Principal:** Aplicar no código as decisões de redução de escopo, construir a Árvore Sintática Abstrata (AST) a partir do parser, implementar a tabela de símbolos e a análise semântica sobre a AST e atualizar a documentação do projeto para a nova arquitetura.
-**Período:** 04/11/2026 a 18/11/2026
+**Período:** 30/09/2026 a 18/10/2026
 
 ---
 

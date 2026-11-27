@@ -1,16 +1,45 @@
 # Documento de Planejamento - Sprint 3
 
 ## Visão Geral da Sprint
-**Objetivo Principal:** Implementar o Analisador Sintático (Parser) utilizando GNU Bison, definir a gramática formal para o subconjunto Mini-JS, integrar os valores semânticos com o Analisador Léxico (Flex) e estruturar a suíte de testes automatizados com mecanismos de recuperação de erros.
+**Objetivo Principal:** Implementar o Analisador Sintático (Parser) utilizando GNU Bison, definir a gramática formal para o subconjunto de JavaScript adotado pelo projeto, integrar os valores semânticos com o Analisador Léxico (Flex) e estruturar a suíte de testes automatizados com mecanismos de recuperação de erros.
 **Período:** 16/09/2026 a 30/09/2026
 
+## Resultado Esperado
+Ao final da sprint, o compilador deverá reconhecer a estrutura sintática das construções planejadas da linguagem de entrada e reportar violações da gramática. Um programa como `function soma(a, b) { return a + b; } console.log(soma(2, 3));` deverá ser aceito sintaticamente. Entradas com instruções incompletas deverão gerar diagnósticos e permitir a recuperação nos pontos de sincronização previstos.
+
+## Escopo da Sprint
+*   Integração entre Flex e Bison por tokens e valores semânticos.
+*   Gramática de programas, blocos, declarações, atribuições, expressões e controle de fluxo.
+*   Declarações e chamadas de funções, retornos e impressão com `console.log`.
+*   Precedência, associatividade, resolução de ambiguidades e recuperação de erros sintáticos.
+*   Automação de compilação e testes de aceitação e rejeição sintática.
+
+## Exclusões e Continuidade
+*   A construção de uma AST persistente e sua utilização nas fases seguintes não constituem entrega desta sprint; mensagens de reconhecimento não equivalem a uma árvore construída.
+*   A tabela de símbolos e as verificações gerais de nomes, escopos e tipos ficam para a etapa semântica. Verificações pontuais no parser não substituem essa etapa.
+*   A geração de Python permanece para uma etapa posterior.
+*   A negação lógica `!`, mencionada no planejamento, recebe ajustes de implementação na Sprint 6; sua presença neste documento não comprova conclusão nesta sprint.
+
 ---
+
+## Resultados da Sprint
+O analisador sintático foi concluído dentro do escopo previsto para esta sprint, incluindo sua integração com o analisador léxico. Essa conclusão se refere à etapa de reconhecimento sintático, sem representar a entrega da AST ou da análise semântica previstas para etapas posteriores.
+
+## Organização e Responsáveis
+As atividades foram realizadas em conjunto pela equipe, com Felipe Melo de Sousa à frente do trabalho no analisador sintático.
+
+## Problemas Encontrados e Soluções
+A principal dificuldade foi integrar os analisadores léxico e sintático, compreendendo como estabelecer a comunicação entre os dois componentes para que os tokens reconhecidos pelo lexer fossem utilizados pelo parser.
+
+A integração foi alcançada combinando os exemplos apresentados em aula com experimentação prática na configuração das ferramentas. O ponto decisivo foi compartilhar as definições dos tokens pelo cabeçalho `parser.tab.h`, gerado pelo Bison e incluído no arquivo do Flex, e estabelecer a passagem de valores semânticos por meio de `%union` e `yylval`.
+
+A automação da compilação pelo Makefile e a execução conjunta de testes com casos válidos e inválidos consolidaram a integração, permitindo verificar o fluxo completo entre os analisadores léxico e sintático.
 
 ## 1. Infraestrutura e Automação de Testes
 Estabelecer um ambiente de compilação contínua e uma suíte de testes padronizada para validação sintática do compilador.
 
 *   **Automação com Makefile:** Configurar scripts de compilação automática integrando `flex`, `bison` e `gcc`.
-*   **Suíte de Casos de Teste:** Criar arquivos de teste em JavaScript cobrindo as construções do Mini-JS (expressões, declarações, controle de fluxo, funções e recuperação de erros).
+*   **Suíte de Casos de Teste:** Criar arquivos de teste em JavaScript cobrindo as construções da linguagem de entrada (expressões, declarações, controle de fluxo, funções e recuperação de erros).
 *   **Pipeline de Validação:** Executar bateria de testes automatizados para verificar a aceitação de sintaxes válidas e a rejeição de sintaxes inválidas.
 
 ## 2. Implementação da Gramática Livre de Contexto (Bison)

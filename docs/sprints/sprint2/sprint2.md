@@ -4,7 +4,35 @@
 **Objetivo Principal:** Formalizar a especificação léxica da linguagem, concluir a implementação funcional do Analisador Léxico (Scanner) e estabelecer o início da gramática livre de contexto para a fase seguinte.
 **Período:** 02/09/2026 a 16/09/2026
 
+## Resultado Esperado
+Ao final da sprint, o scanner deverá converter pequenos programas na linguagem de entrada em sequências de tokens conforme a especificação léxica planejada, descartar espaços e comentários e identificar entradas léxicas inválidas. Por exemplo, `let total = 10 + 2;` deverá produzir os tokens da declaração, do identificador, da atribuição, dos operandos, do operador e do ponto e vírgula. A gramática deverá ter um esboço para orientar a implementação do parser.
+
+## Escopo da Sprint
+*   Formalização das categorias de tokens, expressões regulares, autômatos e regras de desambiguação.
+*   Implementação do scanner, localização das entradas e tratamento de erros léxicos.
+*   Testes por categoria de token, entradas inválidas e programas de exemplo.
+*   Esboço da gramática e preparação da integração com o analisador sintático.
+
+## Exclusões e Continuidade
+*   A validação completa da estrutura dos programas e a recuperação de erros sintáticos ficam para a Sprint 3.
+*   A construção da AST, a resolução de identificadores, a análise de tipos e a geração de Python ficam para etapas posteriores.
+*   O reconhecimento de um token não implica suporte à construção correspondente na gramática.
+*   Os requisitos léxicos registrados nesta sprint representam o planejamento daquele período; os cortes posteriores de linguagem serão tratados na revisão de escopo da Sprint 4.
+
 ---
+
+## Resultados da Sprint
+A implementação do analisador léxico foi iniciada e concluída nesta sprint. O trabalho concentrou-se na definição das regras de reconhecimento dos tokens, com caráter predominantemente declarativo.
+
+O esboço da gramática previsto no planejamento não foi iniciado nesta sprint. A implementação ficou restrita ao reconhecimento de tokens.
+
+## Organização e Responsáveis
+As atividades foram realizadas em conjunto pela equipe, com Augusto Garcia Medeiros à frente do trabalho no analisador léxico.
+
+## Problemas Encontrados e Soluções
+A principal dificuldade foi o primeiro contato com uma ferramenta pouco familiar à equipe e a compreensão da estrutura do analisador léxico. A familiarização com a organização das regras de reconhecimento foi o principal desafio de aprendizagem nesta etapa.
+
+Para superar essa dificuldade, a equipe seguiu o guia da disciplina e utilizou as explicações em sala e os slides como apoio à compreensão da ferramenta e à implementação das regras.
 
 ## 1. Formalização da Especificação Léxica
 Partindo da tabela de tokens e das decisões de escopo produzidas na Sprint 1, o objetivo é consolidar uma especificação formal e completa.
