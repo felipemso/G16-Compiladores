@@ -188,12 +188,117 @@ foreach ($opcao in @("--xyz", "-x")) {
     }
 }
 
-# 7. Sumario Final
+# 7. Geracao de Python: --python, -o e execucao do .py gerado
+Write-Host "`n--- Executando Casos de Teste de Geracao de Python ---" -ForegroundColor Yellow
+$Python = $null
+foreach ($candidato in @("python3", "python", "py")) {
+    # "--version" descarta o atalho da Microsoft Store, que existe no PATH mas nao executa o Python
+    if (Get-Command $candidato -ErrorAction SilentlyContinue) {
+        & $candidato --version *> $null
+        if ($LASTEXITCODE -eq 0) {
+            $Python = $candidato
+            break
+        }
+    }
+}
+$Pulados = 0
+if (-not $Python) {
+    Write-Host "  [AVISO] Python nao encontrado: os .py gerados nao serao executados" -ForegroundColor DarkYellow
+}
+
+# Le a saida de um comando como texto com quebras LF, do mesmo jeito que os arquivos de referencia
+function ConvertTo-TextoLf($linhas) {
+    if ($linhas.Count -gt 0) { return ($linhas -join "`n") + "`n" }
+    return ""
+}
+
+$PyDir = Join-Path $ScriptDir "python"
+$PyErros = [System.IO.Path]::GetTempFileName()
+$PyGravado = [System.IO.Path]::GetTempFileName()
+$PyCodificacaoOriginal = [Console]::OutputEncoding
+$PyEncodingOriginal = $env:PYTHONIOENCODING
+try {
+    # No Windows, o Python escreve na codificacao local por padrao; UTF-8 mantem acentos iguais ao .saida
+    [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+    $env:PYTHONIOENCODING = "utf-8"
+    foreach ($arquivo in (Get-ChildItem -Path $PyDir -Filter "*.js" | Sort-Object Name)) {
+        $base = $arquivo.FullName.Substring(0, $arquivo.FullName.Length - 3)
+
+        # a) O codigo impresso com --python e igual ao .py.esperado
+        $Total++
+        $gerado = ConvertTo-TextoLf @(& $Minijs --python $arquivo.FullName 2> $PyErros)
+        $code = $LASTEXITCODE
+        $esperado = "$base.py.esperado"
+        if ((Test-Path $esperado) -and $code -eq 0 -and (Get-Item $PyErros).Length -eq 0) {
+            $passou = $gerado -ceq [System.IO.File]::ReadAllText($esperado).Replace("`r`n", "`n")
+        } else {
+            $passou = $false
+        }
+        if ($passou) {
+            $Passaram++
+            Write-Host "  [PASSOU] $($arquivo.Name) (--python)" -ForegroundColor Green
+        } else {
+            $Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (--python)" -ForegroundColor Red
+            Get-Content $PyErros
+        }
+
+        # b) O arquivo gravado com -o e igual ao que sai com --python, e nada vai para a tela
+        $Total++
+        Remove-Item $PyGravado -ErrorAction SilentlyContinue
+        $tela = @(& $Minijs $arquivo.FullName -o $PyGravado 2> $PyErros)
+        $code = $LASTEXITCODE
+        if ($code -eq 0 -and $tela.Count -eq 0 -and (Get-Item $PyErros).Length -eq 0 -and (Test-Path $PyGravado)) {
+            $passou = [System.IO.File]::ReadAllText($PyGravado).Replace("`r`n", "`n") -ceq $gerado
+        } else {
+            $passou = $false
+        }
+        if ($passou) {
+            $Passaram++
+            Write-Host "  [PASSOU] $($arquivo.Name) (-o)" -ForegroundColor Green
+        } else {
+            $Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (-o: arquivo diferente da saida de --python)" -ForegroundColor Red
+        }
+
+        # c) O .py gerado roda no Python e imprime o mesmo que o .saida
+        if (-not $Python) {
+            $Pulados++
+            continue
+        }
+        $Total++
+        $execucao = ConvertTo-TextoLf @(& $Python $PyGravado 2> $PyErros)
+        $code = $LASTEXITCODE
+        $saida = "$base.saida"
+        if ((Test-Path $saida) -and $code -eq 0) {
+            $passou = $execucao -ceq [System.IO.File]::ReadAllText($saida).Replace("`r`n", "`n")
+        } else {
+            $passou = $false
+        }
+        if ($passou) {
+            $Passaram++
+            Write-Host "  [PASSOU] $($arquivo.Name) (execucao com $Python)" -ForegroundColor Green
+        } else {
+            $Falharam++
+            Write-Host "  [FALHOU] $($arquivo.Name) (execucao com $Python)" -ForegroundColor Red
+            Get-Content $PyErros
+        }
+    }
+} finally {
+    [Console]::OutputEncoding = $PyCodificacaoOriginal
+    $env:PYTHONIOENCODING = $PyEncodingOriginal
+    Remove-Item $PyErros, $PyGravado -ErrorAction SilentlyContinue
+}
+
+# 8. Sumario Final
 Write-Host "`n============================================================" -ForegroundColor Cyan
 Write-Host "                   SUMARIO DOS TESTES                      " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "  Total de testes executados: $Total"
 Write-Host "  Testes que passaram:       $Passaram" -ForegroundColor Green
+if ($Pulados -gt 0) {
+    Write-Host "  Execucoes puladas:         $Pulados (Python nao encontrado)" -ForegroundColor DarkYellow
+}
 if ($Falharam -gt 0) {
     Write-Host "  Testes que falharam:       $Falharam" -ForegroundColor Red
     Write-Host "============================================================" -ForegroundColor Red
