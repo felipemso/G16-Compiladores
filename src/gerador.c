@@ -38,6 +38,26 @@ static void gera_corpo(Gerador *g, const No *corpo) {
     g->nivel--;
 }
 
+static const char *operador_python(Operador operador) {
+    switch (operador) {
+        case OP_SOMA: return "+";
+        case OP_SUBTRACAO: return "-";
+        case OP_MULTIPLICACAO: return "*";
+        case OP_DIVISAO: return "/";
+        case OP_IGUAL: return "==";
+        case OP_DIFERENTE: return "!=";
+        case OP_MENOR: return "<";
+        case OP_MENOR_IGUAL: return "<=";
+        case OP_MAIOR: return ">";
+        case OP_MAIOR_IGUAL: return ">=";
+        case OP_E: return "and";
+        case OP_OU: return "or";
+        case OP_NEGATIVO: return "-";
+        case OP_NAO: return "not ";
+        default: return "";
+    }
+}
+
 static void gera_expressao(Gerador *g, const No *no) {
     if (!no) {
         return;
@@ -52,6 +72,15 @@ static void gera_expressao(Gerador *g, const No *no) {
             break;
         case NO_BOOLEANO:
             fputs(no->valor.booleano ? "True" : "False", g->saida);
+            break;
+        case NO_BINARIO:
+            gera_expressao(g, no->filhos[0]);
+            fprintf(g->saida, " %s ", operador_python(no->operador));
+            gera_expressao(g, no->filhos[1]);
+            break;
+        case NO_UNARIO:
+            fputs(operador_python(no->operador), g->saida);
+            gera_expressao(g, no->filhos[0]);
             break;
         default:
             break;
