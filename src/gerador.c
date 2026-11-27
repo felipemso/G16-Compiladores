@@ -58,29 +58,29 @@ static void gera_expressao(Gerador *g, const No *no) {
     }
 }
 
-/* Percorre blocos soltos e comandos vazios procurando exatamente um comando efetivo. */
-static int busca_unico_comando(const No *no, const No **unico) {
-    if (!no || no->categoria == NO_VAZIO) {
-        return 1;
-    }
-    if (no->categoria == NO_BLOCO) {
-        for (const No *item = no->filhos[0]; item; item = item->proximo) {
-            if (!busca_unico_comando(item, unico)) {
+/* Percorre blocos soltos e comandos vazios; devolve 0 se houver mais de um comando efetivo. */
+static int coleta_ate_um_comando(const No *no, const No **unico) {
+    for (; no; no = no->proximo) {
+        if (no->categoria == NO_VAZIO) {
+            continue;
+        }
+        if (no->categoria == NO_BLOCO) {
+            if (!coleta_ate_um_comando(no->filhos[0], unico)) {
                 return 0;
             }
+            continue;
         }
-        return 1;
+        if (*unico) {
+            return 0;
+        }
+        *unico = no;
     }
-    if (*unico) {
-        return 0;
-    }
-    *unico = no;
     return 1;
 }
 
 static const No *unico_if(const No *no) {
     const No *unico = NULL;
-    return (busca_unico_comando(no, &unico) && unico && unico->categoria == NO_IF) ? unico : NULL;
+    return (coleta_ate_um_comando(no, &unico) && unico && unico->categoria == NO_IF) ? unico : NULL;
 }
 
 static void gera_if(Gerador *g, const No *no) {
