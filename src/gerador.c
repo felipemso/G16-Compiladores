@@ -29,7 +29,7 @@ static void gera_lista(Gerador *g, const No *lista) {
 static void gera_corpo(Gerador *g, const No *corpo) {
     int antes = g->linhas;
     g->nivel++;
-    gera_comando(g, corpo);
+    gera_lista(g, corpo);
     if (g->linhas == antes) {
         inicia_linha(g);
         fputs("pass", g->saida);

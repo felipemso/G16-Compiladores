@@ -1131,6 +1131,9 @@ int main(void) {
     total++; falhas += testa_geracao("Else com blocos soltos e comandos vazios em torno de unico if vira elif",
                                      "let x = 0, a = false, b = true; if (a) { x = 1; } else { ; {} { if (b) { x = 2; }; } }",
                                      "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\n");
+    total++; falhas += testa_geracao("Corpo sem chaves com lista de nos gera todos os itens",
+                                     "if (true) let a = 1, b = 2;",
+                                     "if True:\n    a = 1\n    b = 2\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");
