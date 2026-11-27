@@ -51,6 +51,11 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             arquivo_python = argv[++i];
+        } else if (argv[i][0] == '-' && argv[i][1] != '\0') {
+            /* Sem isso, uma opcao digitada errado seria aberta como nome de arquivo */
+            fprintf(stderr, "Erro: opcao desconhecida '%s'\n", argv[i]);
+            fprintf(stderr, "Uso: minijs [--ast] [--tabela] [--python] [-o saida.py] [arquivo.js]\n");
+            return 1;
         } else {
             arquivo = argv[i];
         }
