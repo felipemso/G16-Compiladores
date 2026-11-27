@@ -9,6 +9,22 @@ typedef struct {
 
 static void gera_comando(Gerador *g, const No *no);
 
+static const char *AUXILIAR_PRINT =
+    "def _js_str(valor):\n"
+    "    if valor is None:\n"
+    "        return \"undefined\"\n"
+    "    if isinstance(valor, bool):\n"
+    "        return \"true\" if valor else \"false\"\n"
+    "    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:\n"
+    "        return str(int(valor))\n"
+    "    return str(valor)\n"
+    "\n"
+    "\n"
+    "def _js_print(*valores):\n"
+    "    print(\" \".join(_js_str(valor) for valor in valores))\n"
+    "\n"
+    "\n";
+
 static void inicia_linha(Gerador *g) {
     for (int i = 0; i < g->nivel; i++) {
         fputs("    ", g->saida);
@@ -81,6 +97,7 @@ static int eh_comparacao(const No *no) {
 }
 
 static void gera_expressao(Gerador *g, const No *no);
+static void gera_separados(Gerador *g, const No *lista);
 
 static void gera_operando(Gerador *g, const No *pai, const No *filho, int direita) {
     int p_pai = precedencia(pai);
@@ -102,6 +119,7 @@ static void gera_expressao(Gerador *g, const No *no) {
     }
     switch (no->categoria) {
         case NO_ID:
+        case NO_PARAMETRO:
         case NO_STRING:
             fputs(no->valor.texto, g->saida);
             break;
@@ -120,8 +138,22 @@ static void gera_expressao(Gerador *g, const No *no) {
             fputs(operador_python(no->operador), g->saida);
             gera_operando(g, no, no->filhos[0], 0);
             break;
+        case NO_CHAMADA:
+            fprintf(g->saida, "%s(", no->valor.texto);
+            gera_separados(g, no->filhos[0]);
+            fputc(')', g->saida);
+            break;
         default:
             break;
+    }
+}
+
+static void gera_separados(Gerador *g, const No *lista) {
+    for (const No *no = lista; no; no = no->proximo) {
+        gera_expressao(g, no);
+        if (no->proximo) {
+            fputs(", ", g->saida);
+        }
     }
 }
 
@@ -200,14 +232,60 @@ static void gera_comando(Gerador *g, const No *no) {
         case NO_IF:
             gera_if(g, no);
             break;
+        case NO_FUNCAO:
+            inicia_linha(g);
+            fprintf(g->saida, "def %s(", no->valor.texto);
+            gera_separados(g, no->filhos[0]);
+            fputs("):", g->saida);
+            termina_linha(g);
+            gera_corpo(g, no->filhos[1]);
+            break;
+        case NO_RETURN:
+            inicia_linha(g);
+            fputs("return", g->saida);
+            if (no->filhos[0]) {
+                fputc(' ', g->saida);
+                gera_expressao(g, no->filhos[0]);
+            }
+            termina_linha(g);
+            break;
+        case NO_CHAMADA:
+            inicia_linha(g);
+            gera_expressao(g, no);
+            termina_linha(g);
+            break;
+        case NO_PRINT:
+            inicia_linha(g);
+            fputs("_js_print(", g->saida);
+            gera_separados(g, no->filhos[0]);
+            fputc(')', g->saida);
+            termina_linha(g);
+            break;
         default:
             break;
     }
 }
 
+static int usa_print(const No *no) {
+    for (; no; no = no->proximo) {
+        if (no->categoria == NO_PRINT) {
+            return 1;
+        }
+        for (int i = 0; i < NO_MAX_FILHOS; i++) {
+            if (usa_print(no->filhos[i])) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void gera_python(const No *raiz, FILE *saida) {
     Gerador g = { saida, 0, 0 };
     if (raiz) {
+        if (usa_print(raiz->filhos[0])) {
+            fputs(AUXILIAR_PRINT, saida);
+        }
         gera_lista(&g, raiz->filhos[0]);
     }
 }
