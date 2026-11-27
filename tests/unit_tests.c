@@ -1249,6 +1249,15 @@ int main(void) {
     total++; falhas += testa_geracao("Programa sem console.log nao gera auxiliar",
                                      "function f(a) { return a; } f(1);",
                                      "def f(a):\n    return a\nf(1)\n");
+    total++; falhas += testa_geracao("While gera cabecalho e corpo indentado",
+                                     "let i = 0; while (i < 3) { i = i + 1; }",
+                                     "i = 0\nwhile i < 3:\n    i = i + 1\n");
+    total++; falhas += testa_geracao("While com corpo vazio gera pass",
+                                     "while (false) {} while (a) ; while (b) { ; {} }",
+                                     "while False:\n    pass\nwhile a:\n    pass\nwhile b:\n    pass\n");
+    total++; falhas += testa_geracao("While aninhado e dentro de funcao mantem indentacao",
+                                     "function f(n) { while (n > 0) { while (n > 1) n = n - 1; n = n - 1; } }",
+                                     "def f(n):\n    while n > 0:\n        while n > 1:\n            n = n - 1\n        n = n - 1\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

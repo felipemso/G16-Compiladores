@@ -232,6 +232,14 @@ static void gera_comando(Gerador *g, const No *no) {
         case NO_IF:
             gera_if(g, no);
             break;
+        case NO_WHILE:
+            inicia_linha(g);
+            fputs("while ", g->saida);
+            gera_expressao(g, no->filhos[0]);
+            fputs(":", g->saida);
+            termina_linha(g);
+            gera_corpo(g, no->filhos[1]);
+            break;
         case NO_FUNCAO:
             inicia_linha(g);
             fprintf(g->saida, "def %s(", no->valor.texto);
