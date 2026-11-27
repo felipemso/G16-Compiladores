@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "semantico.h"
 #include "tabela.h"
 
@@ -54,7 +55,31 @@ static Simbolo *busca_uso(const char *nome, int linha) {
 
 /* Ponto unico de entrada de nomes na tabela: variaveis, funcoes e parametros.
  * Retorna NULL quando a declaracao e invalida; o nome nao entra e o primeiro continua valendo. */
+/* Nomes validos no Mini-JS que quebrariam o .py gerado. As palavras reservadas do Python que
+ * tambem sao do JS (from, await, class...) ja sao recusadas pelo lexer e nao entram aqui. */
+static const char *const nomes_reservados_python[] = {
+    "False", "None", "True", "and", "as", "assert", "async", "def", "del", "elif", "except",
+    "global", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+    /* Usados pelo codigo gerado: o console.log vira _js_print, que depende destes nomes.
+     * Manter em dia com a funcao auxiliar do gerador.c */
+    "print", "_js_print", "_js_str", "abs", "bool", "float", "int", "isinstance", "str",
+};
+
+static bool reservado_python(const char *nome) {
+    for (size_t i = 0; i < sizeof nomes_reservados_python / sizeof nomes_reservados_python[0]; i++) {
+        if (strcmp(nome, nomes_reservados_python[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static Simbolo *declara(const char *nome, CategoriaSimbolo categoria, TipoDado tipo, int linha) {
+    /* O nome continua entrando na tabela, para os usos seguintes nao virarem "nao declarado" */
+    if (reservado_python(nome)) {
+        erro_semantico(linha, "nome '%s' e reservado em Python", nome);
+    }
+
     Simbolo *anterior = tabela_busca_local(nome);
     if (anterior) {
         erro_semantico(linha, "'%s' ja foi declarado neste escopo (linha %d)", nome, anterior->linha);

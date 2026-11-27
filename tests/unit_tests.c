@@ -803,6 +803,28 @@ static int testa_geracao_raiz_nula(void) {
     return verifica("Raiz nula nao gera nada", ok);
 }
 
+/* Cada nome da lista, declarado sozinho, tem que gerar exatamente um erro */
+static int testa_todos_reservados_python(void) {
+    static const char *const nomes[] = {
+        "False", "None", "True", "and", "as", "assert", "async", "def", "del", "elif", "except",
+        "global", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+        "print", "_js_print", "_js_str", "abs", "bool", "float", "int", "isinstance", "str",
+    };
+    size_t total = sizeof nomes / sizeof nomes[0];
+    size_t recusados = 0;
+    for (size_t i = 0; i < total; i++) {
+        char codigo[64];
+        snprintf(codigo, sizeof codigo, "let %s = 1;", nomes[i]);
+        if (analisa_codigo(codigo) && erros_semanticos == 1) {
+            recusados++;
+        } else {
+            printf("  (nome '%s' nao foi recusado)\n", nomes[i]);
+        }
+        limpa_analise();
+    }
+    return verifica("Todos os nomes reservados do Python geram erro", recusados == total);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -1098,6 +1120,22 @@ int main(void) {
                                     no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(NULL, 1), 1), 0);
     total++; falhas += testa_arvore("Comando simples no corpo sem bloco e permitido",
                                     no_while(no_booleano(1, 1), no_vazio(1), 1), 0);
+
+    printf("\n--- Nomes Reservados do Python ---\n");
+    total++; falhas += testa_regra("Variavel com palavra reservada do Python gera erro", "let pass = 1;", 1);
+    total++; falhas += testa_regra("var com palavra reservada do Python gera erro", "var lambda = 1;", 1);
+    total++; falhas += testa_regra("const com palavra reservada do Python gera erro", "const None = 1;", 1);
+    total++; falhas += testa_regra("Funcao com palavra reservada do Python gera erro", "function def() { return 1; }", 1);
+    total++; falhas += testa_regra("Parametro com palavra reservada do Python gera erro", "function f(is) { return is; }", 1);
+    total++; falhas += testa_regra("Variavel local com palavra reservada gera erro", "function f() { let elif = 1; return elif; }", 1);
+    total++; falhas += testa_regra("Uso depois do erro nao gera erro em cascata", "let and = 1; let x = and + 1; and = 2;", 1);
+    total++; falhas += testa_regra("Nome print gera erro", "let print = 1;", 1);
+    total++; falhas += testa_regra("Nome da auxiliar do console.log gera erro", "function _js_print(a) { return a; }", 1);
+    total++; falhas += testa_regra("Nome usado pela auxiliar do console.log gera erro", "let str = \"a\";", 1);
+    total++; falhas += testa_regra("Nome reservado repetido gera erro nas duas declaracoes e na redeclaracao", "let pass = 1; let pass = 2;", 3);
+    total++; falhas += testa_regra("Maiusculas diferentes sao permitidas", "let none = 1; let Pass = 2; let TRUE = 3;", 0);
+    total++; falhas += testa_regra("Nome que contem palavra reservada e permitido", "let passo = 1; let definir = 2; let is_ok = 3;", 0);
+    total++; falhas += testa_todos_reservados_python();
 
     printf("\n--- Geracao de Python ---\n");
     total++; falhas += testa_geracao("Programa vazio gera Python vazio", "", "");
