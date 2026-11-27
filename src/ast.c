@@ -172,6 +172,22 @@ static int usa_texto(TipoNo categoria) {
     }
 }
 
+/* Nos de expressao recebem um tipo na analise semantica (T21) */
+static int eh_expressao(TipoNo categoria) {
+    switch (categoria) {
+        case NO_ID:
+        case NO_NUMERO:
+        case NO_STRING:
+        case NO_BOOLEANO:
+        case NO_BINARIO:
+        case NO_UNARIO:
+        case NO_CHAMADA:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 static void imprime_valor(const No *no) {
     static const char *categorias[] = {
         "NO_PROGRAMA", "NO_BLOCO", "NO_DECL_VAR", "NO_ATRIBUICAO",
@@ -184,6 +200,7 @@ static void imprime_valor(const No *no) {
         "&&", "||", "-", "!"
     };
     static const char *declaradores[] = { "let", "var", "const" };
+    static const char *tipos[] = { "desconhecido", "numero", "string", "booleano" };
 
     printf("%s", categorias[no->categoria]);
     if (no->categoria == NO_DECL_VAR) {
@@ -196,6 +213,9 @@ static void imprime_valor(const No *no) {
         printf(" %s", no->valor.booleano ? "true" : "false");
     } else if (no->categoria == NO_BINARIO || no->categoria == NO_UNARIO) {
         printf(" %s", operadores[no->operador]);
+    }
+    if (eh_expressao(no->categoria)) {
+        printf(" [%s]", tipos[no->tipo_inferido]);
     }
     putchar('\n');
 }

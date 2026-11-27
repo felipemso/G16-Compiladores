@@ -142,7 +142,23 @@ for arquivo in "$SCRIPT_DIR/ast"/*.js; do
     fi
 done
 
-# 6. Sumario Final
+# 6. Opcoes de linha de comando: opcao desconhecida e erro, e nao nome de arquivo
+echo ""
+echo "--- Executando Casos de Teste de Opcoes ---"
+for opcao in --xyz -x; do
+    TOTAL=$((TOTAL + 1))
+    "$MINIJS" "$opcao" "$SCRIPT_DIR/validos/01_declaracoes.js" > /dev/null 2> "$AST_TMP/erros"
+    code=$?
+    if [ $code -ne 0 ] && grep -q "opcao desconhecida" "$AST_TMP/erros"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo "  [PASSOU] opcao $opcao rejeitada (codigo: $code)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo "  [FALHOU] opcao $opcao (esperava erro de opcao desconhecida, codigo: $code)"
+    fi
+done
+
+# 7. Sumario Final
 echo ""
 echo -e "\033[0;36m============================================================\033[0m"
 echo -e "\033[0;36m                   SUMARIO DOS TESTES                      \033[0m"

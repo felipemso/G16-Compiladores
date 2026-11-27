@@ -169,6 +169,8 @@ static TipoDado tipo_binario(No *no) {
         case OP_DIVISAO:
             if (esquerda == TIPO_STRING || direita == TIPO_STRING) {
                 erro_semantico(no->linha, "operador '%s' nao pode ser usado com string", nome_operador(no->operador));
+                /* Como no +: depois do erro o resultado e desconhecido, para nao gerar erros em cascata */
+                return TIPO_DESCONHECIDO;
             }
             /* O resultado aritmetico e sempre numero (NaN tambem e numero em JS) */
             return TIPO_NUMERO;
@@ -199,6 +201,7 @@ static TipoDado tipo_unario(No *no) {
     }
     if (operando == TIPO_STRING) {
         erro_semantico(no->linha, "operador '%s' nao pode ser usado com string", nome_operador(no->operador));
+        return TIPO_DESCONHECIDO;
     }
     return TIPO_NUMERO;
 }

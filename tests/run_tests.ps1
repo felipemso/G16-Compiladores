@@ -171,7 +171,24 @@ try {
     Remove-Item $AstErros
 }
 
-# 6. Sumario Final
+# 6. Opcoes de linha de comando: opcao desconhecida e erro, e nao nome de arquivo
+Write-Host "`n--- Executando Casos de Teste de Opcoes ---" -ForegroundColor Yellow
+$ArquivoValido = Join-Path (Join-Path $ScriptDir "validos") "01_declaracoes.js"
+foreach ($opcao in @("--xyz", "-x")) {
+    $Total++
+    $output = & $Minijs $opcao $ArquivoValido 2>&1
+    $code = $LASTEXITCODE
+    $texto = ($output | ForEach-Object { "$_" }) -join "`n"
+    if ($code -ne 0 -and $texto.Contains("opcao desconhecida")) {
+        $Passaram++
+        Write-Host "  [PASSOU] opcao $opcao rejeitada (codigo: $code)" -ForegroundColor Green
+    } else {
+        $Falharam++
+        Write-Host "  [FALHOU] opcao $opcao (esperava erro de opcao desconhecida, codigo: $code)" -ForegroundColor Red
+    }
+}
+
+# 7. Sumario Final
 Write-Host "`n============================================================" -ForegroundColor Cyan
 Write-Host "                   SUMARIO DOS TESTES                      " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan

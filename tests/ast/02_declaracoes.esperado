@@ -1,20 +1,20 @@
 NO_PROGRAMA
 ├── NO_DECL_VAR let a
 ├── NO_DECL_VAR let b
-│   └── NO_BINARIO +
-│       ├── NO_NUMERO 1
-│       └── NO_BINARIO *
-│           ├── NO_NUMERO 2
-│           └── NO_NUMERO 3
+│   └── NO_BINARIO + [numero]
+│       ├── NO_NUMERO 1 [numero]
+│       └── NO_BINARIO * [numero]
+│           ├── NO_NUMERO 2 [numero]
+│           └── NO_NUMERO 3 [numero]
 ├── NO_DECL_VAR var texto
-│   └── NO_STRING "oi"
+│   └── NO_STRING "oi" [string]
 ├── NO_DECL_VAR const flag
-│   └── NO_BOOLEANO true
+│   └── NO_BOOLEANO true [booleano]
 ├── NO_ATRIBUICAO a
-│   └── NO_UNARIO -
-│       └── NO_ID b
+│   └── NO_UNARIO - [numero]
+│       └── NO_ID b [numero]
 └── NO_BLOCO
     ├── NO_DECL_VAR let interno
-    │   └── NO_BOOLEANO false
+    │   └── NO_BOOLEANO false [booleano]
     ├── NO_VAZIO
     └── NO_BLOCO
