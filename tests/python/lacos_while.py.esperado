@@ -1,0 +1,39 @@
+def _js_str(valor):
+    if valor is None:
+        return "undefined"
+    if isinstance(valor, bool):
+        return "true" if valor else "false"
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(" ".join(_js_str(valor) for valor in valores))
+
+
+i = 0
+soma = 0
+while i < 5:
+    soma = soma + i
+    i = i + 1
+cont = 0
+x = 0
+while x < 3:
+    y = 0
+    while y < 2:
+        cont = cont + 1
+        y = y + 1
+    x = x + 1
+while False:
+    pass
+while False:
+    pass
+def potencia(base, exp):
+    res = 1
+    n = exp
+    while n > 0:
+        res = res * base
+        n = n - 1
+    return res
+_js_print(i, soma, cont, potencia(2, 5), potencia(3, 0))
