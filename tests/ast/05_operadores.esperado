@@ -1,40 +1,40 @@
 NO_PROGRAMA
 ├── NO_PRINT
-│   ├── NO_BINARIO /
-│   │   ├── NO_BINARIO *
-│   │   │   ├── NO_BINARIO -
-│   │   │   │   ├── NO_BINARIO +
-│   │   │   │   │   ├── NO_NUMERO 1
-│   │   │   │   │   └── NO_NUMERO 2
-│   │   │   │   └── NO_NUMERO 3
-│   │   │   └── NO_NUMERO 4
-│   │   └── NO_NUMERO 2
-│   ├── NO_UNARIO -
-│   │   └── NO_NUMERO 1
-│   └── NO_UNARIO !
-│       └── NO_BOOLEANO false
+│   ├── NO_BINARIO / [numero]
+│   │   ├── NO_BINARIO * [numero]
+│   │   │   ├── NO_BINARIO - [numero]
+│   │   │   │   ├── NO_BINARIO + [numero]
+│   │   │   │   │   ├── NO_NUMERO 1 [numero]
+│   │   │   │   │   └── NO_NUMERO 2 [numero]
+│   │   │   │   └── NO_NUMERO 3 [numero]
+│   │   │   └── NO_NUMERO 4 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   ├── NO_UNARIO - [numero]
+│   │   └── NO_NUMERO 1 [numero]
+│   └── NO_UNARIO ! [booleano]
+│       └── NO_BOOLEANO false [booleano]
 ├── NO_PRINT
-│   ├── NO_BINARIO ==
-│   │   ├── NO_NUMERO 1
-│   │   └── NO_NUMERO 2
-│   ├── NO_BINARIO !=
-│   │   ├── NO_NUMERO 1
-│   │   └── NO_NUMERO 2
-│   ├── NO_BINARIO <
-│   │   ├── NO_NUMERO 1
-│   │   └── NO_NUMERO 2
-│   ├── NO_BINARIO <=
-│   │   ├── NO_NUMERO 1
-│   │   └── NO_NUMERO 2
-│   ├── NO_BINARIO >
-│   │   ├── NO_NUMERO 1
-│   │   └── NO_NUMERO 2
-│   └── NO_BINARIO >=
-│       ├── NO_NUMERO 1
-│       └── NO_NUMERO 2
+│   ├── NO_BINARIO == [booleano]
+│   │   ├── NO_NUMERO 1 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   ├── NO_BINARIO != [booleano]
+│   │   ├── NO_NUMERO 1 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   ├── NO_BINARIO < [booleano]
+│   │   ├── NO_NUMERO 1 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   ├── NO_BINARIO <= [booleano]
+│   │   ├── NO_NUMERO 1 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   ├── NO_BINARIO > [booleano]
+│   │   ├── NO_NUMERO 1 [numero]
+│   │   └── NO_NUMERO 2 [numero]
+│   └── NO_BINARIO >= [booleano]
+│       ├── NO_NUMERO 1 [numero]
+│       └── NO_NUMERO 2 [numero]
 └── NO_PRINT
-    └── NO_BINARIO ||
-        ├── NO_BINARIO &&
-        │   ├── NO_BOOLEANO true
-        │   └── NO_BOOLEANO false
-        └── NO_BOOLEANO true
+    └── NO_BINARIO || [booleano]
+        ├── NO_BINARIO && [booleano]
+        │   ├── NO_BOOLEANO true [booleano]
+        │   └── NO_BOOLEANO false [booleano]
+        └── NO_BOOLEANO true [booleano]

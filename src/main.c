@@ -79,11 +79,12 @@ int main(int argc, char *argv[]) {
     if (res != 0) {
         reporta_falha("lexica/sintatica", yynerrs);
     } else {
+        /* A semantica so roda sobre uma AST completa, sem erros de sintaxe */
+        analisa(raiz_ast);
+        /* Impressa depois da semantica, para mostrar o tipo inferido de cada expressao */
         if (mostrar_ast) {
             ast_imprime(raiz_ast);
         }
-        /* A semantica so roda sobre uma AST completa, sem erros de sintaxe */
-        analisa(raiz_ast);
         if (mostrar_tabela) {
             tabela_imprime();
         }
