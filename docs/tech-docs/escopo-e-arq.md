@@ -27,7 +27,7 @@ O compilador traduz apenas comandos de JavaScript que possuem equivalente direto
   * Números (inteiros e decimais).
   * Textos (strings com aspas simples ou duplas, em uma única linha).
   * Booleanos (`true` e `false`).
-* **Saída:** comando `console.log(...)` com zero ou mais argumentos separados por vírgula (traduzido diretamente para `print(...)`).
+* **Saída:** comando `console.log(...)` com zero ou mais argumentos separados por vírgula (traduzido para `_js_print(...)`, uma função auxiliar que imprime os valores como o JavaScript; veja a [Geração de Python](geracao.md#34-funcao-auxiliar-do-consolelog)).
 * **Comentários:** de linha (`// ...`) e de bloco (`/* ... */`), descartados pelo analisador léxico.
 
 ### 2.2 O que NÃO Faz Parte do Projeto
@@ -49,6 +49,7 @@ O critério de corte é a tradução direta: quando um recurso se comporta de fo
 * **`var` tratado como `let`:** `var` é aceito, mas segue as mesmas regras de `let`. O `var` original do JS tem escopo de função e sofre *hoisting* (pode ser usado antes da linha da declaração, valendo `undefined`); Python não tem nada equivalente.
 * **Declaração direto no corpo de `if`/`else`/`while`/`for`:** uma declaração não pode ser o corpo inteiro de uma estrutura de controle, como em `if (c) let x = 1;`; ela precisa estar dentro de um bloco com `{ }`. O próprio JS proíbe isso para `let` e `const` (é erro de sintaxe), e, como `var` é tratado como `let`, a regra vale para os três.
 * **Número de argumentos diferente do número de parâmetros:** `soma(1)` ou `soma(1, 2, 3)` para `function soma(a, b)` são rejeitados. Em JS, argumentos faltantes viram `undefined` e os excedentes são ignorados; em Python, os dois casos geram `TypeError`.
+* **Nomes reservados do Python:** variáveis, funções e parâmetros não podem usar nomes válidos em JS que quebrariam o Python gerado, como `None`, `True`, `def`, `pass`, `lambda` e `print`, nem os nomes usados pelas funções auxiliares (`_js_print`, `_js_str`, `str`, `int` etc.). A lista completa está na [Geração de Python](geracao.md#37-nomes-reservados-do-python).
 * **Chamada de função antes da declaração:** a função deve ser declarada antes de ser chamada (recursão é permitida, pois a função já existe dentro do próprio corpo). Em JS, declarações de função sofrem *hoisting* e podem ser chamadas antes da linha onde aparecem; em Python, o `def` só passa a existir quando é executado, e a chamada antecipada gera `NameError`.
 
 #### Tipos e operações
@@ -71,18 +72,18 @@ O critério de corte é a tradução direta: quando um recurso se comporta de fo
 
 O fluxo de compilação acontece em 5 etapas:
 
-**Léxico → Sintático → AST → Semântico → [Geração de Python, próxima etapa]**
+**Léxico → Sintático → AST → Semântico → Geração de Python**
 
 1. **Léxico (Flex):** lê o texto em JS, gera os tokens e descarta comentários e espaços. Caracteres inválidos, strings com quebra de linha e palavras reservadas fora do escopo são relatados como erro léxico, com o número da linha.
 2. **Sintático (Bison):** valida a estrutura do código e as regras gramaticais, pedindo os tokens ao léxico conforme precisa. Em caso de erro, o parser se recupera descartando a entrada até o próximo `;` ou `}` e continua a análise, para relatar vários erros em uma única execução.
 3. **Árvore Sintática (AST):** organiza o programa em uma estrutura de árvore na memória (`ast.c`). Os nós são construídos pelas ações semânticas do Bison, durante a própria análise sintática, e cada nó guarda a linha de origem para as mensagens de erro.
 4. **Semântico:** percorre a AST e preenche a tabela de símbolos (`semantico.c` e `tabela.c`), registrando variáveis, funções e parâmetros com uma pilha de escopos (global, função, bloco e `for`). Essa fase só roda quando o léxico e o sintático terminam sem erros, isto é, sobre uma AST completa. A opção `--tabela` imprime a tabela de símbolos ao final.
-5. **Geração de Python (próxima etapa):** percorrerá a AST já validada e gerará o arquivo `.py` correspondente, devidamente indentado. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST.
+5. **Geração de Python:** percorre a AST já validada e escreve o programa equivalente em Python, devidamente indentado (`gerador.c`). Só roda quando as fases anteriores terminam sem erros, e por isso nenhum `.py` é criado quando a compilação falha. A opção `--python` imprime o código gerado e a opção `-o saida.py` o grava em um arquivo. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST. Os detalhes da tradução estão na [Geração de Python](geracao.md).
 
 Quando a compilação falha, o compilador informa em qual fase ocorreu a falha (`lexica/sintatica` ou `semantica`) e a quantidade de erros. Os erros léxicos chegam ao parser como tokens inválidos, por isso as duas primeiras fases são relatadas juntas.
 
 ### Tecnologias
 * **Linguagem:** C
 * **Ferramentas:** Flex (`lexer/lexer.l`) e Bison (`parser/parser.y`)
-* **Módulos:** `src/ast.c` (AST), `src/tabela.c` (tabela de símbolos e escopos), `src/semantico.c` (análise semântica) e `src/main.c` (orquestra as fases)
+* **Módulos:** `src/ast.c` (AST), `src/tabela.c` (tabela de símbolos e escopos), `src/semantico.c` (análise semântica), `src/gerador.c` (geração de Python) e `src/main.c` (orquestra as fases)
 * **Comunicação:** arquivo `parser.tab.h` (tokens) e estrutura `%union` / `yylval` para troca de dados entre léxico e sintático; a raiz da AST (`raiz_ast`) é entregue pelo parser à fase semântica.
