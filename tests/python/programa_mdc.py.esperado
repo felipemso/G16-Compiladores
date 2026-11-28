@@ -1,0 +1,28 @@
+def _js_str(valor):
+    if valor is None:
+        return "undefined"
+    if isinstance(valor, bool):
+        return "true" if valor else "false"
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(" ".join(_js_str(valor) for valor in valores))
+
+
+def mdc(a, b):
+    while a != b:
+        if a > b:
+            a = a - b
+        else:
+            b = b - a
+    return a
+def mmc(a, b):
+    return a * b / mdc(a, b)
+_js_print("mdc(48, 18) =", mdc(48, 18))
+_js_print("mdc(17, 5) =", mdc(17, 5))
+_js_print("mdc(100, 75) =", mdc(100, 75))
+_js_print("mmc(4, 6) =", mmc(4, 6))
+_js_print("mmc(21, 6) =", mmc(21, 6))
