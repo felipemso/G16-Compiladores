@@ -105,3 +105,53 @@ A sprint manteve as regras da sprint anterior, com um cuidado extra para o arqui
 | [T36](https://github.com/felipemso/G16-Compiladores/issues/61) | Ajustes pendentes da sprint anterior | Semântica | Pedro |
 | [T37](https://github.com/felipemso/G16-Compiladores/issues/62) | Documentação da geração de código | Documentação | Augusto |
 | [T38](https://github.com/felipemso/G16-Compiladores/issues/63) | Sprint, retrospectiva e README final | Documentação | Augusto |
+
+---
+
+## 8. Problemas Encontrados e Soluções
+Registro das dificuldades que surgiram durante a sprint e de como foram resolvidas.
+
+### 8.1 Arquivo do Gerador Compartilhado
+*   **Problema:** As tarefas T28–T32 alteravam o mesmo arquivo, `src/gerador.c`, e a mesma função, que escolhe a tradução de cada tipo de nó. A T29 e a T30 chegaram a ser desenvolvidas ao mesmo tempo, e as duas mexiam no tratamento de declarações.
+*   **Solução:** A T29 esperou o merge da T30 e foi refeita sobre o `dev` atualizado, aproveitando o que a T30 já tinha feito. Os Pull Requests da geração foram mantidos pequenos.
+
+### 8.2 Impressão Diferente entre JavaScript e Python
+*   **Problema:** O `print` do Python não imprime os valores como o `console.log`: escreve `True`, `None` e `2.0` onde o JavaScript escreve `true`, `undefined` e `2`. Os programas gerados rodavam, mas imprimiam um resultado diferente.
+*   **Solução:** O `console.log` passou a ser traduzido para uma função auxiliar, `_js_print`, escrita no início do arquivo gerado somente quando o programa a usa. Como um programa poderia declarar uma variável com o nome dessa função ou de uma função do Python que ela usa, a T33 passou a rejeitar esses nomes na análise semântica.
+
+### 8.3 Precedência Diferente entre as Linguagens
+*   **Problema:** Copiar as expressões sem cuidado mudaria o seu significado: no Python, `not a == b` significa `not (a == b)`, e `a < b == c` é uma comparação encadeada, enquanto no JavaScript as duas expressões são avaliadas da esquerda para a direita.
+*   **Solução:** O gerador recalcula os parênteses a partir da AST, usando a tabela de precedência do Python, e coloca parênteses quando há uma comparação dentro de outra. Os casos foram cobertos por testes unitários e conferidos com a semântica do JavaScript.
+
+### 8.4 Conferência com o Node
+*   **Problema:** Para provar que o Python gerado se comporta como o JavaScript, era preciso rodar o programa original no Node, que não estava instalado em todas as máquinas da equipe.
+*   **Solução:** A saída de cada programa de ponta a ponta foi conferida no Node por quem o tinha instalado e gravada no arquivo `.saida`. Os testes comparam a execução do Python com esse arquivo, então qualquer integrante consegue rodá-los sem o Node. Se o Python não estiver instalado, o script avisa e pula apenas a etapa de execução.
+
+### 8.5 Diferenças Não Detectadas pela Análise Semântica
+*   **Problema:** No teste final, todos os programas válidos foram compilados e executados. Um deles, que soma o retorno de uma função com uma string, compila sem erro, mas o Python gerado gera `TypeError`, enquanto o JavaScript concatena os valores. A análise semântica não rejeita o programa porque o tipo do retorno de uma função é desconhecido.
+*   **Solução:** Imitar o JavaScript em cada operação exigiria gerar código extra, o que contraria o critério de tradução direta do projeto. O caso foi registrado, junto com outros como a divisão por zero, nas limitações conhecidas da página [Geração de Python](../../tech-docs/geracao.md#4-limitacoes-conhecidas).
+
+### 8.6 Redistribuição da Documentação
+*   **Problema:** As tarefas de documentação (T37 e T38) precisaram mudar de responsável no fim da sprint.
+*   **Solução:** As duas tarefas foram assumidas por Augusto Garcia Medeiros depois que todo o código estava concluído, o que permitiu documentar o estado final do compilador, com as tabelas e os exemplos gerados pela versão entregue.
+
+---
+
+## 9. Retrospectiva Final do Projeto
+
+### 9.1 O que Funcionou
+*   **Critério de escopo claro:** manter apenas os recursos com tradução direta simplificou todas as etapas seguintes. Como a semântica já rejeita os casos em que as linguagens divergem, o gerador não precisa de `global`, `nonlocal` nem de código extra para imitar o JavaScript.
+*   **AST como representação intermediária:** uma única estrutura de nó serviu à análise semântica e à geração, e o Python pôde ser gerado diretamente dela, sem código intermediário.
+*   **Issues detalhadas:** cada tarefa tinha critérios de aceitação, dependências e commits sugeridos, o que permitiu que as frentes trabalhassem em paralelo e que a revisão conferisse o que foi pedido.
+*   **Testes em camadas:** testes unitários em memória, testes de arquivo para programas válidos, inválidos e para a AST, e testes que executam o Python gerado. Ao final, o `make test` executa 292 testes unitários e 133 testes de arquivo, e cada mudança era conferida antes do merge.
+
+### 9.2 O que Faríamos Diferente
+*   **Definir o escopo mais cedo:** a redução de escopo veio depois que a AST já estava planejada. Decidir no início quais recursos têm tradução direta teria evitado retrabalho no léxico e no sintático.
+*   **Integração contínua:** o `make test` era executado manualmente antes de cada merge. Uma automação no GitHub, rodando os testes em cada Pull Request, daria a mesma garantia sem depender de quem revisa.
+*   **Combinar a ordem das tarefas em arquivos compartilhados:** `parser.y`, `unit_tests.c` e `gerador.c` concentraram os conflitos do projeto. Definir antes a ordem dos Pull Requests que mexem no mesmo arquivo teria evitado esperas e retrabalho.
+*   **Documentar ao longo da sprint:** concentrar a documentação no fim da sprint deixou pouca margem quando ela precisou mudar de responsável.
+
+### 9.3 O que Ficou Fora do Escopo
+*   **Recursos da linguagem:** orientação a objetos, *arrow functions*, arrays, funções aninhadas, atribuição a variável global dentro de função, sombreamento de nomes, `break`, `continue`, `switch`, `++`, `+=`, `%`, sequências de escape e notação científica. A justificativa de cada corte está no [Escopo e Arquitetura](../../tech-docs/escopo-e-arq.md#22-o-que-nao-faz-parte-do-projeto).
+*   **Etapas do compilador:** código intermediário e otimização. A AST cumpre o papel de representação intermediária.
+*   **Comportamentos em tempo de execução:** casos como a divisão por zero e operações entre tipos desconhecidos, que só aparecem ao executar o programa, estão registrados nas [limitações conhecidas](../../tech-docs/geracao.md#4-limitacoes-conhecidas) da geração.
