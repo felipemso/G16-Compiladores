@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -579,6 +579,72 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#resultado-esperado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resultado Esperado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#escopo-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escopo da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exclusoes-e-continuidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exclusões e Continuidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resultados-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resultados da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#organizacao-e-responsaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Organização e Responsáveis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1-formalizacao-da-especificacao-lexica" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -737,6 +803,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprint5/sprint5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 5
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprint6/sprint6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 6
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -810,6 +932,72 @@
     <span class="md-ellipsis">
       
         Visão Geral da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resultado-esperado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resultado Esperado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#escopo-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escopo da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exclusoes-e-continuidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exclusões e Continuidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resultados-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resultados da Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#organizacao-e-responsaveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Organização e Responsáveis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problemas Encontrados e Soluções
       
     </span>
   </a>
@@ -931,7 +1119,31 @@
 <h2 id="visao-geral-da-sprint">Visão Geral da Sprint</h2>
 <p><strong>Objetivo Principal:</strong> Formalizar a especificação léxica da linguagem, concluir a implementação funcional do Analisador Léxico (Scanner) e estabelecer o início da gramática livre de contexto para a fase seguinte.
 <strong>Período:</strong> 02/09/2026 a 16/09/2026</p>
+<h2 id="resultado-esperado">Resultado Esperado</h2>
+<p>Ao final da sprint, o scanner deverá converter pequenos programas na linguagem de entrada em sequências de tokens conforme a especificação léxica planejada, descartar espaços e comentários e identificar entradas léxicas inválidas. Por exemplo, <code>let total = 10 + 2;</code> deverá produzir os tokens da declaração, do identificador, da atribuição, dos operandos, do operador e do ponto e vírgula. A gramática deverá ter um esboço para orientar a implementação do parser.</p>
+<h2 id="escopo-da-sprint">Escopo da Sprint</h2>
+<ul>
+<li>Formalização das categorias de tokens, expressões regulares, autômatos e regras de desambiguação.</li>
+<li>Implementação do scanner, localização das entradas e tratamento de erros léxicos.</li>
+<li>Testes por categoria de token, entradas inválidas e programas de exemplo.</li>
+<li>Esboço da gramática e preparação da integração com o analisador sintático.</li>
+</ul>
+<h2 id="exclusoes-e-continuidade">Exclusões e Continuidade</h2>
+<ul>
+<li>A validação completa da estrutura dos programas e a recuperação de erros sintáticos ficam para a Sprint 3.</li>
+<li>A construção da AST, a resolução de identificadores, a análise de tipos e a geração de Python ficam para etapas posteriores.</li>
+<li>O reconhecimento de um token não implica suporte à construção correspondente na gramática.</li>
+<li>Os requisitos léxicos registrados nesta sprint representam o planejamento daquele período; os cortes posteriores de linguagem serão tratados na revisão de escopo da Sprint 4.</li>
+</ul>
 <hr />
+<h2 id="resultados-da-sprint">Resultados da Sprint</h2>
+<p>A implementação do analisador léxico foi iniciada e concluída nesta sprint. O trabalho concentrou-se na definição das regras de reconhecimento dos tokens, com caráter predominantemente declarativo.</p>
+<p>O esboço da gramática previsto no planejamento não foi iniciado nesta sprint. A implementação ficou restrita ao reconhecimento de tokens.</p>
+<h2 id="organizacao-e-responsaveis">Organização e Responsáveis</h2>
+<p>As atividades foram realizadas em conjunto pela equipe, com Augusto Garcia Medeiros à frente do trabalho no analisador léxico.</p>
+<h2 id="problemas-encontrados-e-solucoes">Problemas Encontrados e Soluções</h2>
+<p>A principal dificuldade foi o primeiro contato com uma ferramenta pouco familiar à equipe e a compreensão da estrutura do analisador léxico. A familiarização com a organização das regras de reconhecimento foi o principal desafio de aprendizagem nesta etapa.</p>
+<p>Para superar essa dificuldade, a equipe seguiu o guia da disciplina e utilizou as explicações em sala e os slides como apoio à compreensão da ferramenta e à implementação das regras.</p>
 <h2 id="1-formalizacao-da-especificacao-lexica">1. Formalização da Especificação Léxica</h2>
 <p>Partindo da tabela de tokens e das decisões de escopo produzidas na Sprint 1, o objetivo é consolidar uma especificação formal e completa.</p>
 <ul>
