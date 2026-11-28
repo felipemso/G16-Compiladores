@@ -627,6 +627,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../geracao/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geração de Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -638,10 +666,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -659,8 +687,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1098,7 +1126,7 @@
 <li>Números (inteiros e decimais).</li>
 <li>Textos (strings com aspas simples ou duplas, em uma única linha).</li>
 <li>Booleanos (<code>true</code> e <code>false</code>).</li>
-<li><strong>Saída:</strong> comando <code>console.log(...)</code> com zero ou mais argumentos separados por vírgula (traduzido diretamente para <code>print(...)</code>).</li>
+<li><strong>Saída:</strong> comando <code>console.log(...)</code> com zero ou mais argumentos separados por vírgula (traduzido para <code>_js_print(...)</code>, uma função auxiliar que imprime os valores como o JavaScript; veja a <a href="../geracao/#34-funcao-auxiliar-do-consolelog">Geração de Python</a>).</li>
 <li><strong>Comentários:</strong> de linha (<code>// ...</code>) e de bloco (<code>/* ... */</code>), descartados pelo analisador léxico.</li>
 </ul>
 <h3 id="22-o-que-nao-faz-parte-do-projeto">2.2 O que NÃO Faz Parte do Projeto</h3>
@@ -1121,6 +1149,7 @@
 <li><strong><code>var</code> tratado como <code>let</code>:</strong> <code>var</code> é aceito, mas segue as mesmas regras de <code>let</code>. O <code>var</code> original do JS tem escopo de função e sofre <em>hoisting</em> (pode ser usado antes da linha da declaração, valendo <code>undefined</code>); Python não tem nada equivalente.</li>
 <li><strong>Declaração direto no corpo de <code>if</code>/<code>else</code>/<code>while</code>/<code>for</code>:</strong> uma declaração não pode ser o corpo inteiro de uma estrutura de controle, como em <code>if (c) let x = 1;</code>; ela precisa estar dentro de um bloco com <code>{ }</code>. O próprio JS proíbe isso para <code>let</code> e <code>const</code> (é erro de sintaxe), e, como <code>var</code> é tratado como <code>let</code>, a regra vale para os três.</li>
 <li><strong>Número de argumentos diferente do número de parâmetros:</strong> <code>soma(1)</code> ou <code>soma(1, 2, 3)</code> para <code>function soma(a, b)</code> são rejeitados. Em JS, argumentos faltantes viram <code>undefined</code> e os excedentes são ignorados; em Python, os dois casos geram <code>TypeError</code>.</li>
+<li><strong>Nomes reservados do Python:</strong> variáveis, funções e parâmetros não podem usar nomes válidos em JS que quebrariam o Python gerado, como <code>None</code>, <code>True</code>, <code>def</code>, <code>pass</code>, <code>lambda</code> e <code>print</code>, nem os nomes usados pelas funções auxiliares (<code>_js_print</code>, <code>_js_str</code>, <code>str</code>, <code>int</code> etc.). A lista completa está na <a href="../geracao/#37-nomes-reservados-do-python">Geração de Python</a>.</li>
 <li><strong>Chamada de função antes da declaração:</strong> a função deve ser declarada antes de ser chamada (recursão é permitida, pois a função já existe dentro do próprio corpo). Em JS, declarações de função sofrem <em>hoisting</em> e podem ser chamadas antes da linha onde aparecem; em Python, o <code>def</code> só passa a existir quando é executado, e a chamada antecipada gera <code>NameError</code>.</li>
 </ul>
 <h4 id="tipos-e-operacoes">Tipos e operações</h4>
@@ -1143,20 +1172,20 @@
 <hr />
 <h2 id="3-arquitetura-do-compilador">3. Arquitetura do Compilador</h2>
 <p>O fluxo de compilação acontece em 5 etapas:</p>
-<p><strong>Léxico → Sintático → AST → Semântico → [Geração de Python, próxima etapa]</strong></p>
+<p><strong>Léxico → Sintático → AST → Semântico → Geração de Python</strong></p>
 <ol>
 <li><strong>Léxico (Flex):</strong> lê o texto em JS, gera os tokens e descarta comentários e espaços. Caracteres inválidos, strings com quebra de linha e palavras reservadas fora do escopo são relatados como erro léxico, com o número da linha.</li>
 <li><strong>Sintático (Bison):</strong> valida a estrutura do código e as regras gramaticais, pedindo os tokens ao léxico conforme precisa. Em caso de erro, o parser se recupera descartando a entrada até o próximo <code>;</code> ou <code>}</code> e continua a análise, para relatar vários erros em uma única execução.</li>
 <li><strong>Árvore Sintática (AST):</strong> organiza o programa em uma estrutura de árvore na memória (<code>ast.c</code>). Os nós são construídos pelas ações semânticas do Bison, durante a própria análise sintática, e cada nó guarda a linha de origem para as mensagens de erro.</li>
 <li><strong>Semântico:</strong> percorre a AST e preenche a tabela de símbolos (<code>semantico.c</code> e <code>tabela.c</code>), registrando variáveis, funções e parâmetros com uma pilha de escopos (global, função, bloco e <code>for</code>). Essa fase só roda quando o léxico e o sintático terminam sem erros, isto é, sobre uma AST completa. A opção <code>--tabela</code> imprime a tabela de símbolos ao final.</li>
-<li><strong>Geração de Python (próxima etapa):</strong> percorrerá a AST já validada e gerará o arquivo <code>.py</code> correspondente, devidamente indentado. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST.</li>
+<li><strong>Geração de Python:</strong> percorre a AST já validada e escreve o programa equivalente em Python, devidamente indentado (<code>gerador.c</code>). Só roda quando as fases anteriores terminam sem erros, e por isso nenhum <code>.py</code> é criado quando a compilação falha. A opção <code>--python</code> imprime o código gerado e a opção <code>-o saida.py</code> o grava em um arquivo. Como explicado na seção 2.2, não há código intermediário: o Python é gerado diretamente da AST. Os detalhes da tradução estão na <a href="../geracao/">Geração de Python</a>.</li>
 </ol>
 <p>Quando a compilação falha, o compilador informa em qual fase ocorreu a falha (<code>lexica/sintatica</code> ou <code>semantica</code>) e a quantidade de erros. Os erros léxicos chegam ao parser como tokens inválidos, por isso as duas primeiras fases são relatadas juntas.</p>
 <h3 id="tecnologias">Tecnologias</h3>
 <ul>
 <li><strong>Linguagem:</strong> C</li>
 <li><strong>Ferramentas:</strong> Flex (<code>lexer/lexer.l</code>) e Bison (<code>parser/parser.y</code>)</li>
-<li><strong>Módulos:</strong> <code>src/ast.c</code> (AST), <code>src/tabela.c</code> (tabela de símbolos e escopos), <code>src/semantico.c</code> (análise semântica) e <code>src/main.c</code> (orquestra as fases)</li>
+<li><strong>Módulos:</strong> <code>src/ast.c</code> (AST), <code>src/tabela.c</code> (tabela de símbolos e escopos), <code>src/semantico.c</code> (análise semântica), <code>src/gerador.c</code> (geração de Python) e <code>src/main.c</code> (orquestra as fases)</li>
 <li><strong>Comunicação:</strong> arquivo <code>parser.tab.h</code> (tokens) e estrutura <code>%union</code> / <code>yylval</code> para troca de dados entre léxico e sintático; a raiz da AST (<code>raiz_ast</code>) é entregue pelo parser à fase semântica.</li>
 </ul>
 

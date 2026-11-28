@@ -1,0 +1,1894 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../semantica/">
+      
+      
+        <link rel="next" href="../../sprints/sprint1/sprint1/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Geração de Python - Compiladores (G16)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#geracao-de-codigo-python" class="md-skip">
+          Ir para o conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+<header class="custom-header md-header" data-md-component="header">
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Título navbar -->
+      <a href="./" class="brand">
+        <span class="brand-name">Compiladores</span>
+        <span class="brand-tag">(G16)</span>
+      </a>
+
+      <!-- Chaves navbar -->
+      <ul class="nav-links">
+        
+          <li>
+            
+              <a href="../.."
+                 >
+                Home
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../sobre/"
+                 >
+                Sobre
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../escopo-e-arq/"
+                 class="current">
+                Documentação
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../equipe/"
+                 >
+                Equipe
+              </a>
+            
+          </li>
+        
+      </ul>
+
+      <!-- Search — reuses Material's native search component -->
+      <div class="nav-search-wrap">
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando a pesquisa
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Compiladores (G16)" class="md-nav__button md-logo" aria-label="Compiladores (G16)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Compiladores (G16)
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sobre/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sobre
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentação
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentação
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../escopo-e-arq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escopo e Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gramatica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gramática
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ast/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Análise Semântica
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geração de Python
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geração de Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-como-o-gerador-percorre-a-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Como o Gerador Percorre a AST
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Como o Gerador Percorre a AST">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-estado-do-gerador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Estado do Gerador
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-comandos-e-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Comandos e Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-indentacao-e-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Indentação e pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-traducao-de-cada-construcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tradução de Cada Construção
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tradução de Cada Construção">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-declaracoes-e-valores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Declarações e Valores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-operadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Operadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-controle-de-fluxo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Controle de Fluxo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-funcoes-e-saida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Funções e Saída
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-decisoes-de-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Decisões de Projeto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Decisões de Projeto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-geracao-direta-da-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Geração Direta da AST
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-blocos-nao-viram-nada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Blocos Não Viram Nada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-parenteses-por-precedencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Parênteses por Precedência
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-funcao-auxiliar-do-consolelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Função Auxiliar do console.log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-for-vira-while" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 for Vira while
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-else-if-vira-elif" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 else if Vira elif
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-nomes-reservados-do-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Nomes Reservados do Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-limitacoes-conhecidas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Limitações Conhecidas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-exemplo-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Exemplo Completo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-testes-da-geracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Testes da Geração
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint1/sprint1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint2/sprint2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint3/sprint3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint4/sprint4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint5/sprint5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 5
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprints/sprint6/sprint6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 6
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../equipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-como-o-gerador-percorre-a-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Como o Gerador Percorre a AST
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Como o Gerador Percorre a AST">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-estado-do-gerador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Estado do Gerador
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-comandos-e-expressoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Comandos e Expressões
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-indentacao-e-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Indentação e pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-traducao-de-cada-construcao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tradução de Cada Construção
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Tradução de Cada Construção">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-declaracoes-e-valores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Declarações e Valores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-operadores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Operadores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-controle-de-fluxo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Controle de Fluxo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-funcoes-e-saida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Funções e Saída
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-decisoes-de-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Decisões de Projeto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Decisões de Projeto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-geracao-direta-da-ast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Geração Direta da AST
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-blocos-nao-viram-nada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Blocos Não Viram Nada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-parenteses-por-precedencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Parênteses por Precedência
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-funcao-auxiliar-do-consolelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Função Auxiliar do console.log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-for-vira-while" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 for Vira while
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-else-if-vira-elif" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 else if Vira elif
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-nomes-reservados-do-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Nomes Reservados do Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-limitacoes-conhecidas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Limitações Conhecidas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-exemplo-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Exemplo Completo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-testes-da-geracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Testes da Geração
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="geracao-de-codigo-python">Geração de Código Python</h1>
+<p>A geração de código é a última fase do compilador: ela percorre a AST e escreve o programa equivalente em Python. Fica em <code>src/gerador.c</code>, e a interface pública é uma única função:</p>
+<pre><code class="language-c">void gera_python(const No *raiz, FILE *saida);
+</code></pre>
+<p>A geração só é executada quando as análises léxica, sintática e semântica terminam <strong>sem nenhum erro</strong>. Assim, o gerador sempre recebe uma AST completa e válida, e nunca precisa tratar nós faltando ou nomes não declarados. Duas opções de linha de comando acionam a geração:</p>
+<table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Efeito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--python</code></td>
+<td>Imprime o Python gerado na saída padrão</td>
+</tr>
+<tr>
+<td><code>-o saida.py</code></td>
+<td>Grava o Python gerado no arquivo <code>saida.py</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash">./minijs --python programa.js
+./minijs programa.js -o programa.py
+python3 programa.py
+</code></pre>
+<p>Se a compilação falhar, nenhum arquivo é criado.</p>
+<hr />
+<h2 id="1-como-o-gerador-percorre-a-ast">1. Como o Gerador Percorre a AST</h2>
+<h3 id="11-estado-do-gerador">1.1 Estado do Gerador</h3>
+<p>Durante a geração, o gerador guarda três informações:</p>
+<pre><code class="language-c">typedef struct {
+    FILE *saida;
+    int nivel;
+    int linhas;
+} Gerador;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Para que serve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>saida</code></td>
+<td>Para onde o Python é escrito: o terminal (<code>--python</code>) ou o arquivo de <code>-o</code></td>
+</tr>
+<tr>
+<td><code>nivel</code></td>
+<td>Nível de indentação atual; cada nível equivale a 4 espaços</td>
+</tr>
+<tr>
+<td><code>linhas</code></td>
+<td>Quantas linhas já foram escritas; serve para saber se um corpo ficou vazio</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-comandos-e-expressoes">1.2 Comandos e Expressões</h3>
+<p>O percurso é feito por duas funções recursivas, uma para cada tipo de nó:</p>
+<ul>
+<li><strong><code>gera_comando</code></strong> trata os nós de comando (declaração, atribuição, <code>if</code>, <code>while</code>, <code>for</code>, função, <code>return</code>, chamada e <code>console.log</code>). Cada comando ocupa uma ou mais <strong>linhas inteiras</strong>: a linha começa com a indentação do nível atual e termina com uma quebra de linha.</li>
+<li><strong><code>gera_expressao</code></strong> trata os nós de expressão (literais, identificadores, operações e chamadas). Uma expressão é escrita <strong>no meio de uma linha</strong>, sem indentação e sem quebra de linha.</li>
+</ul>
+<p>Uma declaração <code>let x = a + 1;</code>, por exemplo, é escrita por <code>gera_comando</code>, que abre a linha, escreve <code>x =</code> e chama <code>gera_expressao</code> para o inicializador. Esta, por sua vez, chama a si mesma para cada operando da soma.</p>
+<p>Listas de comandos, parâmetros e argumentos são percorridas pelo ponteiro <code>proximo</code>, do mesmo jeito que na AST. Parâmetros e argumentos são escritos separados por <code>,</code>.</p>
+<h3 id="13-indentacao-e-pass">1.3 Indentação e <code>pass</code></h3>
+<p>Python marca blocos pela indentação, e não por chaves. Sempre que um comando tem corpo (<code>if</code>, <code>else</code>, <code>while</code>, <code>for</code> e <code>function</code>), o gerador:</p>
+<ol>
+<li>escreve a linha de abertura terminada em <code>:</code> (por exemplo, <code>if x &gt; 0:</code>);</li>
+<li>aumenta o <code>nivel</code> e gera os comandos do corpo, que saem com 4 espaços a mais;</li>
+<li>se nenhuma linha foi escrita no corpo, escreve <code>pass</code>;</li>
+<li>volta ao <code>nivel</code> anterior.</li>
+</ol>
+<p>O passo 3 existe porque Python não aceita um bloco vazio. Corpos como <code>{}</code>, <code>;</code> ou <code>{ ; {} }</code> não geram nenhuma linha, e o gerador percebe isso comparando o contador <code>linhas</code> antes e depois do corpo.</p>
+<pre><code class="language-javascript">if (x &gt; 0) {
+}
+function nada() {
+}
+</code></pre>
+<pre><code class="language-python">if x &gt; 0:
+    pass
+def nada():
+    pass
+</code></pre>
+<hr />
+<h2 id="2-traducao-de-cada-construcao">2. Tradução de Cada Construção</h2>
+<h3 id="21-declaracoes-e-valores">2.1 Declarações e Valores</h3>
+<table>
+<thead>
+<tr>
+<th>Construção</th>
+<th>Mini-JS</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declaração com valor (<code>let</code>, <code>var</code> ou <code>const</code>)</td>
+<td><code>let x = 10;</code></td>
+<td><code>x = 10</code></td>
+</tr>
+<tr>
+<td>Declaração sem valor</td>
+<td><code>let y;</code></td>
+<td><code>y = None</code></td>
+</tr>
+<tr>
+<td>Declaração múltipla</td>
+<td><code>let a = 1, b;</code></td>
+<td><code>a = 1</code> e <code>b = None</code>, uma por linha</td>
+</tr>
+<tr>
+<td>Atribuição</td>
+<td><code>x = x + 1;</code></td>
+<td><code>x = x + 1</code></td>
+</tr>
+<tr>
+<td>Número inteiro e decimal</td>
+<td><code>10</code>, <code>3.14</code>, <code>10.0</code></td>
+<td><code>10</code>, <code>3.14</code>, <code>10</code></td>
+</tr>
+<tr>
+<td>String</td>
+<td><code>"ola"</code>, <code>'oi'</code></td>
+<td><code>"ola"</code>, <code>'oi'</code> (mesmas aspas)</td>
+</tr>
+<tr>
+<td>Booleano</td>
+<td><code>true</code>, <code>false</code></td>
+<td><code>True</code>, <code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p>O tipo de declaração (<code>let</code>, <code>var</code> ou <code>const</code>) não aparece no Python, que não tem declaração de variável. A diferença entre eles já foi verificada pela análise semântica (por exemplo, a atribuição a <code>const</code>).</p>
+<h3 id="22-operadores">2.2 Operadores</h3>
+<table>
+<thead>
+<tr>
+<th>Construção</th>
+<th>Mini-JS</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Aritméticos</td>
+<td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></td>
+<td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></td>
+</tr>
+<tr>
+<td>Relacionais</td>
+<td><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td>
+<td><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td>
+</tr>
+<tr>
+<td>Lógicos</td>
+<td><code>a &amp;&amp; b</code>, <code>a || b</code>, <code>!a</code></td>
+<td><code>a and b</code>, <code>a or b</code>, <code>not a</code></td>
+</tr>
+<tr>
+<td>Menos unário</td>
+<td><code>-a</code></td>
+<td><code>-a</code></td>
+</tr>
+<tr>
+<td>Parênteses</td>
+<td><code>(a + 1) * 2</code></td>
+<td><code>(a + 1) * 2</code></td>
+</tr>
+</tbody>
+</table>
+<p>A divisão <code>/</code> do Python 3 sempre devolve um número real (<code>7 / 2</code> é <code>3.5</code>), como no JavaScript. Os parênteses não são copiados do código original: o gerador recalcula onde eles são necessários (veja a seção 3.3).</p>
+<h3 id="23-controle-de-fluxo">2.3 Controle de Fluxo</h3>
+<table>
+<thead>
+<tr>
+<th>Construção</th>
+<th>Mini-JS</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bloco solto</td>
+<td><code>{ let g = 1; }</code></td>
+<td><code>g = 1</code>, no mesmo nível</td>
+</tr>
+<tr>
+<td>Comando vazio</td>
+<td><code>;</code></td>
+<td>nada</td>
+</tr>
+<tr>
+<td><code>if</code> / <code>else</code></td>
+<td><code>if (a &gt; 0) { ... } else { ... }</code></td>
+<td><code>if a &gt; 0:</code> / <code>else:</code></td>
+</tr>
+<tr>
+<td><code>else if</code></td>
+<td><code>else if (a &lt; 0) { ... }</code></td>
+<td><code>elif a &lt; 0:</code></td>
+</tr>
+<tr>
+<td><code>while</code></td>
+<td><code>while (a &lt; 5) { ... }</code></td>
+<td><code>while a &lt; 5:</code></td>
+</tr>
+<tr>
+<td><code>for</code></td>
+<td><code>for (let i = 0; i &lt; 3; i = i + 1) { ... }</code></td>
+<td><code>i = 0</code>, <code>while i &lt; 3:</code> e, no fim do corpo, <code>i = i + 1</code></td>
+</tr>
+<tr>
+<td><code>for</code> sem condição</td>
+<td><code>for (;;) { }</code></td>
+<td><code>while True:</code></td>
+</tr>
+</tbody>
+</table>
+<p>Exemplo:</p>
+<pre><code class="language-javascript">if (a &gt; 0) { a = 1; } else if (a &lt; 0) { a = 2; } else { a = 3; }
+for (let i = 0; i &lt; 3; i = i + 1) { console.log(i); }
+</code></pre>
+<pre><code class="language-python">if a &gt; 0:
+    a = 1
+elif a &lt; 0:
+    a = 2
+else:
+    a = 3
+i = 0
+while i &lt; 3:
+    _js_print(i)
+    i = i + 1
+</code></pre>
+<h3 id="24-funcoes-e-saida">2.4 Funções e Saída</h3>
+<table>
+<thead>
+<tr>
+<th>Construção</th>
+<th>Mini-JS</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declaração de função</td>
+<td><code>function soma(x, y) { ... }</code></td>
+<td><code>def soma(x, y):</code></td>
+</tr>
+<tr>
+<td><code>return</code> com valor</td>
+<td><code>return x + y;</code></td>
+<td><code>return x + y</code></td>
+</tr>
+<tr>
+<td><code>return</code> sem valor</td>
+<td><code>return;</code></td>
+<td><code>return</code></td>
+</tr>
+<tr>
+<td>Chamada como comando</td>
+<td><code>nada();</code></td>
+<td><code>nada()</code></td>
+</tr>
+<tr>
+<td>Chamada em expressão</td>
+<td><code>let r = soma(1, 2) * 2;</code></td>
+<td><code>r = soma(1, 2) * 2</code></td>
+</tr>
+<tr>
+<td>Impressão</td>
+<td><code>console.log(a, "b");</code></td>
+<td><code>_js_print(a, "b")</code></td>
+</tr>
+</tbody>
+</table>
+<p>O <code>console.log</code> vira uma chamada a uma função auxiliar, escrita no início do arquivo gerado (veja a seção 3.4).</p>
+<hr />
+<h2 id="3-decisoes-de-projeto">3. Decisões de Projeto</h2>
+<h3 id="31-geracao-direta-da-ast">3.1 Geração Direta da AST</h3>
+<p>O Python é gerado diretamente da AST, sem código intermediário. Como Python é uma linguagem de alto nível, quase todas as construções do Mini-JS têm uma equivalente direta, e uma representação de nível mais baixo não traria ganho para a tradução. Além disso, a análise semântica já rejeitou os programas cuja tradução direta teria comportamento diferente (veja o <a href="../escopo-e-arq/">Escopo e Arquitetura</a>). Por isso, o gerador também não precisa emitir <code>global</code> nem <code>nonlocal</code>: atribuir a uma variável global dentro de função e declarar uma função dentro de outra são erros semânticos.</p>
+<h3 id="32-blocos-nao-viram-nada">3.2 Blocos Não Viram Nada</h3>
+<p>Um bloco <code>{ ... }</code> solto não gera nenhuma linha: seus comandos saem no mesmo nível de indentação de quem está em volta. Em Python, só funções criam escopo, e a análise semântica proíbe o sombreamento de nomes. Assim, nenhuma variável de um bloco interno pode sobrescrever uma variável externa por acidente ao "perder" o bloco.</p>
+<pre><code class="language-javascript">let a = 1;
+{
+    let b = 2;
+    a = b;
+}
+</code></pre>
+<pre><code class="language-python">a = 1
+b = 2
+a = b
+</code></pre>
+<h3 id="33-parenteses-por-precedencia">3.3 Parênteses por Precedência</h3>
+<p>A AST não guarda os parênteses do código original: a ordem de avaliação já está na forma da árvore. Ao escrever uma operação, o gerador compara a precedência do operador pai com a do filho e só coloca parênteses quando eles são necessários. Os níveis seguem a precedência do Python:</p>
+<table>
+<thead>
+<tr>
+<th>Nível</th>
+<th>Operadores</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (menor)</td>
+<td><code>or</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>and</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>not</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>+</code>, <code>-</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>*</code>, <code>/</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>-</code> unário</td>
+</tr>
+<tr>
+<td>8 (maior)</td>
+<td>literais, nomes e chamadas</td>
+</tr>
+</tbody>
+</table>
+<p>Um operando recebe parênteses quando:</p>
+<ol>
+<li>o nível do filho é <strong>menor</strong> que o do pai, como em <code>(a + b) * c</code>;</li>
+<li>o filho está <strong>à direita</strong> e tem o <strong>mesmo</strong> nível do pai, como em <code>a - (b - c)</code>. Todos os operadores binários são associativos à esquerda, então <code>a - b - c</code> já significa <code>(a - b) - c</code> e não precisa de parênteses;</li>
+<li>o pai e o filho são <strong>comparações</strong>, como em <code>(a &lt; b) == c</code>.</li>
+</ol>
+<p>A regra 3 e a posição do <code>not</code> no nível 3 corrigem duas diferenças entre as linguagens:</p>
+<table>
+<thead>
+<tr>
+<th>Mini-JS</th>
+<th>Significado no JS</th>
+<th>Python sem parênteses</th>
+<th>Significado no Python</th>
+<th>Python gerado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a &lt; b == c</code></td>
+<td><code>(a &lt; b) == c</code></td>
+<td><code>a &lt; b == c</code></td>
+<td><code>a &lt; b and b == c</code> (comparação encadeada)</td>
+<td><code>(a &lt; b) == c</code></td>
+</tr>
+<tr>
+<td><code>!a == b</code></td>
+<td><code>(!a) == b</code></td>
+<td><code>not a == b</code></td>
+<td><code>not (a == b)</code></td>
+<td><code>(not a) == b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-funcao-auxiliar-do-consolelog">3.4 Função Auxiliar do <code>console.log</code></h3>
+<p>O <code>print</code> do Python não imprime os valores do mesmo jeito que o <code>console.log</code>: ele escreve <code>True</code>, <code>None</code> e <code>2.0</code> onde o JavaScript escreve <code>true</code>, <code>undefined</code> e <code>2</code>. Por isso, <code>console.log(...)</code> vira uma chamada a <code>_js_print(...)</code>, e duas funções auxiliares são escritas no início do arquivo gerado:</p>
+<pre><code class="language-python">def _js_str(valor):
+    if valor is None:
+        return &quot;undefined&quot;
+    if isinstance(valor, bool):
+        return &quot;true&quot; if valor else &quot;false&quot;
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) &lt; 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(&quot; &quot;.join(_js_str(valor) for valor in valores))
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Valor</th>
+<th><code>print</code></th>
+<th><code>_js_print</code> e <code>console.log</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>None</code> (variável sem valor ou função sem retorno)</td>
+<td><code>None</code></td>
+<td><code>undefined</code></td>
+</tr>
+<tr>
+<td><code>True</code> / <code>False</code></td>
+<td><code>True</code> / <code>False</code></td>
+<td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+<td><code>4 / 2</code></td>
+<td><code>2.0</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>7 / 2</code></td>
+<td><code>3.5</code></td>
+<td><code>3.5</code></td>
+</tr>
+<tr>
+<td><code>console.log("a", 1)</code></td>
+<td><code>a 1</code></td>
+<td><code>a 1</code></td>
+</tr>
+</tbody>
+</table>
+<p>As funções só são escritas quando o programa usa <code>console.log</code> em algum lugar, inclusive dentro de funções, <code>if</code> e laços. Um programa sem impressão gera apenas o seu próprio código.</p>
+<h3 id="35-for-vira-while">3.5 <code>for</code> Vira <code>while</code></h3>
+<p>O <code>for</code> do Python percorre uma sequência (<code>for i in range(3)</code>), enquanto o <code>for</code> do JavaScript é um laço com inicialização, condição e incremento livres. A tradução que funciona para qualquer <code>for</code> é a forma equivalente com <code>while</code>: a inicialização sai antes do laço, a condição vira a condição do <code>while</code> e o incremento vai para o fim do corpo. Sem condição, o laço vira <code>while True:</code>.</p>
+<p>Essa tradução é segura porque <code>break</code> e <code>continue</code> estão fora do escopo. Com <code>continue</code>, o incremento no fim do corpo seria pulado e o laço nunca terminaria.</p>
+<h3 id="36-else-if-vira-elif">3.6 <code>else if</code> Vira <code>elif</code></h3>
+<p>Na AST, um <code>else if</code> é um <code>if</code> dentro do <code>else</code> do <code>if</code> anterior. Traduzido ao pé da letra, cada <code>else if</code> aumentaria um nível de indentação. O gerador reconhece o caso em que o <code>else</code> contém <strong>apenas</strong> outro <code>if</code> (ignorando blocos e comandos vazios em volta) e escreve <code>elif</code>, mantendo a cadeia no mesmo nível, como no código original. Se o <code>else</code> tiver outros comandos além do <code>if</code>, ele continua sendo um <code>else:</code> com o <code>if</code> dentro.</p>
+<h3 id="37-nomes-reservados-do-python">3.7 Nomes Reservados do Python</h3>
+<p>Alguns nomes válidos em JavaScript quebrariam o programa gerado. A análise semântica rejeita declarar variável, função ou parâmetro com esses nomes, com a mensagem <code>nome 'x' e reservado em Python</code>:</p>
+<ul>
+<li><strong>Palavras reservadas do Python</strong> que são identificadores comuns no Mini-JS: <code>False</code>, <code>None</code>, <code>True</code>, <code>and</code>, <code>as</code>, <code>assert</code>, <code>async</code>, <code>def</code>, <code>del</code>, <code>elif</code>, <code>except</code>, <code>global</code>, <code>is</code>, <code>lambda</code>, <code>nonlocal</code>, <code>not</code>, <code>or</code>, <code>pass</code> e <code>raise</code>. As que também são reservadas no JavaScript (<code>class</code>, <code>import</code> etc.) já são rejeitadas pelo léxico.</li>
+<li><strong>Nomes usados pelo código gerado:</strong> <code>_js_print</code> e <code>_js_str</code>, além de <code>print</code>, <code>abs</code>, <code>bool</code>, <code>float</code>, <code>int</code>, <code>isinstance</code> e <code>str</code>, que as funções auxiliares usam. Uma variável chamada <code>str</code>, por exemplo, esconderia a função do Python e quebraria o <code>_js_print</code>.</li>
+</ul>
+<hr />
+<h2 id="4-limitacoes-conhecidas">4. Limitações Conhecidas</h2>
+<p>Os casos abaixo passam pela análise semântica, mas o Python gerado se comporta de forma diferente do JavaScript. Tratá-los exigiria gerar código extra para imitar o JavaScript em cada operação, o que contraria o critério de tradução direta do projeto.</p>
+<table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Exemplo</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Divisão por zero</td>
+<td><code>1 / 0</code></td>
+<td><code>Infinity</code></td>
+<td><code>ZeroDivisionError</code></td>
+</tr>
+<tr>
+<td>Variável sem valor em uma conta</td>
+<td><code>let x; let y = x + 1;</code></td>
+<td><code>NaN</code></td>
+<td><code>TypeError</code></td>
+</tr>
+<tr>
+<td>Tipos que a semântica não conhece</td>
+<td><code>soma(1, 2) + "!"</code></td>
+<td><code>"3!"</code></td>
+<td><code>TypeError</code></td>
+</tr>
+<tr>
+<td>Inteiros acima de 2^53</td>
+<td><code>console.log(fatorial(25))</code></td>
+<td><code>1.5511210043330986e+25</code></td>
+<td><code>15511210043330985984000000</code></td>
+</tr>
+<tr>
+<td>Números muito pequenos</td>
+<td><code>console.log(1 / 100000)</code></td>
+<td><code>0.00001</code></td>
+<td><code>1e-05</code></td>
+</tr>
+<tr>
+<td>Literal com mais de 15 dígitos</td>
+<td><code>0.1234567890123456</code></td>
+<td><code>0.1234567890123456</code></td>
+<td><code>0.123456789012346</code></td>
+</tr>
+<tr>
+<td>Zero negativo</td>
+<td><code>console.log(-0)</code></td>
+<td><code>-0</code></td>
+<td><code>0</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Tipos desconhecidos:</strong> as regras de tipo só geram erro quando os dois tipos envolvidos são conhecidos (veja a <a href="../semantica/">Análise Semântica</a>). O retorno de funções, os parâmetros e as variáveis reatribuídas com outro tipo ficam como desconhecidos, e uma combinação inválida entre eles só aparece ao executar o Python.</li>
+<li><strong>Números:</strong> o JavaScript guarda todo número como real de 64 bits, enquanto o Python tem inteiros de tamanho ilimitado e outra regra para escolher a notação científica. Os resultados só divergem em valores muito grandes ou muito pequenos. Os literais são escritos com até 15 dígitos significativos.</li>
+</ul>
+<hr />
+<h2 id="5-exemplo-completo">5. Exemplo Completo</h2>
+<p>Entrada (<code>tests/python/programa_fatorial.js</code>):</p>
+<pre><code class="language-javascript">// Fatorial recursivo de 0 a 10
+function fatorial(n) {
+    if (n &lt;= 1) {
+        return 1;
+    }
+    return n * fatorial(n - 1);
+}
+
+for (let i = 0; i &lt;= 10; i = i + 1) {
+    console.log(&quot;fatorial de&quot;, i, &quot;=&quot;, fatorial(i));
+}
+</code></pre>
+<p>Python gerado com <code>./minijs --python tests/python/programa_fatorial.js</code>:</p>
+<pre><code class="language-python">def _js_str(valor):
+    if valor is None:
+        return &quot;undefined&quot;
+    if isinstance(valor, bool):
+        return &quot;true&quot; if valor else &quot;false&quot;
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) &lt; 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(&quot; &quot;.join(_js_str(valor) for valor in valores))
+
+
+def fatorial(n):
+    if n &lt;= 1:
+        return 1
+    return n * fatorial(n - 1)
+i = 0
+while i &lt;= 10:
+    _js_print(&quot;fatorial de&quot;, i, &quot;=&quot;, fatorial(i))
+    i = i + 1
+</code></pre>
+<p>Saída, idêntica no Node e no Python:</p>
+<pre><code class="language-text">fatorial de 0 = 1
+fatorial de 1 = 1
+fatorial de 2 = 2
+fatorial de 3 = 6
+fatorial de 4 = 24
+fatorial de 5 = 120
+fatorial de 6 = 720
+fatorial de 7 = 5040
+fatorial de 8 = 40320
+fatorial de 9 = 362880
+fatorial de 10 = 3628800
+</code></pre>
+<hr />
+<h2 id="6-testes-da-geracao">6. Testes da Geração</h2>
+<p>A pasta <code>tests/python/</code> tem, para cada programa, três arquivos: o <code>.js</code> de entrada, o <code>.py.esperado</code> com o Python que deve ser gerado e o <code>.saida</code> com o que o programa deve imprimir. Os scripts <code>run_tests.sh</code> e <code>run_tests.ps1</code> fazem três checagens em cada programa:</p>
+<ol>
+<li>a saída de <code>./minijs --python</code> é igual ao <code>.py.esperado</code>;</li>
+<li>o arquivo gravado com <code>-o</code> é igual ao <code>.py.esperado</code>;</li>
+<li>a execução do Python gerado imprime exatamente o <code>.saida</code>.</li>
+</ol>
+<p>As saídas dos programas completos (<code>programa_*.js</code>) foram conferidas rodando o <code>.js</code> original no Node. Os testes unitários (<code>tests/unit_tests.c</code>) também cobrem a geração de cada construção isoladamente.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Grupo 16, Compiladores(T01)
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "navigation.expand"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
