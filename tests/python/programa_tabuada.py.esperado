@@ -1,0 +1,22 @@
+def _js_str(valor):
+    if valor is None:
+        return "undefined"
+    if isinstance(valor, bool):
+        return "true" if valor else "false"
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(" ".join(_js_str(valor) for valor in valores))
+
+
+i = 1
+while i <= 5:
+    _js_print("tabuada do", i)
+    j = 1
+    while j <= 10:
+        _js_print(" ", i, "x", j, "=", i * j)
+        j = j + 1
+    i = i + 1

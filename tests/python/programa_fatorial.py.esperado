@@ -1,0 +1,22 @@
+def _js_str(valor):
+    if valor is None:
+        return "undefined"
+    if isinstance(valor, bool):
+        return "true" if valor else "false"
+    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:
+        return str(int(valor))
+    return str(valor)
+
+
+def _js_print(*valores):
+    print(" ".join(_js_str(valor) for valor in valores))
+
+
+def fatorial(n):
+    if n <= 1:
+        return 1
+    return n * fatorial(n - 1)
+i = 0
+while i <= 10:
+    _js_print("fatorial de", i, "=", fatorial(i))
+    i = i + 1
