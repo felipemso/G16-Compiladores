@@ -4,27 +4,27 @@ NO_PROGRAMA
 │   ├── NO_PARAMETRO b
 │   └── NO_BLOCO
 │       └── NO_RETURN
-│           └── NO_BINARIO +
-│               ├── NO_ID a
-│               └── NO_ID b
+│           └── NO_BINARIO + [desconhecido]
+│               ├── NO_ID a [desconhecido]
+│               └── NO_ID b [desconhecido]
 ├── NO_FUNCAO vazia
 │   └── NO_BLOCO
 │       └── NO_RETURN
-├── NO_CHAMADA soma
-│   ├── NO_NUMERO 1
-│   └── NO_NUMERO 2
+├── NO_CHAMADA soma [desconhecido]
+│   ├── NO_NUMERO 1 [numero]
+│   └── NO_NUMERO 2 [numero]
 ├── NO_DECL_VAR let resultado
-│   └── NO_BINARIO *
-│       ├── NO_CHAMADA soma
-│       │   ├── NO_CHAMADA soma
-│       │   │   ├── NO_NUMERO 3
-│       │   │   └── NO_NUMERO 4
-│       │   └── NO_NUMERO 5
-│       └── NO_NUMERO 2
+│   └── NO_BINARIO * [numero]
+│       ├── NO_CHAMADA soma [desconhecido]
+│       │   ├── NO_CHAMADA soma [desconhecido]
+│       │   │   ├── NO_NUMERO 3 [numero]
+│       │   │   └── NO_NUMERO 4 [numero]
+│       │   └── NO_NUMERO 5 [numero]
+│       └── NO_NUMERO 2 [numero]
 ├── NO_PRINT
 ├── NO_PRINT
-│   ├── NO_ID resultado
-│   ├── NO_STRING 'ok'
-│   ├── NO_BOOLEANO true
-│   └── NO_NUMERO 2.5
-└── NO_CHAMADA vazia
+│   ├── NO_ID resultado [numero]
+│   ├── NO_STRING 'ok' [string]
+│   ├── NO_BOOLEANO true [booleano]
+│   └── NO_NUMERO 2.5 [numero]
+└── NO_CHAMADA vazia [desconhecido]

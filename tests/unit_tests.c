@@ -5,6 +5,7 @@
 #include "ast.h"
 #include "tabela.h"
 #include "semantico.h"
+#include "gerador.h"
 
 /* Declarações externas do Flex e Bison */
 extern int yyparse(void);
@@ -768,6 +769,78 @@ static int testa_anotacao_comandos(void) {
     return falhas;
 }
 
+#define AUXILIAR_PRINT \
+    "def _js_str(valor):\n" \
+    "    if valor is None:\n" \
+    "        return \"undefined\"\n" \
+    "    if isinstance(valor, bool):\n" \
+    "        return \"true\" if valor else \"false\"\n" \
+    "    if isinstance(valor, float) and valor.is_integer() and abs(valor) < 1e21:\n" \
+    "        return str(int(valor))\n" \
+    "    return str(valor)\n" \
+    "\n" \
+    "\n" \
+    "def _js_print(*valores):\n" \
+    "    print(\" \".join(_js_str(valor) for valor in valores))\n" \
+    "\n" \
+    "\n"
+
+static bool gera_texto(const No *raiz, char *texto, size_t tamanho) {
+    const char *caminho = "teste_gerador.tmp";
+    FILE *arquivo = fopen(caminho, "w+");
+    if (!arquivo) {
+        return false;
+    }
+    gera_python(raiz, arquivo);
+    rewind(arquivo);
+    size_t lidos = fread(texto, 1, tamanho - 1, arquivo);
+    texto[lidos] = '\0';
+    fclose(arquivo);
+    remove(caminho);
+    return true;
+}
+
+static int testa_geracao(const char *descricao, const char *codigo, const char *esperado) {
+    int resultado = parse_string(codigo);
+    char texto[4096];
+    bool gerado = gera_texto(raiz_ast, texto, sizeof(texto));
+    bool ok = resultado == 0 && yynerrs == 0 && gerado && strcmp(texto, esperado) == 0;
+    if (!ok && gerado) {
+        printf("    obtido: [%s]\n", texto);
+    }
+    ast_libera(raiz_ast);
+    raiz_ast = NULL;
+    return verifica(descricao, ok);
+}
+
+static int testa_geracao_raiz_nula(void) {
+    char texto[16];
+    bool ok = gera_texto(NULL, texto, sizeof(texto)) && texto[0] == '\0';
+    return verifica("Raiz nula nao gera nada", ok);
+}
+
+/* Cada nome da lista, declarado sozinho, tem que gerar exatamente um erro */
+static int testa_todos_reservados_python(void) {
+    static const char *const nomes[] = {
+        "False", "None", "True", "and", "as", "assert", "async", "def", "del", "elif", "except",
+        "global", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+        "print", "_js_print", "_js_str", "abs", "bool", "float", "int", "isinstance", "str",
+    };
+    size_t total = sizeof nomes / sizeof nomes[0];
+    size_t recusados = 0;
+    for (size_t i = 0; i < total; i++) {
+        char codigo[64];
+        snprintf(codigo, sizeof codigo, "let %s = 1;", nomes[i]);
+        if (analisa_codigo(codigo) && erros_semanticos == 1) {
+            recusados++;
+        } else {
+            printf("  (nome '%s' nao foi recusado)\n", nomes[i]);
+        }
+        limpa_analise();
+    }
+    return verifica("Todos os nomes reservados do Python geram erro", recusados == total);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -1011,6 +1084,10 @@ int main(void) {
     total++; falhas += testa_regra("Menos unario em string gera erro", "let x = -\"a\";", 1);
     total++; falhas += testa_regra("Aritmetica com booleano nao gera erro", "let x = true - 1;", 0);
     total++; falhas += testa_regra("Aritmetica com parametro nao gera erro", "function f(p) { return p * 2; }", 0);
+    total++; falhas += testa_regra("Erro de - nao gera erro de comparacao em cascata", "let x = (\"a\" - 1) < \"b\";", 1);
+    total++; falhas += testa_regra("Erro de * nao gera erro de + em cascata", "let s = \"a\" * 2; let t = s + \"x\";", 1);
+    total++; falhas += testa_regra("Erro de menos unario nao gera erro em cascata", "let b = -\"a\" == \"b\";", 1);
+    total++; falhas += testa_regra("String na conta de fora continua gerando erro", "let x = (\"a\" / 2) * \"b\";", 2);
     total++; falhas += testa_regra("Comparacao entre numero e string gera erro", "let b = 1 == \"1\";", 1);
     total++; falhas += testa_regra("Comparacao entre booleano e numero gera erro", "let b = true < 1;", 1);
     total++; falhas += testa_regra("Comparacao de resultado booleano com numero gera erro", "let b = (1 < 2) == 1;", 1);
@@ -1063,6 +1140,142 @@ int main(void) {
                                     no_for(decl(DECLARADOR_LET, "i", 1), NULL, NULL, no_bloco(NULL, 1), 1), 0);
     total++; falhas += testa_arvore("Comando simples no corpo sem bloco e permitido",
                                     no_while(no_booleano(1, 1), no_vazio(1), 1), 0);
+
+    printf("\n--- Nomes Reservados do Python ---\n");
+    total++; falhas += testa_regra("Variavel com palavra reservada do Python gera erro", "let pass = 1;", 1);
+    total++; falhas += testa_regra("var com palavra reservada do Python gera erro", "var lambda = 1;", 1);
+    total++; falhas += testa_regra("const com palavra reservada do Python gera erro", "const None = 1;", 1);
+    total++; falhas += testa_regra("Funcao com palavra reservada do Python gera erro", "function def() { return 1; }", 1);
+    total++; falhas += testa_regra("Parametro com palavra reservada do Python gera erro", "function f(is) { return is; }", 1);
+    total++; falhas += testa_regra("Variavel local com palavra reservada gera erro", "function f() { let elif = 1; return elif; }", 1);
+    total++; falhas += testa_regra("Uso depois do erro nao gera erro em cascata", "let and = 1; let x = and + 1; and = 2;", 1);
+    total++; falhas += testa_regra("Nome print gera erro", "let print = 1;", 1);
+    total++; falhas += testa_regra("Nome da auxiliar do console.log gera erro", "function _js_print(a) { return a; }", 1);
+    total++; falhas += testa_regra("Nome usado pela auxiliar do console.log gera erro", "let str = \"a\";", 1);
+    total++; falhas += testa_regra("Nome reservado repetido gera erro nas duas declaracoes e na redeclaracao", "let pass = 1; let pass = 2;", 3);
+    total++; falhas += testa_regra("Maiusculas diferentes sao permitidas", "let none = 1; let Pass = 2; let TRUE = 3;", 0);
+    total++; falhas += testa_regra("Nome que contem palavra reservada e permitido", "let passo = 1; let definir = 2; let is_ok = 3;", 0);
+    total++; falhas += testa_todos_reservados_python();
+
+    printf("\n--- Geracao de Python ---\n");
+    total++; falhas += testa_geracao("Programa vazio gera Python vazio", "", "");
+    total++; falhas += testa_geracao("Comando vazio e blocos nao geram linhas", "; { } { ; { } }", "");
+    total++; falhas += testa_geracao_raiz_nula();
+    total++; falhas += testa_geracao("Declaracao let com e sem valor inicial", "let x = 10; let y;", "x = 10\ny = None\n");
+    total++; falhas += testa_geracao("Declaracao multipla com var e const gera uma linha por variavel",
+                                     "var a = \"oi\", b = 'fim', c; const t = true, f = false;",
+                                     "a = \"oi\"\nb = 'fim'\nc = None\nt = True\nf = False\n");
+    total++; falhas += testa_geracao("Atribuicao gera linha x = e",
+                                     "let x = 3.14, y; y = x; x = 2;",
+                                     "x = 3.14\ny = None\ny = x\nx = 2\n");
+    total++; falhas += testa_geracao("Bloco solto mantem nivel de indentacao e comando vazio nao gera linha",
+                                     "let a = 1; ; { let b = 2; ; { a = b; } } { let c = 3; }",
+                                     "a = 1\nb = 2\na = b\nc = 3\n");
+    total++; falhas += testa_geracao("If com bloco e com corpo vazio gera indentacao e pass",
+                                     "let x = 0; if (true) { x = 1; } if (false) {} if (true) ;",
+                                     "x = 0\nif True:\n    x = 1\nif False:\n    pass\nif True:\n    pass\n");
+    total++; falhas += testa_geracao("If e else aninhados mantem indentacao e geram pass em else vazio",
+                                     "let x = 0, a = true, b = false; if (a) { if (b) x = 1; else x = 2; } else ;",
+                                     "x = 0\na = True\nb = False\nif a:\n    if b:\n        x = 1\n    else:\n        x = 2\nelse:\n    pass\n");
+    total++; falhas += testa_geracao("Else if encadeado vira elif",
+                                     "let x = 0, a = false, b = true; if (a) x = 1; else if (b) x = 2; else x = 3;",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\nelse:\n    x = 3\n");
+    total++; falhas += testa_geracao("Else com bloco contendo so outro if vira elif",
+                                     "let x = 0, a = false, b = true; if (a) { x = 1; } else { if (b) { x = 2; } else { x = 3; } }",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\nelse:\n    x = 3\n");
+    total++; falhas += testa_geracao("Else com outros comandos alem do if mantem else indentado",
+                                     "let x = 0, a = false, b = true; if (a) { x = 1; } else { if (b) { x = 2; } x = 3; }",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelse:\n    if b:\n        x = 2\n    x = 3\n");
+    total++; falhas += testa_geracao("Else com blocos soltos e comandos vazios em torno de unico if vira elif",
+                                     "let x = 0, a = false, b = true; if (a) { x = 1; } else { ; {} { if (b) { x = 2; }; } }",
+                                     "x = 0\na = False\nb = True\nif a:\n    x = 1\nelif b:\n    x = 2\n");
+    total++; falhas += testa_geracao("Corpo sem chaves com lista de nos gera todos os itens",
+                                     "if (true) let a = 1, b = 2;",
+                                     "if True:\n    a = 1\n    b = 2\n");
+    total++; falhas += testa_geracao("Operadores aritmeticos mantem simbolos",
+                                     "x = a + b - c * d / e; y = 10 / 4 + 3.14;",
+                                     "x = a + b - c * d / e\ny = 10 / 4 + 3.14\n");
+    total++; falhas += testa_geracao("Operadores relacionais mantem simbolos",
+                                     "x = a < b; x = a <= b; x = a > b; x = a >= b; x = a == b; x = a != b;",
+                                     "x = a < b\nx = a <= b\nx = a > b\nx = a >= b\nx = a == b\nx = a != b\n");
+    total++; falhas += testa_geracao("Operadores logicos viram and e or",
+                                     "x = a && b || c;",
+                                     "x = a and b or c\n");
+    total++; falhas += testa_geracao("Menos unario e negacao viram - e not",
+                                     "x = -a; x = !b; x = -a * b; x = a && !b;",
+                                     "x = -a\nx = not b\nx = -a * b\nx = a and not b\n");
+    total++; falhas += testa_geracao("Condicao do if com expressao",
+                                     "if (x > 0) { x = x - 1; }",
+                                     "if x > 0:\n    x = x - 1\n");
+    total++; falhas += testa_geracao("Negacao antes de comparacao ganha parenteses",
+                                     "x = !a == b;",
+                                     "x = (not a) == b\n");
+    total++; falhas += testa_geracao("Comparacao dentro de comparacao ganha parenteses",
+                                     "x = a < b == c; y = a == b == c; z = a == (b < c);",
+                                     "x = (a < b) == c\ny = (a == b) == c\nz = a == (b < c)\n");
+    total++; falhas += testa_geracao("Parenteses so quando a precedencia exige",
+                                     "x = (1 + 2) * 3; y = 1 + 2 * 3; z = a / (b * c);",
+                                     "x = (1 + 2) * 3\ny = 1 + 2 * 3\nz = a / (b * c)\n");
+    total++; falhas += testa_geracao("Associatividade a esquerda mantem parenteses a direita",
+                                     "x = a - (b - c); y = a - b - c;",
+                                     "x = a - (b - c)\ny = a - b - c\n");
+    total++; falhas += testa_geracao("Operandos de not, menos unario e logicos com parenteses",
+                                     "x = !(a && b); x = -(a + b); x = (a || b) && c; x = a == !b; x = a > b && b > c;",
+                                     "x = not (a and b)\nx = -(a + b)\nx = (a or b) and c\nx = a == (not b)\nx = a > b and b > c\n");
+    total++; falhas += testa_geracao("Funcao com parametros gera def e return com valor",
+                                     "function soma(a, b) { return a + b; }",
+                                     "def soma(a, b):\n    return a + b\n");
+    total++; falhas += testa_geracao("Funcao sem parametros com corpo vazio gera pass e return sem valor",
+                                     "function f() {} function g() { ; {} return; }",
+                                     "def f():\n    pass\ndef g():\n    return\n");
+    total++; falhas += testa_geracao("Corpo da funcao com if e declaracao mantem indentacao",
+                                     "function sinal(n) { let s = 1; if (n < 0) { return -s; } return s; }",
+                                     "def sinal(n):\n    s = 1\n    if n < 0:\n        return -s\n    return s\n");
+    total++; falhas += testa_geracao("Chamada como comando com e sem argumentos",
+                                     "f(); g(1, x, 'a');",
+                                     "f()\ng(1, x, 'a')\n");
+    total++; falhas += testa_geracao("Chamada dentro de expressao e como argumento",
+                                     "x = f(a + 1, g(b)) * 2; y = -f(); z = !g(a) && h(a < b, (c || d));",
+                                     "x = f(a + 1, g(b)) * 2\ny = -f()\nz = not g(a) and h(a < b, c or d)\n");
+    total++; falhas += testa_geracao("Chamada recursiva no return",
+                                     "function fat(n) { if (n <= 1) { return 1; } return n * fat(n - 1); }",
+                                     "def fat(n):\n    if n <= 1:\n        return 1\n    return n * fat(n - 1)\n");
+    total++; falhas += testa_geracao("console.log vira chamada a funcao auxiliar escrita no inicio",
+                                     "let x = 1; console.log(x, 'a' + 'b', x > 0); console.log();",
+                                     AUXILIAR_PRINT "x = 1\n_js_print(x, 'a' + 'b', x > 0)\n_js_print()\n");
+    total++; falhas += testa_geracao("console.log aninhado em funcao e if tambem gera auxiliar",
+                                     "function f(a) { if (a) { console.log(a); } }",
+                                     AUXILIAR_PRINT "def f(a):\n    if a:\n        _js_print(a)\n");
+    total++; falhas += testa_geracao("Programa sem console.log nao gera auxiliar",
+                                     "function f(a) { return a; } f(1);",
+                                     "def f(a):\n    return a\nf(1)\n");
+    total++; falhas += testa_geracao("While gera cabecalho e corpo indentado",
+                                     "let i = 0; while (i < 3) { i = i + 1; }",
+                                     "i = 0\nwhile i < 3:\n    i = i + 1\n");
+    total++; falhas += testa_geracao("While com corpo vazio gera pass",
+                                     "while (false) {} while (a) ; while (b) { ; {} }",
+                                     "while False:\n    pass\nwhile a:\n    pass\nwhile b:\n    pass\n");
+    total++; falhas += testa_geracao("While aninhado e dentro de funcao mantem indentacao",
+                                     "function f(n) { while (n > 0) { while (n > 1) n = n - 1; n = n - 1; } }",
+                                     "def f(n):\n    while n > 0:\n        while n > 1:\n            n = n - 1\n        n = n - 1\n");
+    total++; falhas += testa_geracao("For completo vira init seguido de while com incremento no fim",
+                                     "let s = 0; for (let i = 0; i < 3; i = i + 1) { s = s + i; }",
+                                     "s = 0\ni = 0\nwhile i < 3:\n    s = s + i\n    i = i + 1\n");
+    total++; falhas += testa_geracao("For aceita declaracao multipla e atribuicao na inicializacao",
+                                     "let k = 0; for (let a = 0, b = 2; a < b; a = a + 1) k = k + 1; for (k = 1; k < 3; k = k + 1) k = k;",
+                                     "k = 0\na = 0\nb = 2\nwhile a < b:\n    k = k + 1\n    a = a + 1\nk = 1\nwhile k < 3:\n    k = k\n    k = k + 1\n");
+    total++; falhas += testa_geracao("For com partes vazias omite init/incr e usa while True sem condicao",
+                                     "for (; i < 3; i = i + 1) { s = s + i; } for (let j = 0; j < 2;) { j = j + 1; } for (let k = 0;; k = k + 1) { f(k); } for (;;) ;",
+                                     "while i < 3:\n    s = s + i\n    i = i + 1\nj = 0\nwhile j < 2:\n    j = j + 1\nk = 0\nwhile True:\n    f(k)\n    k = k + 1\nwhile True:\n    pass\n");
+    total++; falhas += testa_geracao("For com corpo vazio gera so incremento ou pass quando nao ha incremento",
+                                     "for (let i = 0; i < 3; i = i + 1) {} for (let j = 0; j < 3; j = j + 1) ; for (; c;) {} for (; c;) { ; {} }",
+                                     "i = 0\nwhile i < 3:\n    i = i + 1\nj = 0\nwhile j < 3:\n    j = j + 1\nwhile c:\n    pass\nwhile c:\n    pass\n");
+    total++; falhas += testa_geracao("For dentro de for e dentro de funcao mantem indentacao",
+                                     "function soma(n) { let t = 0; for (let i = 0; i < n; i = i + 1) { for (let j = 0; j < n; passo(j)) t = t + 1; } return t; }",
+                                     "def soma(n):\n    t = 0\n    i = 0\n    while i < n:\n        j = 0\n        while j < n:\n            t = t + 1\n            passo(j)\n        i = i + 1\n    return t\n");
+    total++; falhas += testa_geracao("For com incremento expressao gera a expressao no fim do corpo",
+                                     "for (let i = 0; i < 1; i + 1) ;",
+                                     "i = 0\nwhile i < 1:\n    i + 1\n");
 
     int passaram = total - falhas;
     printf("\n-----------------------------------------\n");

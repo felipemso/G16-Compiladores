@@ -142,13 +142,95 @@ for arquivo in "$SCRIPT_DIR/ast"/*.js; do
     fi
 done
 
-# 6. Sumario Final
+# 6. Opcoes de linha de comando: opcao desconhecida e erro, e nao nome de arquivo
+echo ""
+echo "--- Executando Casos de Teste de Opcoes ---"
+for opcao in --xyz -x; do
+    TOTAL=$((TOTAL + 1))
+    "$MINIJS" "$opcao" "$SCRIPT_DIR/validos/01_declaracoes.js" > /dev/null 2> "$AST_TMP/erros"
+    code=$?
+    if [ $code -ne 0 ] && grep -q "opcao desconhecida" "$AST_TMP/erros"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo "  [PASSOU] opcao $opcao rejeitada (codigo: $code)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo "  [FALHOU] opcao $opcao (esperava erro de opcao desconhecida, codigo: $code)"
+    fi
+done
+
+# 7. Geracao de Python: --python, -o e execucao do .py gerado
+echo ""
+echo "--- Executando Casos de Teste de Geracao de Python ---"
+PYTHON=""
+for candidato in python3 python; do
+    # "--version" descarta atalhos que existem no PATH, mas nao executam o Python
+    if command -v "$candidato" > /dev/null 2>&1 && "$candidato" --version > /dev/null 2>&1; then
+        PYTHON="$candidato"
+        break
+    fi
+done
+PULADOS=0
+if [ -z "$PYTHON" ]; then
+    echo -e "  \033[0;33m[AVISO]\033[0m Python nao encontrado: os .py gerados nao serao executados"
+fi
+for arquivo in "$SCRIPT_DIR/python"/*.js; do
+    [ -e "$arquivo" ] || continue
+    nome=$(basename "$arquivo")
+    base="${arquivo%.js}"
+
+    # a) O codigo impresso com --python e igual ao .py.esperado
+    TOTAL=$((TOTAL + 1))
+    if "$MINIJS" --python "$arquivo" > "$AST_TMP/gerado.py" 2> "$AST_TMP/erros" \
+        && [ ! -s "$AST_TMP/erros" ] \
+        && diff -u --strip-trailing-cr "$base.py.esperado" "$AST_TMP/gerado.py"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo -e "  \033[0;32m[PASSOU]\033[0m $nome (--python)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo -e "  \033[0;31m[FALHOU]\033[0m $nome (--python)"
+        cat "$AST_TMP/erros"
+    fi
+
+    # b) O arquivo gravado com -o e igual ao que sai com --python, e nada vai para a tela
+    TOTAL=$((TOTAL + 1))
+    rm -f "$AST_TMP/gravado.py"
+    if "$MINIJS" "$arquivo" -o "$AST_TMP/gravado.py" > "$AST_TMP/saida" 2> "$AST_TMP/erros" \
+        && [ ! -s "$AST_TMP/saida" ] && [ ! -s "$AST_TMP/erros" ] \
+        && cmp -s "$AST_TMP/gerado.py" "$AST_TMP/gravado.py"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo -e "  \033[0;32m[PASSOU]\033[0m $nome (-o)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo -e "  \033[0;31m[FALHOU]\033[0m $nome (-o: arquivo diferente da saida de --python)"
+    fi
+
+    # c) O .py gerado roda no Python e imprime o mesmo que o .saida
+    if [ -z "$PYTHON" ]; then
+        PULADOS=$((PULADOS + 1))
+        continue
+    fi
+    TOTAL=$((TOTAL + 1))
+    if "$PYTHON" "$AST_TMP/gerado.py" > "$AST_TMP/execucao" 2> "$AST_TMP/erros" \
+        && diff -u --strip-trailing-cr "$base.saida" "$AST_TMP/execucao"; then
+        PASSARAM=$((PASSARAM + 1))
+        echo -e "  \033[0;32m[PASSOU]\033[0m $nome (execucao com $PYTHON)"
+    else
+        FALHARAM=$((FALHARAM + 1))
+        echo -e "  \033[0;31m[FALHOU]\033[0m $nome (execucao com $PYTHON)"
+        cat "$AST_TMP/erros"
+    fi
+done
+
+# 8. Sumario Final
 echo ""
 echo -e "\033[0;36m============================================================\033[0m"
 echo -e "\033[0;36m                   SUMARIO DOS TESTES                      \033[0m"
 echo -e "\033[0;36m============================================================\033[0m"
 echo "  Total de testes executados: $TOTAL"
 echo -e "  Testes que passaram:       \033[0;32m$PASSARAM\033[0m"
+if [ $PULADOS -gt 0 ]; then
+    echo -e "  Execucoes puladas:         \033[0;33m$PULADOS\033[0m (Python nao encontrado)"
+fi
 if [ $FALHARAM -gt 0 ]; then
     echo -e "  Testes que falharam:       \033[0;31m$FALHARAM\033[0m"
     echo -e "\033[0;31m============================================================\033[0m"

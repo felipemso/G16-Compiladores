@@ -14,6 +14,8 @@ TABELA_C = $(SRC_DIR)/tabela.c
 TABELA_H = $(SRC_DIR)/tabela.h
 SEMANTICO_C = $(SRC_DIR)/semantico.c
 SEMANTICO_H = $(SRC_DIR)/semantico.h
+GERADOR_C = $(SRC_DIR)/gerador.c
+GERADOR_H = $(SRC_DIR)/gerador.h
 
 CFLAGS = -I$(SRC_DIR)
 
@@ -26,12 +28,12 @@ YACC_H = parser.tab.h
 all: $(TARGET)
 
 # Como gerar o executavel final (junta o main.c com os arquivos gerados)
-$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H) $(SEMANTICO_C) $(SEMANTICO_H)
-	gcc $(CFLAGS) -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(TABELA_C) $(SEMANTICO_C)
+$(TARGET): $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H) $(SEMANTICO_C) $(SEMANTICO_H) $(GERADOR_C) $(GERADOR_H)
+	gcc $(CFLAGS) -o $(TARGET) $(YACC_C) $(LEX_C) $(SRC_DIR)/main.c $(AST_C) $(TABELA_C) $(SEMANTICO_C) $(GERADOR_C)
 
 # Como gerar o executavel de testes unitarios em memoria (diferencial)
-$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H) $(SEMANTICO_C) $(SEMANTICO_H)
-	gcc $(CFLAGS) -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(TABELA_C) $(SEMANTICO_C)
+$(TEST_UNIT): $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(AST_H) $(TABELA_C) $(TABELA_H) $(SEMANTICO_C) $(SEMANTICO_H) $(GERADOR_C) $(GERADOR_H)
+	gcc $(CFLAGS) -o $(TEST_UNIT) $(YACC_C) $(LEX_C) $(TESTS_DIR)/unit_tests.c $(AST_C) $(TABELA_C) $(SEMANTICO_C) $(GERADOR_C)
 
 # Como gerar os arquivos do Bison
 $(YACC_C): $(PARSER_DIR)/parser.y
