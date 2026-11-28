@@ -12,7 +12,7 @@
         <link rel="prev" href="../../sprint5/sprint5/">
       
       
-        <link rel="next" href="../../../equipe/">
+        <link rel="next" href="../../sprint7/sprint7/">
       
       
         
@@ -129,6 +129,15 @@
               <a href="../../../equipe/"
                  >
                 Equipe
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="../../../uso-de-ia/"
+                 >
+                Uso de IA
               </a>
             
           </li>
@@ -828,10 +837,99 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#6-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-reducao-de-escopo-durante-a-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Redução de Escopo Durante a Sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-conflitos-nos-testes-unitarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Conflitos nos Testes Unitários
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-liberacao-de-memoria-com-erros-sintaticos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Liberação de Memória com Erros Sintáticos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-pendencias-identificadas-nas-revisoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Pendências Identificadas nas Revisões
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sprint7/sprint7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 7
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -867,6 +965,33 @@
     
   
     Equipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../uso-de-ia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uso de IA
   
 
     
@@ -1026,6 +1151,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#6-problemas-encontrados-e-solucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Problemas Encontrados e Soluções
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Problemas Encontrados e Soluções">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-reducao-de-escopo-durante-a-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Redução de Escopo Durante a Sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-conflitos-nos-testes-unitarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Conflitos nos Testes Unitários
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-liberacao-de-memoria-com-erros-sintaticos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Liberação de Memória com Erros Sintáticos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-pendencias-identificadas-nas-revisoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Pendências Identificadas nas Revisões
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1122,6 +1308,29 @@
 <li><strong>Strings e Erros Léxicos:</strong> Rejeitar quebras de linha em strings e garantir que erros léxicos informem a linha e façam a compilação falhar.</li>
 <li><strong>Testes da AST e da Tabela:</strong> Validar estrutura da árvore, cadastro e resolução de símbolos, abertura e encerramento de escopos e liberação de recursos.</li>
 <li><strong>Testes Semânticos:</strong> Cobrir programas válidos e violações das regras de variáveis, tipos e funções, com diagnósticos que indiquem a localização do erro.</li>
+</ul>
+<hr />
+<h2 id="6-problemas-encontrados-e-solucoes">6. Problemas Encontrados e Soluções</h2>
+<p>Registro das dificuldades que surgiram durante a sprint e de como foram resolvidas.</p>
+<h3 id="61-reducao-de-escopo-durante-a-sprint">6.1 Redução de Escopo Durante a Sprint</h3>
+<ul>
+<li><strong>Problema:</strong> A orientação do professor para reduzir o escopo chegou em 04/11, com a AST e a tabela de símbolos já planejadas. Recursos como arrays, funções aninhadas e atribuição a globais dentro de funções precisavam sair do compilador antes da implementação das regras semânticas.</li>
+<li><strong>Solução:</strong> A equipe adotou um critério único (permanecem apenas os recursos com tradução direta para Python) e aplicou os cortes no léxico e no sintático antes de construir a AST. Os cortes que dependem de escopo ou de tipo viraram regras semânticas, e a justificativa de cada um foi registrada no documento de Escopo e Arquitetura.</li>
+</ul>
+<h3 id="62-conflitos-nos-testes-unitarios">6.2 Conflitos nos Testes Unitários</h3>
+<ul>
+<li><strong>Problema:</strong> As tarefas da AST e da tabela de símbolos foram desenvolvidas em paralelo, e quase todas adicionavam casos ao mesmo arquivo, <code>tests/unit_tests.c</code>. Os merges de tarefas como T12 e T13, e T13 e T17, geraram conflitos nesse arquivo.</li>
+<li><strong>Solução:</strong> Os conflitos foram resolvidos manualmente, mantendo os casos das duas tarefas, e os testes ficaram organizados em seções por assunto. A regra de que todo commit compila e passa no <code>make test</code> garantiu que nenhum caso se perdesse na resolução.</li>
+</ul>
+<h3 id="63-liberacao-de-memoria-com-erros-sintaticos">6.3 Liberação de Memória com Erros Sintáticos</h3>
+<ul>
+<li><strong>Problema:</strong> Os nomes e textos lidos pelo léxico e os nós da AST são alocados dinamicamente. Quando o parser encontra um erro e descarta parte da entrada para se recuperar, os valores descartados não chegam a nenhuma regra que os libere.</li>
+<li><strong>Solução:</strong> O <code>parser.y</code> passou a declarar <code>%destructor</code> para os textos (<code>free</code>) e para os nós (<code>ast_libera</code>), e o Bison libera automaticamente os valores descartados. As revisões dos Pull Requests conferiram a liberação contando as alocações e liberações em programas válidos e inválidos.</li>
+</ul>
+<h3 id="64-pendencias-identificadas-nas-revisoes">6.4 Pendências Identificadas nas Revisões</h3>
+<ul>
+<li><strong>Problema:</strong> Ao final da sprint, as revisões apontaram ajustes que não bloqueavam a entrega: o <code>--ast</code> não mostrava o tipo inferido, uma opção desconhecida era tratada como nome de arquivo, uma regra semântica não tinha arquivo de teste e um erro com string em operação aritmética podia gerar um segundo erro em cascata.</li>
+<li><strong>Solução:</strong> Os ajustes foram reunidos em uma tarefa própria (T36) e concluídos na Sprint 7.</li>
 </ul>
 <hr />
 
