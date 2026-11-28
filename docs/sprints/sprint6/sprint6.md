@@ -83,3 +83,24 @@ Consolidar o lexer e o parser para suportar a nova etapa do compilador e validar
 *   **Testes Semânticos:** Cobrir programas válidos e violações das regras de variáveis, tipos e funções, com diagnósticos que indiquem a localização do erro.
 
 ---
+
+## 6. Problemas Encontrados e Soluções
+Registro das dificuldades que surgiram durante a sprint e de como foram resolvidas.
+
+### 6.1 Redução de Escopo Durante a Sprint
+*   **Problema:** A orientação do professor para reduzir o escopo chegou em 04/11, com a AST e a tabela de símbolos já planejadas. Recursos como arrays, funções aninhadas e atribuição a globais dentro de funções precisavam sair do compilador antes da implementação das regras semânticas.
+*   **Solução:** A equipe adotou um critério único (permanecem apenas os recursos com tradução direta para Python) e aplicou os cortes no léxico e no sintático antes de construir a AST. Os cortes que dependem de escopo ou de tipo viraram regras semânticas, e a justificativa de cada um foi registrada no documento de Escopo e Arquitetura.
+
+### 6.2 Conflitos nos Testes Unitários
+*   **Problema:** As tarefas da AST e da tabela de símbolos foram desenvolvidas em paralelo, e quase todas adicionavam casos ao mesmo arquivo, `tests/unit_tests.c`. Os merges de tarefas como T12 e T13, e T13 e T17, geraram conflitos nesse arquivo.
+*   **Solução:** Os conflitos foram resolvidos manualmente, mantendo os casos das duas tarefas, e os testes ficaram organizados em seções por assunto. A regra de que todo commit compila e passa no `make test` garantiu que nenhum caso se perdesse na resolução.
+
+### 6.3 Liberação de Memória com Erros Sintáticos
+*   **Problema:** Os nomes e textos lidos pelo léxico e os nós da AST são alocados dinamicamente. Quando o parser encontra um erro e descarta parte da entrada para se recuperar, os valores descartados não chegam a nenhuma regra que os libere.
+*   **Solução:** O `parser.y` passou a declarar `%destructor` para os textos (`free`) e para os nós (`ast_libera`), e o Bison libera automaticamente os valores descartados. As revisões dos Pull Requests conferiram a liberação contando as alocações e liberações em programas válidos e inválidos.
+
+### 6.4 Pendências Identificadas nas Revisões
+*   **Problema:** Ao final da sprint, as revisões apontaram ajustes que não bloqueavam a entrega: o `--ast` não mostrava o tipo inferido, uma opção desconhecida era tratada como nome de arquivo, uma regra semântica não tinha arquivo de teste e um erro com string em operação aritmética podia gerar um segundo erro em cascata.
+*   **Solução:** Os ajustes foram reunidos em uma tarefa própria (T36) e concluídos na Sprint 7.
+
+---
